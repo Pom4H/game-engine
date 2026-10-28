@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "sourceEvidence": {
+    "capture": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018.heapprofile.json",
+    "metadata": "../thegame/artifacts/stalls-render-stability-allocation-engine-20261018.heap-sampling.json",
+    "renderer": "the-engine",
+    "prepareCameraBatchesEstimatedSelfBytes": 952083812,
+    "scope": "Collection-inclusive sampled cumulative allocations during approximately 33 seconds, including warmup. This is not retained heap or a leak measurement. The earlier capture without '-engine' selected the legacy renderer and is excluded."
+  },
+  "problem": "Batch regrouping concatenated the exact normalized shared-material JSON into a new hash key for every source entity. Actual Game material specifications in the isolated fixture produce 924–1032-character material keys, while canonical owned transient mesh keys are only 9–10 characters.",
+  "change": {
+    "file": "src/render/webgpu.ts",
+    "behavior": "Use WeakMap identity tokens for the already content-deduplicated GPUMesh and equality-preserving tokens for the unchanged shared-material JSON. Preserve group insertion order, surface-use and culling distinctions, color/variation exclusions, and stream records.",
+    "lifetime": "Mesh identities are weak. The material token map contains only current eligible material values after each plan rebuild. Token serials never reset, including preparation and scene resets, so retained batch keys cannot alias unrelated resource generations. Evicted and recreated GPU meshes receive a new token."
+  },
+  "allocationFixture": {
+    "artifact": "artifacts/render-stability/batch-key-production-allocation.json",
+    "script": "artifacts/render-stability/batch-key-production-allocation.mjs",
+    "method": "Node inspector HeapProfiler at 4096-byte interval with collected minor/major-GC objects included; actual Game engineGameMaterial specifications, transient frozen geometry, 512 entities in 64 batches, 64 iterations per condition. Built production method versus frozen preceding full-scan method.",
+    "exactGroupOrderAndInstanceBytes": true,
+    "forcedRebuildEstimatedTotalBytes": {"reference":56557088,"production":21151744},
+    "stablePlanEstimatedTotalBytes": {"reference":2365744,"production":2556104},
+    "interpretation": "The isolated forced-rebuild run sampled about 62.6% fewer allocated bytes. Stable-plan values do not establish a reduction. A preceding mechanism fixture found little reduction from short mesh tokens alone; material tokens account for the substantial difference."
+  },
+  "validation": {
+    "engineTypecheck": "passed",
+    "engineBuild": "passed",
+    "focusedTests": {"passed":47,"failed":0},
+    "files": ["test/gpu-batch-key-lifetime.test.mjs","test/temporal-batch-updates.test.mjs","test/gpu-visibility.test.mjs","test/renderer-post.test.mjs","test/render-surface-presence.test.mjs"],
+    "fixtureCorrection": "The surface-presence test now returns its shared stable GPU mesh, matching production mesh-key deduplication. Its physical-presence assertions are unchanged.",
+    "coverage": ["distinct equal-content primitive identities share the actual GPU mesh", "distinct transient meshes remain separate", "exact material equality excluding per-instance color and variation", "material split and return reuse the correct live buffer", "historical material values are pruned", "empty working set and preparation cleanup release material keys", "GPU mesh eviction and recreation cannot retain dead instance or reflection resources", "60 frozen-oracle temporal/compact states preserve stream and upload bytes"]
+  },
+  "limits": "This isolated allocation result does not establish canonical FPS or eliminate the captured GC hitch. Native integration and fixed-quality live capture are coordinated separately."
+}

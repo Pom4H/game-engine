@@ -1,0 +1,1005 @@
+{
+  "date": "2026-10-17T03:48:25.964Z",
+  "scope": "Same-tick original physical support for an observed cold NPC, exact original-work recovery for legacy records, original saved identity/wallet/owner preservation and installed production Office regression",
+  "capability": "original-residents-19",
+  "tests": {
+    "pass": 111,
+    "assertions": 14770,
+    "files": 13,
+    "seconds": 232.59,
+    "log": "artifacts/office-cold-support-regression-r2-20261017.log",
+    "newCases": 7,
+    "earlierRuns": [
+      "Physical regression before fix: 2 pass / 2 fail; after stream fix: 4 pass.",
+      "Added legacy cases before job fix: 1 pass / 2 fail; standalone after fix: 7 pass / 70 assertions, before the final small durable-descriptor commit.",
+      "Final 111-test run includes final source, account/company/workforce/harness/player/directory/lift/cold-worker/save-failure regressions."
+    ]
+  },
+  "sourceFixture": {
+    "town": {
+      "x": 4352,
+      "z": 3104
+    },
+    "plan": "building:settlement:3:2:132:97",
+    "point": {
+      "x": 4243,
+      "y": 26.901520590187904,
+      "z": 3119
+    },
+    "before": {
+      "result": {
+        "ok": true,
+        "result": {
+          "seq": 1,
+          "ok": true,
+          "message": "Камера следует за жителем."
+        }
+      },
+      "id": "resident:building:settlement:3:2:132:97:0",
+      "money": 123,
+      "position": [
+        4243,
+        26.89707614574346,
+        3119.0054652677945
+      ],
+      "grounded": false,
+      "floor": null,
+      "registeredPlan": false,
+      "activity": "walk",
+      "reason": "Идёт к месту отдыха",
+      "observing": "resident:building:settlement:3:2:132:97:0"
+    },
+    "after": {
+      "result": {
+        "ok": true,
+        "result": {
+          "seq": 1,
+          "ok": true,
+          "message": "Камера следует за жителем."
+        }
+      },
+      "id": "resident:building:settlement:3:2:132:97:0",
+      "money": 123,
+      "position": [
+        4243,
+        26.901520590187904,
+        3119.0054652677945
+      ],
+      "grounded": true,
+      "floor": {
+        "y": 26.901520590187904,
+        "normal": [
+          0,
+          1,
+          0
+        ]
+      },
+      "registeredPlan": true,
+      "activity": "walk",
+      "reason": "Идёт к месту отдыха",
+      "observing": "resident:building:settlement:3:2:132:97:0"
+    },
+    "limits": "Private original authority fixture and real source floor at a distant town, no canonical actor pose mutation or second playable world"
+  },
+  "legacyAudit": {
+    "savedActors": 1824,
+    "missingWorkDescriptors": 1693
+  },
+  "recoveryBounds": {
+    "maxSourceChunksPerLookup": 64,
+    "cachedPositiveAndNegativeResults": 128,
+    "physicalInstallation": false,
+    "actorCreation": false,
+    "globalCatalogMutation": false,
+    "substitutedJobOnMiss": false,
+    "newWireFields": false
+  },
+  "realSaveRehearsal": {
+    "date": "2026-10-17T03:40:05.554Z",
+    "ok": true,
+    "scope": "Consistent copy of the actual canonical SQLite save, original GameAuthority and original existing NPC; private copy only, no listener, canonical controller or pose staging",
+    "copyMethod": "SQLite VACUUM INTO through a read-only source connection",
+    "before": {
+      "id": "resident:building:-3:3:1:1",
+      "name": "Алексей Волков",
+      "money": 57,
+      "position": [
+        -225.45681869011477,
+        0.31570136565448315,
+        435.60373328647273
+      ],
+      "homeId": "home:building:-3:3:1",
+      "workId": "work:building:-2:3:0"
+    },
+    "observation": {
+      "id": "resident:building:-3:3:1:1",
+      "money": 57,
+      "position": [
+        -225.45681869011477,
+        0.31570136565448315,
+        435.60373328647273
+      ],
+      "grounded": true
+    },
+    "possessed": {
+      "id": "resident:building:-3:3:1:1",
+      "money": 57,
+      "position": [
+        -225.45681869011477,
+        0.31570136565448315,
+        435.60373328647273
+      ],
+      "grounded": true
+    },
+    "account": {
+      "id": "b8345678-1234-4234-8234-123456789abc",
+      "ownerActorId": "resident:human:b8345678-1234-4234-8234-123456789abc",
+      "activeActorId": "resident:building:-3:3:1:1",
+      "controlRevision": 2
+    },
+    "workRecovery": {
+      "lookups": 1,
+      "cacheHits": 0,
+      "recovered": 1,
+      "missing": 0,
+      "generatedChunks": 9,
+      "maxChunks": 9,
+      "cached": 1
+    },
+    "restoredWork": {
+      "id": "work:building:-2:3:0",
+      "kind": "work",
+      "name": "Жилой дом",
+      "point": {
+        "x": -189.13337969689942,
+        "y": 0.24955559966390356,
+        "z": 431.09976056403826
+      },
+      "yaw": 4.71238898038469,
+      "site": {
+        "roof": {
+          "x": -186.53337969689943,
+          "y": 3.829555599663903,
+          "z": 427.61932331407894
+        },
+        "id": "shop:building:-2:3:0",
+        "buildingId": "building:-2:3:0",
+        "commercial": false,
+        "kind": "bakery",
+        "name": "Уголок · 2",
+        "district": "Пригород",
+        "x": -191.04183764128058,
+        "y": 0.20955559966390355,
+        "z": 427.61932331407894,
+        "yaw": 4.71238898038469,
+        "width": 5.4,
+        "market": "-2:3",
+        "lease": 150
+      }
+    },
+    "savedWorkDescriptor": false,
+    "rows": {
+      "before": 4014,
+      "after": 4016,
+      "missing": 0,
+      "protected": 136,
+      "ownerDifferences": 0
+    },
+    "limits": [
+      "The existing saved far NPC is outdoors near the hub rim. The true distant upper-floor regression is a separate isolated source fixture, not this real-save sample.",
+      "Normal live-source NPC motion within one tick is allowed; no authoritative pose is edited."
+    ]
+  },
+  "restart": {
+    "date": "2026-10-17T03:43:39.373Z",
+    "oldPid": 6872,
+    "newPid": 17076,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; same-tick original support for observed NPCs and exact bounded legacy workplace recovery; Office/backend/microphone untouched",
+    "beforeRows": 4020,
+    "afterRows": 4026,
+    "missingRows": 0,
+    "protectedRows": 136,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 39,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "native": {
+    "label": "office-cold-support-native-20261017-r1",
+    "entry": "http://127.0.0.1:8765/?ui=static",
+    "targetActor": "resident:22089:1",
+    "targetBody": "resident:22089:1",
+    "takeoverDistance": 0.5641893612942911,
+    "takeoverSpeed": 1.7963234675302777,
+    "moved": 0.5023891054797835,
+    "inputToMovementMs": 561,
+    "stopped": {
+      "ack": 520,
+      "releaseSeq": 520,
+      "speed": 0.06769773247528015
+    },
+    "oldBodyMovement": 0,
+    "returnedBody": "player:5bbcb75b-771c-4eb2-8a08-12f18a274459",
+    "states": 12,
+    "rightsBefore": {
+      "accountId": "5bbcb75b-771c-4eb2-8a08-12f18a274459",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "5bbcb75b-771c-4eb2-8a08-12f18a274459",
+      "companies": [],
+      "leases": []
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-cold-support/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/actor-state.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/actor-state.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-places.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/resident-places.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/residents.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/account-control.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/account-control.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/player-actors.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/src/game/player-actors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/cold-resident-control.test.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/test/cold-resident-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/cold-resident-control.ts",
+      "archive": "artifacts/office-cold-support/final-sources/game/test/fixtures/cold-resident-control.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-cold-support/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-cold-support/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-outer-scenery/final-bundles/game.js",
+      "bytes": 2492537,
+      "sha256": "29c02e739da0c5304c3233650a9581292c42a204c5d88373298f175c40e775ca",
+      "role": "Unchanged verified production bundle reused by the native capture"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-19",
+      "archive": "artifacts/office-outer-scenery/final-bundles/office-controller.js",
+      "bytes": 1367751,
+      "sha256": "8750f407cc78d8d66f279e883c4bdff7b94bdd2742e81bdf2a2ef124ab3b39aa",
+      "role": "Unchanged verified production bundle reused by the native capture"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-npjxiyWJ.js",
+      "archive": "artifacts/office-outer-scenery/final-bundles/index-npjxiyWJ.js",
+      "bytes": 1790779,
+      "sha256": "c1d75e367210ac702a2024ce4824e2848d6f4610d9e74388846fb138352050c8",
+      "role": "Unchanged verified production bundle reused by the native capture"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-outer-scenery/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec",
+      "role": "Unchanged verified production bundle reused by the native capture"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-observing.png",
+    "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-possessed.png",
+    "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-returned.png",
+    "artifacts/office-walking/office-cold-support-native-20261017-r1/returned-observer.png"
+  ],
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "debug": {
+    "port": 3253,
+    "live": false
+  },
+  "limits": [
+    "The true distant upper-floor proof is CPU source authority/collision; the actual saved NPC copy is outdoors near the hub rim and the native UI route is in the live hub. This is not a native visit to every dormant NPC or biome.",
+    "Native target was already walking. The 0.564 m reference difference is sampled live motion, not an exact RPC teleport measurement; the actual-copy NPC preserved exact coordinates and wallet.",
+    "Native guest company/lease lists are empty. Their equality supplements the nonempty ownership tests and immediate real-save restart audit.",
+    "The initial actual-copy rehearsal rejected the old missing-job descriptor and retained its failed working copy. Fresh r2/r3 copies reused the same pristine source; r3 uses final source.",
+    "Immediate restart had six additive rows and no missing/changed protected rows. The later read-only additions audit includes ordinary transport/resident keys while the original authority continues; it is not a paused six-key reconstruction.",
+    "Game/controller/UI served bytes are unchanged; no new GPU benchmark or physical microphone capture/playback. Existing C920/audio-reference/autoplay warnings remain.",
+    "Other selected-Office floors, long routes and cold Game-client prediction, light/temporal/water/audio parity and first-person own shadows/reflections remain incomplete or unverified. The full integration goal remains active."
+  ],
+  "files": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-regression-r2-20261017.log",
+      "bytes": 17775,
+      "sha256": "9e98db63a08e8130598a0a1e51ec90487b709127dd4cec722947d5613d79bc54"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 192071,
+      "sha256": "580d7861fe5817004e7328cf6ce93c813106495d5a92f00df3055cb015f5d853"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 192071,
+      "sha256": "580d7861fe5817004e7328cf6ce93c813106495d5a92f00df3055cb015f5d853"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 66493,
+      "sha256": "790257fb421747a706531c95d91e432ecd15c745bd2caf7aef2be3d39eb834ed"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/authority.ts",
+      "bytes": 66493,
+      "sha256": "790257fb421747a706531c95d91e432ecd15c745bd2caf7aef2be3d39eb834ed"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/actor-state.ts",
+      "bytes": 6988,
+      "sha256": "72875cf0138daff9ab9cd43608d75549161a698532cf96dddbe75e0e8ceb1c85"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/actor-state.ts",
+      "bytes": 6988,
+      "sha256": "72875cf0138daff9ab9cd43608d75549161a698532cf96dddbe75e0e8ceb1c85"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-places.ts",
+      "bytes": 6596,
+      "sha256": "2bc9fd72f0c0bbcff1fea73572863da42c2ddab70bb583417becb217e4ea8c9b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/resident-places.ts",
+      "bytes": 6596,
+      "sha256": "2bc9fd72f0c0bbcff1fea73572863da42c2ddab70bb583417becb217e4ea8c9b"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/residents.ts",
+      "bytes": 49638,
+      "sha256": "209484e6c13fe4e77b0e125af65282d5051e524445d3d97f83cdbf8fd89dec2f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/residents.ts",
+      "bytes": 49638,
+      "sha256": "209484e6c13fe4e77b0e125af65282d5051e524445d3d97f83cdbf8fd89dec2f"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/account-control.ts",
+      "bytes": 7005,
+      "sha256": "1f999aa181638953eded72acb5b2cc233357fc3a7c63c935016ad63af5e8c8e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/account-control.ts",
+      "bytes": 7005,
+      "sha256": "1f999aa181638953eded72acb5b2cc233357fc3a7c63c935016ad63af5e8c8e0"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/player-actors.ts",
+      "bytes": 18974,
+      "sha256": "96eb11382138ac55a23894dbc0ebc747457c65ec98f98d40a519fad5b18bd81d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/src/game/player-actors.ts",
+      "bytes": 18974,
+      "sha256": "96eb11382138ac55a23894dbc0ebc747457c65ec98f98d40a519fad5b18bd81d"
+    },
+    {
+      "repo": "game",
+      "path": "test/cold-resident-control.test.ts",
+      "bytes": 7858,
+      "sha256": "65b2d7fdbcf72550b871ef153dc41ab44e486f5520c0480a349aef6845988dc0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/test/cold-resident-control.test.ts",
+      "bytes": 7858,
+      "sha256": "65b2d7fdbcf72550b871ef153dc41ab44e486f5520c0480a349aef6845988dc0"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/cold-resident-control.ts",
+      "bytes": 3685,
+      "sha256": "c647b1844a0ffc4fdad75679da9dcc2830b84787e4daa4f6661dc88cc3af359f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/test/fixtures/cold-resident-control.ts",
+      "bytes": 3685,
+      "sha256": "c647b1844a0ffc4fdad75679da9dcc2830b84787e4daa4f6661dc88cc3af359f"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 786998,
+      "sha256": "526872cdf3eacf66d8852a384bef121b60b9d3a6f68b69810fff739e7fe22faf"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 786998,
+      "sha256": "526872cdf3eacf66d8852a384bef121b60b9d3a6f68b69810fff739e7fe22faf"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 128244,
+      "sha256": "f46ab43cc24931219baa239446fd978af7d48eb642e605e310c976164d2a960c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/final-sources/office/VERIFICATION.md",
+      "bytes": 128244,
+      "sha256": "f46ab43cc24931219baa239446fd978af7d48eb642e605e310c976164d2a960c"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/office-outer-scenery-20261017.json",
+      "bytes": 46869,
+      "sha256": "1da849413cc1f5abb5984600537141a3c0bd9b9a506e8e6faa042998b38412fd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/game.js",
+      "bytes": 2492537,
+      "sha256": "29c02e739da0c5304c3233650a9581292c42a204c5d88373298f175c40e775ca"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/office-controller.js",
+      "bytes": 1367751,
+      "sha256": "8750f407cc78d8d66f279e883c4bdff7b94bdd2742e81bdf2a2ef124ab3b39aa"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/index-npjxiyWJ.js",
+      "bytes": 1790779,
+      "sha256": "c1d75e367210ac702a2024ce4824e2848d6f4610d9e74388846fb138352050c8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 938407,
+      "sha256": "74a7053cd2919188a74b5a3094de6399206c0b5e05c77ba25b79ea3b590d7a39"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 951152,
+      "sha256": "08e43726ae0d2a47feb7360debb097d447f7af5513d381fe34d170a85e66bd88"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/entered.png",
+      "bytes": 454458,
+      "sha256": "a40fedcf0556f7129b97ad85a6c06d73f570c62b99af5ef957b30daf8ea277fa"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/observer.png",
+      "bytes": 641013,
+      "sha256": "3e6e97ed047412c5608808b9c9f11b8731da756678282ecc2eb597664e7e0813"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/report.json",
+      "bytes": 158319,
+      "sha256": "a65ca4de674b8dc659ed24630f52b97ed8d08a55f74f3866e1c0bedc0cbcfeb6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-before-movement.json",
+      "bytes": 4788,
+      "sha256": "79816196a82238f6f921a07a5171552e6ca518f524b2aadcd257e5756a4821cd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-moved.png",
+      "bytes": 227743,
+      "sha256": "dd47111a0598a6684407afc750acce9ffe8daa7a400028f42871cdc6de426355"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-movement.json",
+      "bytes": 16351,
+      "sha256": "c704ded489be82d21d6ff35ded95cddb17773d65b2bf4760765c1c7d3ef3b73b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-observed-scope.png",
+      "bytes": 225002,
+      "sha256": "747c3d1da50ec730454e7ad819db200e994166358905ad7eda9e1d031633a6a0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-observing.png",
+      "bytes": 257066,
+      "sha256": "500bbc06614ede65e2d5389a7b943deae4f211e8e2b6b2ae4203809ef84ceaa9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-panel.png",
+      "bytes": 183776,
+      "sha256": "cbbf366bb5d999f1c0ae20137e2dcf5a75e0f9a7ebedf8d9ab8485a3206c6ddb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-possessed.png",
+      "bytes": 242947,
+      "sha256": "3c26118d55b22e7c317337a61a4987aceac630baeff3261fe23bc26aefe9858e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-report.json",
+      "bytes": 19059,
+      "sha256": "9e57246a77b71752cbd073ba68bb14e75bc2b36ffacda3fff03b89358a08fe17"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-return-start.png",
+      "bytes": 398990,
+      "sha256": "0eef30ddf422726ab890351ae7be0cfd3b3d79cb45d8aad1e67a91263d0f510f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-returned.png",
+      "bytes": 426101,
+      "sha256": "99ec9312466bb2f8a44acb1d143ea2ba579d3e57b14e45d2ef743be0055259ac"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-selection.json",
+      "bytes": 1738,
+      "sha256": "f801ab4fc7c04a1a8c2470b2e25c1349955a15be4403c057739ef91eeb339ce4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/residents-stopped.png",
+      "bytes": 221847,
+      "sha256": "de82f5fe0706891748e685c25770766993fb19579dd907ec51acd3cd0c5bd74f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/returned-observer.png",
+      "bytes": 600122,
+      "sha256": "4a39f8f3e1b78989962a06f1f6e3b87f17354e3df6f4a8b5d49593fc1d1fbb40"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-cold-support-native-20261017-r1/walk-KeyW.png",
+      "bytes": 420806,
+      "sha256": "1c16a25bcb2311622c628784bdca5d1dc0384762318cc4a4fc9ea6e299ac7eee"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-cold-support-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 15859,
+      "sha256": "e23b05b3801ad412103213121868d5389a0eef1984bd88419d9106d198b8b25b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-cold-support-native-20261017-r1/office-entry.json",
+      "bytes": 16030,
+      "sha256": "7ba827ad7f16fb6021c34542dc642eb8c1272f063ff32bb2686dae95b26a8e03"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-cold-support-native-20261017-r1/office-entry.png",
+      "bytes": 603886,
+      "sha256": "8643be0fcabe4bf2196625c4370fc1669c01920000146a7c0f72109cbff9f09a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-native-20261017-r1.log",
+      "bytes": 194,
+      "sha256": "12707b6d9c80f2c8f3cddeee89bdf4b6bccbec3fa6700f416d753924adb94856"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-build-20261017.log",
+      "bytes": 585,
+      "sha256": "9b50bc4ff6151abfbeb2016cd90fce6c5baab5c8bd9b192eb264b6a90bb72c1c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-legacy-before-20261017.log",
+      "bytes": 2513,
+      "sha256": "4f7d0b1d0ba2c74f3a54859d3977e1784a886ba54e6877c9fd134c0798f0d59e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-regression-r1-20261017.log",
+      "bytes": 8992,
+      "sha256": "248c450219e24579b8a2e800e3423da6c0e7217460844cc8fa4255b5e5389087"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-tests-before-20261017.log",
+      "bytes": 2963,
+      "sha256": "6a2bbbc676a55d4ee7ea2832536047642bacc6840bbd9b94ebd4369a1ac1271f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-tests-r1-20261017.log",
+      "bytes": 592,
+      "sha256": "57c9ad1976330c1ae64a9a3370c0f6ca2393507e30aa304efca5ed840c0c1765"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-tests-r2-20261017.log",
+      "bytes": 977,
+      "sha256": "fa0f23ad19a6de296bbe3f5b41702b2d82abef4cb0695458797bcfe69782df5d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-cold-support-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/audit-additions.ts",
+      "bytes": 1125,
+      "sha256": "a69333588e51217b239c6c298a32b20a290580a28580e994a77c299e6e85a2c4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/audit-restart.ts",
+      "bytes": 3047,
+      "sha256": "c1749e981be5bca37e86a9a1144eb602c38956a531937bc0ec1490eda0e1aa29"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/audit-saved.ts",
+      "bytes": 1789,
+      "sha256": "648a58d088a9791208555d177e6cdd542df02eb7c6f3bb2fd1b6acb25ad49eaf"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/authority-before.ts",
+      "bytes": 66193,
+      "sha256": "f924afd21d16f65dd775928c740cc8e3d0718cbd98284c8b05ec68ba0fbda521"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/backup.ts",
+      "bytes": 2467,
+      "sha256": "a0844fe3fd3fd7d8446cd9c80c9126404cd8c2e5391e4b800f5aaea07270ec06"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/documentation.ts",
+      "bytes": 12882,
+      "sha256": "f8966989e2a69bdad0587a9e1304522f43b8eefc5566f6bf3b8fb8373bf5c39f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/evidence.ts",
+      "bytes": 9398,
+      "sha256": "96e34381329a41e5a81305fb04e8acd50dfed516bc04cc70516ed2e29626a2d7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/initial-saved-audit.json",
+      "bytes": 4086,
+      "sha256": "4431317304c6f64a822def23365117c24aa0d82cee1b89ba5f42d086b53c526e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/inspect-rehearsal.ts",
+      "bytes": 973,
+      "sha256": "6f8d9efe7683d7026386b8fbc89013ed6d2938cf8ad3ce7d78bbe7b97578642e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/account-control.ts",
+      "bytes": 6966,
+      "sha256": "5f093c9317bf7bf7a3931fed8ad32217f1dc5848ab988cf4eeaf7ed2e4dedb1b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/actor-state.ts",
+      "bytes": 6983,
+      "sha256": "084320a059ce3bdc86626e7582f11af076f34fb4c6956230a6bf0dfff5ba328d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/cold-resident-control-fixture.ts",
+      "bytes": 3685,
+      "sha256": "c647b1844a0ffc4fdad75679da9dcc2830b84787e4daa4f6661dc88cc3af359f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/cold-resident-control.test.ts",
+      "bytes": 7400,
+      "sha256": "fc239ad967038758a1a7699d2c69470bf9c9e5018e5f0204cc4a2540e13da6e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/player-actors.ts",
+      "bytes": 18935,
+      "sha256": "71b2f0120b8d176650dca289a9b53062444c24187cd0571abf1386a43e9a0bb1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/resident-places.ts",
+      "bytes": 3921,
+      "sha256": "5d7a4856912948efa993b23f0848cc983417dfadd46e9f58374e52b51870ca98"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-before/residents.ts",
+      "bytes": 49583,
+      "sha256": "445edfb3c7623774ca51ea801355c5e522f765df6f5903b43f60ccf2b525824d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/legacy-work-audit.json",
+      "bytes": 1336,
+      "sha256": "411bc1e3f4c6d1f6cb9350d655de978161d4fe6b2a14fec1bd6a7642d06b86a9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/prepare-after.ts",
+      "bytes": 1261,
+      "sha256": "dd01fe8123600884e529944eba47d8bb17db129bae2f3a55cc7ce2e0f7800830"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/prepare-runtime.ts",
+      "bytes": 1535,
+      "sha256": "945bf201c763dd614ef1a5985450ec4526d7ede981024fa12be766f158588cbc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe-after.json",
+      "bytes": 1467,
+      "sha256": "c3dc20eaaacdab0240884483354527388c138b7518cde6739e78898161d9a711"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe-after.log",
+      "bytes": 1037,
+      "sha256": "fd16dcc8160dc7179bde0c2fea9a886adb5c259d74e99272b7918d7ed8d62a39"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe-after.ts",
+      "bytes": 4413,
+      "sha256": "47b3c05d57b220974f6abf1ba6c68edd634ae2105f8363f5a6b3f5e575aed739"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe-before.json",
+      "bytes": 1376,
+      "sha256": "9f2aaf2da81c0d097af6d5ad4ddd408ed3772833150d8ecfce9c3fe885845446"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe-before.log",
+      "bytes": 1001,
+      "sha256": "accf2169cca5364baf2909034b5b1c82f6c88e0572ed43616f599a73b4d42a9c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/probe.ts",
+      "bytes": 4414,
+      "sha256": "274232bf26312f0debcd7d9e5028160bd183c02a49ad6ceb6ef2595ed3cf547a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-r2.log",
+      "bytes": 315,
+      "sha256": "c1fa4fc228ba3408c8d5a4bf50fc6407f0b7b860b48dc0aee451b235fd31d93c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-r2.ts",
+      "bytes": 5840,
+      "sha256": "a62965fb097bcf241d3a30e204181cdd2d555cc6e32de707fd0373e8904ef604"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-r3.log",
+      "bytes": 315,
+      "sha256": "c1fa4fc228ba3408c8d5a4bf50fc6407f0b7b860b48dc0aee451b235fd31d93c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-r3.ts",
+      "bytes": 5840,
+      "sha256": "932dfd275d5c6c0e12d4c95bead4b8ce17f8398fe73fd1760fd86f54456d24be"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-report-r2.json",
+      "bytes": 2636,
+      "sha256": "7d0cd381a9d562e8521348e1cb42b13edcacccbb39122382cf7078dbe31e8abb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-report-r3.json",
+      "bytes": 2636,
+      "sha256": "32021640f57ae922aedabb2cd620b3ab36ad440fd71a4d43ef953befcdfe5385"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-source.sqlite",
+      "bytes": 8499200,
+      "sha256": "81baab685142dccdd1512a78c1319d0ab2b18995aa242a9db972f093c781ebe2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-working-r2.sqlite",
+      "bytes": 8511488,
+      "sha256": "e1edda4e4f4df9646a8d2ac0c9f64875d81a027d91497aee939bdf96f013fe98"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-working-r3.sqlite",
+      "bytes": 8511488,
+      "sha256": "e1edda4e4f4df9646a8d2ac0c9f64875d81a027d91497aee939bdf96f013fe98"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal-working.sqlite",
+      "bytes": 8507392,
+      "sha256": "54cbff43df16cb2747ce1972f8da7dd7fc4565989b70933a5d12312b67b8b513"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal.log",
+      "bytes": 2331,
+      "sha256": "2706c09db9c5405228ef093a9bfe797b8eb4478361d0820dc2095da9700e4f24"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/rehearsal.ts",
+      "bytes": 5910,
+      "sha256": "3cbd8a9aa745f8f0093bfd6bda28c456d8dfb9a2f75e194e32657d2496ea26ad"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart-additions.json",
+      "bytes": 2626,
+      "sha256": "8353f4fd8cd53cef3dd70965232833cad7d131ca546eb832bbbf6d6dd1a68a07"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart-audit.json",
+      "bytes": 636,
+      "sha256": "a2b5f2a94e2690955e93df5d9d380c1304817636829e879b370932b49af86516"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart-operation.json",
+      "bytes": 317,
+      "sha256": "8175f6350db4ed97f4eaf6e70ccf8846104886b5a12b1abb22cf03a9558cb363"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart-ready.json",
+      "bytes": 8806,
+      "sha256": "fe33e1885826268c08cb317bd0b8852a94ebe0cd1814894527a13ee25beece9d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart-ready.sqlite",
+      "bytes": 8511488,
+      "sha256": "abc8b410d31b8e0a578b715b062c440f76dde8afcc630dac8305aa4f2147234f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/restart.ps1",
+      "bytes": 2773,
+      "sha256": "ec76f8a08d8aea84c682d1ff9408f91bd40ec904b0848dfd3fc57d09e3977470"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/run-native.ps1",
+      "bytes": 1607,
+      "sha256": "5335250d500d115b4a4424145f4e5533ff1545c692dcd4c0fbac39da30926c21"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/server-before.err.log",
+      "bytes": 2200,
+      "sha256": "81fe26ece4c6131411a2925f340203be9d4d1d253a11380f1a0b27d666309f2b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/server-before.log",
+      "bytes": 723,
+      "sha256": "2369af63694ede20c2fbbed27ef33908cfbb88e213b695e9826a48c802c9bfd5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-cold-support/verify-evidence.ts",
+      "bytes": 1099,
+      "sha256": "f93244e5e9e21db873e4c31b4248d06e8746de647fd0ce4150d6e9b01a0f3888"
+    }
+  ]
+}

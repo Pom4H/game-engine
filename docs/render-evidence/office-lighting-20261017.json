@@ -1,0 +1,1058 @@
+{
+  "date": "2026-10-17T05:20:08.184Z",
+  "scope": "Shared original Game sun/sky/exposure/irradiance/fog/shadow settings for Office, preserving the pre-change Game renderer values; lighting-only native pixel comparison and production Office control regression",
+  "capability": "original-residents-21",
+  "tests": {
+    "pass": 176,
+    "assertions": 8116,
+    "files": 19,
+    "seconds": 16.85,
+    "log": "artifacts/office-lighting-regression-r1-20261017.log",
+    "originalGameFrames": 45,
+    "officeDirectionalCases": 32
+  },
+  "probe": {
+    "label": "office-lighting-probe-20261017-r2",
+    "scenarios": [
+      {
+        "name": "day",
+        "minute": 960
+      },
+      {
+        "name": "night",
+        "minute": 0
+      },
+      {
+        "name": "rain",
+        "minute": 600
+      }
+    ],
+    "records": 9,
+    "channelsPerImage": 3686400,
+    "exactComparisons": 6,
+    "changedChannels": 0,
+    "physicsBodies": 0,
+    "physicsSteps": 0
+  },
+  "native": {
+    "label": "office-lighting-native-20261017-r2",
+    "states": 12,
+    "actor": "resident:22089:0",
+    "takeoverDistance": 0.18080149984095376,
+    "takeoverSpeed": 1.8090378658281312,
+    "takeoverReference": {
+      "time": 624.18333333293,
+      "tick": 170652,
+      "position": [
+        -286.62,
+        -0.02,
+        87.325
+      ]
+    },
+    "moved": 0.47614177638270905,
+    "rightsBefore": {
+      "accountId": "3b6b6a23-2c8d-459b-8b47-2540968891c8",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "3b6b6a23-2c8d-459b-8b47-2540968891c8",
+      "companies": [],
+      "leases": []
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "earlierFailures": {
+    "readonlyTuple": "Game source type boundary corrected without numeric conversion",
+    "probeRainBound": {
+      "assumed": 0.4,
+      "sourceMaximum": 0.396,
+      "finalProbeCategory": "rain",
+      "finalMinimum": 0.1
+    },
+    "nativeStaleReference": {
+      "displacement": 2.1686873475079587,
+      "referenceTime": 572.4666666663104,
+      "finalFreshReference": {
+        "time": 624.18333333293,
+        "tick": 170652,
+        "position": [
+          -286.62,
+          -0.02,
+          87.325
+        ]
+      }
+    }
+  },
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "pid": 8436,
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "debug": {
+    "ports": [
+      3263,
+      3264,
+      3265,
+      3266
+    ],
+    "live": []
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-lighting.ts",
+      "archive": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-lighting.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "archive": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-world-view.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "archive": "artifacts/office-lighting/final-sources/engine/apps/thegame/test/canonical-connection.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-lighting/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/game-lighting.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/src/game/render/game-lighting.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-renderer.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/src/game/render/the-engine-renderer.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lighting.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/src/game/office-lighting.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/src/game/office-controller.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/game-lighting.test.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/test/game-lighting.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/the-engine-renderer-before-lighting.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/test/fixtures/the-engine-renderer-before-lighting.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lighting.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office-lighting.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office-interiors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "archive": "artifacts/office-lighting/final-sources/game/tools/qa-office-terrain.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-lighting/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-lighting/final-sources/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-lighting/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-lighting/final-bundles/game.js",
+      "bytes": 2496060,
+      "sha256": "c99cb4e29bb897568acb6d5e2c4cedeade20cb29ddbfc24c26a4d88036d526c9"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-21",
+      "archive": "artifacts/office-lighting/final-bundles/office-controller.js",
+      "bytes": 1381904,
+      "sha256": "a66714f9dcce3e0a603fc59bb6dcea4eb76a6b8165a09200c574b569aeea31cd"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-BDN2Mke8.js",
+      "archive": "artifacts/office-lighting/final-bundles/index-BDN2Mke8.js",
+      "bytes": 1792514,
+      "sha256": "ccb5822ce21ea7a1bb81eb069e8022b7d9bcbf6d711379d513e8062abad9ee70"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-lighting/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-lighting/office-lighting-probe-20261017-r2/day-office.png",
+    "artifacts/office-lighting/office-lighting-probe-20261017-r2/night-office.png",
+    "artifacts/office-lighting/office-lighting-probe-20261017-r2/rain-office.png",
+    "artifacts/office-walking/office-lighting-native-20261017-r2/residents-possessed.png",
+    "artifacts/office-walking/office-lighting-native-20261017-r2/returned-observer.png"
+  ],
+  "limits": [
+    "The pixel oracle uses the existing Game Engine adapter before extraction, not historical WebGL output.",
+    "Probe geometry/camera/environment are identical and passive. Source presentation minutes are staged locally; the authority clock and actors continue naturally and receive no staging commands.",
+    "This isolates the listed lighting settings. Complete Game/Office scene-image parity, every environment override, precipitation particles, water and temporal effects remain unproven.",
+    "Native account/company lists are empty for the guest; their equality supplements earlier nonempty account/business tests and durable ownership audits.",
+    "No new FPS, physical microphone or audible-playback-quality measurement. Existing C920/audio-reference/autoplay warnings remain.",
+    "Long travel, all source scenes/layouts, water/temporal/audio parity and first-person own shadows/reflections remain unfinished or unverified. Full integration goal stays active."
+  ],
+  "files": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-lighting.ts",
+      "bytes": 549,
+      "sha256": "600769552d9338794b5517f86d27d5911aa0d26377c9c55208362bafd28762e2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-lighting.ts",
+      "bytes": 549,
+      "sha256": "600769552d9338794b5517f86d27d5911aa0d26377c9c55208362bafd28762e2"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 34554,
+      "sha256": "b5a120ae1b3f68c69593f6f987590c450174ad3d246bdff0b2c092aa7e44452d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 34554,
+      "sha256": "b5a120ae1b3f68c69593f6f987590c450174ad3d246bdff0b2c092aa7e44452d"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 36136,
+      "sha256": "46cd43aef3c4bbc37267c1f6338502704b19c529eb7482d2fd4c43de3e1dd0eb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 36136,
+      "sha256": "46cd43aef3c4bbc37267c1f6338502704b19c529eb7482d2fd4c43de3e1dd0eb"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 49122,
+      "sha256": "6ac9b541b43ae9deb9d45ab0d9a24daf10f8a42cb207c28dc5e41e9ce2539415"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/engine/apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 49122,
+      "sha256": "6ac9b541b43ae9deb9d45ab0d9a24daf10f8a42cb207c28dc5e41e9ce2539415"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 199513,
+      "sha256": "6aa418c01796d4507564d7018d1620d2352d19490025b1ca935ada0b0cdc001c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 199513,
+      "sha256": "6aa418c01796d4507564d7018d1620d2352d19490025b1ca935ada0b0cdc001c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/game-lighting.ts",
+      "bytes": 1088,
+      "sha256": "2483a01978b73020864ea438dd63c723a2e3e8c9db588e07a4832efd446e511d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/src/game/render/game-lighting.ts",
+      "bytes": 1088,
+      "sha256": "2483a01978b73020864ea438dd63c723a2e3e8c9db588e07a4832efd446e511d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/render/the-engine-renderer.ts",
+      "bytes": 7917,
+      "sha256": "0e3a171b23b9877df4b7f2243e2e5389504887ca3df835cf16c14945986552d6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/src/game/render/the-engine-renderer.ts",
+      "bytes": 7917,
+      "sha256": "0e3a171b23b9877df4b7f2243e2e5389504887ca3df835cf16c14945986552d6"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lighting.ts",
+      "bytes": 524,
+      "sha256": "17ceacb3e9f3d6f35990f5273faf64a8b1e0e5101ae22d6dcbe16563f90013a0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/src/game/office-lighting.ts",
+      "bytes": 524,
+      "sha256": "17ceacb3e9f3d6f35990f5273faf64a8b1e0e5101ae22d6dcbe16563f90013a0"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-controller.ts",
+      "bytes": 901,
+      "sha256": "9d4eee45593e7d581ea48fd7d5d773fae5fe3300862181f80b3734cfef164f9f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/src/game/office-controller.ts",
+      "bytes": 901,
+      "sha256": "9d4eee45593e7d581ea48fd7d5d773fae5fe3300862181f80b3734cfef164f9f"
+    },
+    {
+      "repo": "game",
+      "path": "test/game-lighting.test.ts",
+      "bytes": 5976,
+      "sha256": "7409e1ff4bad63b8fd212bd656732594ad37906da335fee51fae86f97d2a8dde"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/test/game-lighting.test.ts",
+      "bytes": 5976,
+      "sha256": "7409e1ff4bad63b8fd212bd656732594ad37906da335fee51fae86f97d2a8dde"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/the-engine-renderer-before-lighting.ts",
+      "bytes": 8578,
+      "sha256": "904c5ec65d4388c7c7ee0c38918eb6a1d0a4d7f9973e12fbaea91c3e09699240"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/test/fixtures/the-engine-renderer-before-lighting.ts",
+      "bytes": 8578,
+      "sha256": "904c5ec65d4388c7c7ee0c38918eb6a1d0a4d7f9973e12fbaea91c3e09699240"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-lighting.ts",
+      "bytes": 9240,
+      "sha256": "cc1435f3c1edcf1f6bb90283a0db38912395f9a1ca9a551ce84c3c6b4c84f7eb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office-lighting.ts",
+      "bytes": 9240,
+      "sha256": "cc1435f3c1edcf1f6bb90283a0db38912395f9a1ca9a551ce84c3c6b4c84f7eb"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 7774,
+      "sha256": "5a256720216b5f56cf1470b1fa228c06bd2e2fa0b286100225a6e81395560c33"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office.ts",
+      "bytes": 7774,
+      "sha256": "5a256720216b5f56cf1470b1fa228c06bd2e2fa0b286100225a6e81395560c33"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 15157,
+      "sha256": "ec9eda59f2f691cbfcccd05ad92fef7287c612be55c9a62ff756d995b44ec80a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office-walking.ts",
+      "bytes": 15157,
+      "sha256": "ec9eda59f2f691cbfcccd05ad92fef7287c612be55c9a62ff756d995b44ec80a"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 16767,
+      "sha256": "fe784f7ff593657b4a17e7dffdda5afe1339aecff2f1a743ad2016e62f6bcba8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office-residents.ts",
+      "bytes": 16767,
+      "sha256": "fe784f7ff593657b4a17e7dffdda5afe1339aecff2f1a743ad2016e62f6bcba8"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "ce8a0b50bb6fe0859288a653c9a7e235337e3e10223d6336cd277523abb45433"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "ce8a0b50bb6fe0859288a653c9a7e235337e3e10223d6336cd277523abb45433"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "593c7bbe16e210acd044daef3d62737ecf58dd1d572fddc6fd9a73cd32c08d53"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "593c7bbe16e210acd044daef3d62737ecf58dd1d572fddc6fd9a73cd32c08d53"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 806110,
+      "sha256": "cbb6916d80d7c380d8d1c19ca36df9bb7955c341b8eb9dfd7b0b07ed27ed9094"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 806110,
+      "sha256": "cbb6916d80d7c380d8d1c19ca36df9bb7955c341b8eb9dfd7b0b07ed27ed9094"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 65642,
+      "sha256": "55be2e1b85077c2f2c10818fecbf1eb76c9f818d05b5b6a4bd401fe20a755587"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/office/ui/src/office/scene.ts",
+      "bytes": 65642,
+      "sha256": "55be2e1b85077c2f2c10818fecbf1eb76c9f818d05b5b6a4bd401fe20a755587"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 133459,
+      "sha256": "0a89c0701c9a64c8db2e101858e52a3df7b598794d49db6f5f5390c26965ad9a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-sources/office/VERIFICATION.md",
+      "bytes": 133459,
+      "sha256": "0a89c0701c9a64c8db2e101858e52a3df7b598794d49db6f5f5390c26965ad9a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/fixture.html",
+      "bytes": 5081,
+      "sha256": "47e08354553c0d84ffd96db5a339d9b98a83f8f2f4b2951d3df9965b0253e69e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/reference.entry.js",
+      "bytes": 987349,
+      "sha256": "8c3dfb688c8a63c7095a77707af7546ca36ab21d96b46464e5e4579fa47e53e6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/source-frame.json",
+      "bytes": 13404330,
+      "sha256": "29a16a0bd3318869bd09b4c6ce81bfbcacbcfbca88313568b3d9ade3e3d9f1ec"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17247,
+      "sha256": "bdf86ac36d97d063f7d0245b88d23e7abbcb80a4378f23ae599f2f853963e415"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r1/office-entry.json",
+      "bytes": 17418,
+      "sha256": "9e57d82c983af8e8d39e4bcc302ba89870811c5f058683ff31f1f451ccc8068e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-probe-20261017-r1.log",
+      "bytes": 3011,
+      "sha256": "e7ede8401caa47d720993a06514db6f323f08fbf2f1778cdd60583895037299d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/day-office.png",
+      "bytes": 163244,
+      "sha256": "0d09c947d68b600e832da12ddfa96804176019add83b445f9b8d523b5e981553"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/day-original-control.png",
+      "bytes": 163244,
+      "sha256": "0d09c947d68b600e832da12ddfa96804176019add83b445f9b8d523b5e981553"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/day-original.png",
+      "bytes": 163244,
+      "sha256": "0d09c947d68b600e832da12ddfa96804176019add83b445f9b8d523b5e981553"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/fixture.html",
+      "bytes": 5101,
+      "sha256": "480487bf8ba90ac1c03131ad8d8852819a6259449d334f5772207975ffeef307"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/night-office.png",
+      "bytes": 57884,
+      "sha256": "1c4c2f3a7112a7ac0a6f32d006b5a8a003668dc39e354d3db4de8deae6e34dcd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/night-original-control.png",
+      "bytes": 57884,
+      "sha256": "1c4c2f3a7112a7ac0a6f32d006b5a8a003668dc39e354d3db4de8deae6e34dcd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/night-original.png",
+      "bytes": 57884,
+      "sha256": "1c4c2f3a7112a7ac0a6f32d006b5a8a003668dc39e354d3db4de8deae6e34dcd"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/progress.json",
+      "bytes": 18575,
+      "sha256": "7c963e98fd721b8bde26d6d1b412e3ec776800bcffdf6af3956c9697ed2f3a9f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/rain-office.png",
+      "bytes": 95838,
+      "sha256": "e36704aa44f014bdb4c2cad37804ce6c24a57b96565baa7529145703a3f955c3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/rain-original-control.png",
+      "bytes": 95838,
+      "sha256": "e36704aa44f014bdb4c2cad37804ce6c24a57b96565baa7529145703a3f955c3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/rain-original.png",
+      "bytes": 95838,
+      "sha256": "e36704aa44f014bdb4c2cad37804ce6c24a57b96565baa7529145703a3f955c3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/reference.entry.js",
+      "bytes": 987349,
+      "sha256": "8c3dfb688c8a63c7095a77707af7546ca36ab21d96b46464e5e4579fa47e53e6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/report.json",
+      "bytes": 20773,
+      "sha256": "8ea31624da75a7a916c22d7139f90d24191b2d3bda6c9a5145a7b9ada0e0a630"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/source-frame.json",
+      "bytes": 13406706,
+      "sha256": "6b3a7d190b120e493a1af12327145fb3a49efd0ecdd33cd0529e54078d2df8ad"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 17251,
+      "sha256": "c4c3316e593ad8739a51e2bbfd228a5d0879f8696cd2a9c0eb6d95b5ff5cbb43"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r2/office-entry.json",
+      "bytes": 17422,
+      "sha256": "0bea3b1cf2dda4930bf450cb7cd544f54ab9f72d5cda5f3ffac2842230de8dd3"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-probe-20261017-r2/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-probe-20261017-r2.log",
+      "bytes": 259,
+      "sha256": "81987dd35d2f50c353ad8bdfdffb8d4e964bf24ebcda80426fc3c56dc9c7503c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 13526405,
+      "sha256": "59f8d5ade692f426c3be86c521fc891bf1eade0b8c6eb79bd2234e91fc638898"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13540060,
+      "sha256": "5b43014fb7c7f29e0ffed3767aa360a682b94ca4d26469d312d8b73f739b7c19"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/entered.png",
+      "bytes": 519733,
+      "sha256": "2d4b4c493123b91ac6e0ca53fb5349c7e98a897f5f8cf816e6df921b9220e8d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/failure.png",
+      "bytes": 286527,
+      "sha256": "1893eb171dd01a41d4bea79759fceccee41bcd0ee5471f90cf405710a611eb04"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/observer.png",
+      "bytes": 591137,
+      "sha256": "9666f795909b620fe5d026c3dfd0debd34a317312f9c38bb5647da639dd06b64"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/report.json",
+      "bytes": 109271,
+      "sha256": "88effc17647d085bea5eaaead3ea42b7cac66ba0c7037555af6acfc684db4240"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/residents-observed-scope.png",
+      "bytes": 267214,
+      "sha256": "208a4d4028ffff109ece26d24a361a0044adade23b46b2275e69bc4ab65fbc76"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/residents-observing.png",
+      "bytes": 347384,
+      "sha256": "185ae5371eb008671cad3e8f3a365c5e997b9d4ff65c5af3e79d3c4067ebc88a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/residents-panel.png",
+      "bytes": 185093,
+      "sha256": "50780f20459d89502de1e35c40adbf2e96ad334931884e04deee4f8fef4d8084"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/residents-possessed.png",
+      "bytes": 294857,
+      "sha256": "4658e7f7d2a268af4ae84e7bfe503e9e5103075791688a8c0383133cc95f9f26"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/residents-selection.json",
+      "bytes": 1624,
+      "sha256": "c8d72492ffb62133d82e0ff51024a934e58dd2acf58c4759cceb2e25b9fc0ed7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/returned-observer.png",
+      "bytes": 587330,
+      "sha256": "0bde8c8e7196e5cbad68deb6d422e2d066ac92e8fd0f1ff139ff052626f0465e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r1/walk-KeyW.png",
+      "bytes": 494601,
+      "sha256": "41e61bdb4cea90f0510c3bc541c98c298e9767386251fcc9fb27bf0b4b26e62e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17240,
+      "sha256": "01413426c211cd90db016744afe92e1570ed84bdf1fbbb46c6bcf3290e36f290"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r1/office-entry.json",
+      "bytes": 17411,
+      "sha256": "44815faaca88cd2098c5d20cc0b034ebb4b851a183b001ecb4e53b83148f8834"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r1/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-native-20261017-r1.log",
+      "bytes": 3323,
+      "sha256": "5f075094f302b489df5dd2cd212e4721e2ef300c4743360c026fafb865136c91"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/canonical-controller-source.json",
+      "bytes": 13526438,
+      "sha256": "48ccd4028746ba138b379dcfc34bab2c46edc01974c22d6914935f86427ed680"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 13538100,
+      "sha256": "fb22da61b6fd4a42581e58a89aa4495ef870419ae7baa279f4db45cc3445636e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/entered.png",
+      "bytes": 479531,
+      "sha256": "8fa8c25afe53419beaf49d57713196931c3e3c1fcc955d019e0a86185b7003fc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/observer.png",
+      "bytes": 591847,
+      "sha256": "fda90e655c6b21ddc0c06a4d0ef738bee4a148515036bcfb756daf932d89649a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/report.json",
+      "bytes": 170891,
+      "sha256": "834fbea763499e44d48f0508dbc5d7f116d6b94e299be5f09845ce91903540b0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-before-movement.json",
+      "bytes": 5282,
+      "sha256": "b813c496dc255c5b83a3bb29a6c3ea28a8498c5d0d4c8d3724bc3ae72a562fa6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-moved.png",
+      "bytes": 225519,
+      "sha256": "f6ea46c459c16ce85cf3b20f42c05f322e2d0a0976005988f32a972c0fa59062"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-movement.json",
+      "bytes": 12937,
+      "sha256": "d9107dd3d9033f57dafee2e666d29f8e57590e3ce6e9e18d072e985252c734ae"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-observed-scope.png",
+      "bytes": 218087,
+      "sha256": "286de9f920d0c86da07bb5ccdf96834403a8d9749c54ba4251370bc3eb9589b9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-observing.png",
+      "bytes": 207440,
+      "sha256": "aa702bbe0a246bd20aabc3424eb8836617199d643f7eb34cdc11330d0f934971"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-panel.png",
+      "bytes": 181643,
+      "sha256": "a85583a2992f5e8c72cbcca29bbb1cc9d95582ed2013ead1faf0820f9b7cff39"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-possessed.png",
+      "bytes": 230239,
+      "sha256": "1ca27c6be879a07aed7b1c49ea16e1de300190e84a706544db6b9f003009da36"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-report.json",
+      "bytes": 15500,
+      "sha256": "96aee92740491a161451c9c1c93670fbddb7189b9d3b93c4718bf0db454dea0b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-return-start.png",
+      "bytes": 476653,
+      "sha256": "a43408ecb1886819f5cf4205f372789304e6af04b9c3e3bf42dfd22b150758ae"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-returned.png",
+      "bytes": 496506,
+      "sha256": "a9d078dbe61110ced343bda26f888292291c71b810fa11fcdc7e56bbb9d595c1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-selection.json",
+      "bytes": 1619,
+      "sha256": "994bf1bd4aad2f5c2f22ec28a6a0571d38ef6dc5ab191b3413899c94c977a11c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/residents-stopped.png",
+      "bytes": 227478,
+      "sha256": "d1f4a459e73812f10ceb5eb9f5dac3be1d4892b8c6c7908265dac149fe56197e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/returned-observer.png",
+      "bytes": 580015,
+      "sha256": "1f9bda91337f78e1954da942c6bd829b07e8f45b141da4c3ba3870619bfdab4b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-lighting-native-20261017-r2/walk-KeyW.png",
+      "bytes": 440683,
+      "sha256": "7be3c76f25224f6f280c90ec7dab3e9d122aa2332f371cbae3a4df98eaa09e47"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r2/office-entry-diagnostics.json",
+      "bytes": 17216,
+      "sha256": "1de3c15864bd65d241658e38f5aee024db4a8fa829aaa50d54cb9bfdb15cd6d5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r2/office-entry.json",
+      "bytes": 17387,
+      "sha256": "58eae050709c412c4d40f365a511e7987ac1e16f3130c0138361b496e94dee8a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-lighting-native-20261017-r2/office-entry.png",
+      "bytes": 229097,
+      "sha256": "27a3d50f7c9e0dc3984977b010c71579947a2774d3c8e9525c773df891e9f3f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-native-20261017-r2.log",
+      "bytes": 96,
+      "sha256": "24833b70b295c3c7e4279a06c093988830b56d924f57dc4b34c6adda9d3b34f2"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting-app-typecheck-20261017.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting-regression-r1-20261017.log",
+      "bytes": 20579,
+      "sha256": "933d3253d123545330c9db1dec70653a90a1096c8b003c93cf96249f4bd07f06"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "783b3ac3c42f90b792768675de67e6b162752b9ecb9f2da2953fecc84cfcecc5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "12ab3c9e376329420c02c5c34a23ff38c7f0a7006f52172ae445db2aefee5c32"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-tests-r1-20261017.log",
+      "bytes": 509,
+      "sha256": "8ac1bbd6c086eecbb802f2fa8b523f8967ea675cbe3c20fa598c3f3ed6ad5598"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-typecheck-20261017.log",
+      "bytes": 815,
+      "sha256": "2d3432f8a872812f852b14dd07283004a50df8a65bb7a1c6ff1b6943189ae465"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-lighting-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/before/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "db1b535d435be80655827d66c44616deb707fb239c1e6f1643b657bfee6bf543"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/before/engine/apps/thegame/client/canonical-world-view.ts",
+      "bytes": 33762,
+      "sha256": "0b7902ad7128a2588eb752e6f39285b363133c55370679eb7602881c04444a81"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/before/game/src/game/office-controller.ts",
+      "bytes": 842,
+      "sha256": "c8d02b62b38dc1c6664c9e24b246b893d9616d6bce79ce1db71ab2ed2d13e85e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/before/game/src/game/render/the-engine-renderer.ts",
+      "bytes": 8414,
+      "sha256": "038b4f5e146920bc5f23f407999636da7bbb666b24b6e5c83a00c5766fa36dac"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/before/office/ui/src/office/scene.ts",
+      "bytes": 65306,
+      "sha256": "36faf5c43b2c9b8309da0c9e2ee320ae03ffe799043569b5af5433b374548b33"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/complete-evidence.ts",
+      "bytes": 20176,
+      "sha256": "5080d27fae71719e484e48e7e615569da9ed680a7a2c9d8f8fa97ceb7cc0b557"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-bundles/game.js",
+      "bytes": 2496060,
+      "sha256": "c99cb4e29bb897568acb6d5e2c4cedeade20cb29ddbfc24c26a4d88036d526c9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-bundles/index-BDN2Mke8.js",
+      "bytes": 1792514,
+      "sha256": "ccb5822ce21ea7a1bb81eb069e8022b7d9bcbf6d711379d513e8062abad9ee70"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/final-bundles/office-controller.js",
+      "bytes": 1381904,
+      "sha256": "a66714f9dcce3e0a603fc59bb6dcea4eb76a6b8165a09200c574b569aeea31cd"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/fixture.html",
+      "bytes": 5081,
+      "sha256": "47e08354553c0d84ffd96db5a339d9b98a83f8f2f4b2951d3df9965b0253e69e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/reference.entry.js",
+      "bytes": 987349,
+      "sha256": "8c3dfb688c8a63c7095a77707af7546ca36ab21d96b46464e5e4579fa47e53e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r1/reference.entry.ts",
+      "bytes": 609,
+      "sha256": "8b937b43eddf8d1ff49bbbba6794fe77c783641827842e1095d2c137d8cc83e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/fixture.html",
+      "bytes": 5101,
+      "sha256": "480487bf8ba90ac1c03131ad8d8852819a6259449d334f5772207975ffeef307"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/reference.entry.js",
+      "bytes": 987349,
+      "sha256": "8c3dfb688c8a63c7095a77707af7546ca36ab21d96b46464e5e4579fa47e53e6"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/office-lighting-probe-20261017-r2/reference.entry.ts",
+      "bytes": 609,
+      "sha256": "8b937b43eddf8d1ff49bbbba6794fe77c783641827842e1095d2c137d8cc83e0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/prepare.ts",
+      "bytes": 1395,
+      "sha256": "211a959026c9601875e855de42f6e3f7135165669c939f84446e70ab90e30185"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/qa-before-rain-bound.ts",
+      "bytes": 9220,
+      "sha256": "ff10d660482f3bf631b4b8809d090c3bda9efa72327de62aeb45d988d7737b78"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/qa-residents-before-fresh-reference.ts",
+      "bytes": 16176,
+      "sha256": "b286bcd36a4828805bff8155eb425072e165613892830873ac68b113a5e27d18"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/run-native.ps1",
+      "bytes": 1746,
+      "sha256": "720aab84a794dd21be8aa60dcf4bd45fdee089d3a534d0e1cd103a9b85e2cabe"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-lighting/wire-source.ts",
+      "bytes": 4190,
+      "sha256": "af16d8db9a9374d87fce5da2b0bf27f9723df063c4be7f084e97752b9a145ec3"
+    }
+  ]
+}

@@ -1,0 +1,696 @@
+{
+  "date": "2026-10-18",
+  "recordedUtc": "2026-10-18T05:13:24.3109349Z",
+  "status": "worker13_and_sat_correctness_frozen_browser_mode_comparison_incomplete",
+  "scope": "Worker13/SAT checkpoint plus completed A1 two-pass trace analysis and headful visibility failure follow-up. CPU/browser traces are diagnostics, not an unprofiled FPS comparison.",
+  "hashes": {
+    "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\body-worker-protocol.ts": "3871cd2d13123183ac7f6aee879b48485d484b0df515c3ec5f0651a00c98a3ec",
+    "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\body-worker-builder.ts": "222d935f2e260352d51b42297053c8d3408bf5a40055e6b46f476ccdb61cd4fb",
+    "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\body-worker-service.ts": "1ba28be96bceb24f9807c06b14bba0b2ce9606b01b09ef0506983b55f1cae6d4",
+    "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\body-worker-control.ts": "900dbceebf29c8f79537e3c200f32f57586be2323bab0ef9884ad9e63f9bb1c5",
+    "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\presentation.ts": "2c6b8f5dcac8a64782f42dac66ee42e562852ce63d1715905adb9bb06ab07144",
+    "C:\\Users\\Roman\\Documents\\game-engine\\src\\physics\\box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+    "C:\\Users\\Roman\\Documents\\game-engine\\dist\\physics\\box-overlap.js": "ad64dbbfea51fbec5adda62752ec4582a7fcc020e75b3be483eb0d1e79989288",
+    "C:\\Users\\Roman\\Documents\\game-engine\\src\\render\\webgpu.ts": "d4b6d0471139d70785d351861c11abe6433a28293b230b699b42389b69c24c71",
+    "C:\\Users\\Roman\\Documents\\game-engine\\test\\box-overlap-axis-closure.test.mjs": "7d08664b670810b187f4aa3fe2f680685c93b61e2a5a59f7df001bb0a90a2c5b",
+    "C:\\Users\\Roman\\Documents\\game-engine\\test\\fixtures\\box-overlap-before-axis-closure.mjs": "594f3c1bc448e57fc9fc75e39ae28f208e0877ef328767254e24273bab7c4ac2",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-game.js": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-game.js.map": "e0c5eb5e46121e5691ec1129e95557b94aca754b27a2322bdb5c62327dcb6fb0",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-worker.js": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\game.js": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+    "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\game.js.map": "e0c5eb5e46121e5691ec1129e95557b94aca754b27a2322bdb5c62327dcb6fb0",
+    "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\body-worker.js": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-game-tests.log": "e34d8f3d4f697751a16fba1294a283eb13eddfee42768498528c43ef04b54767",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\render-stability-worker13-sat-build.log": "5abd6ebd5a6a88a76189b778ace3f64dbf56488f403055eff21853f603f67142",
+    "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\render-stability-worker13-sat-engine-tests.log": "d7dca03617216d723ffc96c488d6a34fafe260c08c959f8942eabbd850533cd6",
+    "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\render-stability-worker13-sat-engine-typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\sat-axis-closure-build.log": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\body-worker-prototype\\production\\browser-report.json": "a124c651bac15b2492f9439e1c94553b68081dc741d5a0f35b940f2ecd0acbc2",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\body-worker-prototype\\production\\hatch-bicycle-54-browser-report.json": "feec14294f3776903271e71d689a6ca1fa790beed52c60bee1df0ab7d6fcde16",
+    "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\remaining-ground-body-worker-20261018.json": "c7d5b1225d0bea109c35b2438790a36c0e930ad0b1ac32a7247dc19d8b0bf7d9",
+    "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\occupancy-sat-closure-hoist-20261018.json": "a870e07f927efa133ff09bc2a68e65dd40ebebda69665df486daea2fbde23260",
+    "C:\\Users\\Roman\\Documents\\thegame\\tools\\qa-frame-sampler.ts": "17fdba3002a5a03a8149a714442276cebf04886751b13a25f8e361bc4c8f48ac",
+    "C:\\Users\\Roman\\Documents\\thegame\\test\\qa-frame-sampler.test.ts": "76793a6a375f6c03c0f760675b76e6416796d1cb6638048b8518e23423abdf85",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\qa-frame-sampler-browser-20261018.json": "7a6592ff8c19d72d756830516166bc5f6d3eb8acde2b883764f233473507bba4",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\qa-frame-sampler-browser-20261018.log": "d67cfd9c24bc73229b399b96c031a446eb698b434ed39393cb7349e6ff44b905",
+    "C:\\Users\\Roman\\Documents\\thegame\\tools\\qa-browser-info.ts": "674e95926579c11d7bc973f78b6b92057b5c28000d0dacb2b82cd840e7eb7cdd",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-runtime-info-probe-20261018.json": "b78703b84198362ed95fd5d56ac3a8d040ea99d2fde20131c7d304a1439bb4ad",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-runtime-info-probe-20261018.log": "1721115b782d6334bd69723ab3af8f99e86544ceedb49e9816158e22400372d0",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-mode-worker13-sat-20261018-progress.json": "9e6eea383cb72b38814f898748c00ce22cccfa83fca910cdb004ae8fd59d4772",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-mode-worker13-sat-20261018-a1.log": "47378dda05aa9c52c0a8cf7675260b47fc76495e6d26caad0b0cb5c55e821dcd",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-mode-worker13-sat-20261018-b1.log": "957812a88acbe288a760f807bd5fc7725b7f05056d792fbf23dff7743a59bdce",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\stalls-browser-mode-worker13-sat-20261018-a1.json": "f7cafc4064c5bb44c1f18f09671ec225c0d66a07c8eacc756a9926449795a625",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-audit-browser-mode-worker13-sat-20261018-a1.json": "489707868373158fc1482b109d79918cfc29fcd825dc7e0690e63143440e3135",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\capture-overrides-browser-mode-worker13-sat-20261018-a1.json": "abb170003e96cdd9ce483b97bd57aa6085967137ce5cc7754143a2028f9412e4",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\stalls-browser-mode-worker13-sat-20261018-a1.browser-trace-owner-facts.json": "3a38bac58b73e5805e364d3f6d61df735f00ec2730030f0c2841d0cf776d49af",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\stalls-browser-mode-worker13-sat-20261018-a1.browser-trace-analysis.json": "dd536f7f4074784e527f824f07bb84d18799db381c895ca6faf0d15343560a60",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\headful-visibility-smoke-20261018.json": "1c5a0753465e5b5ae2cab050ab82900b86da84d1c26ea80af04a47c13db1a826",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-mode-worker13-sat-20261018-headful-boot2.log": "0d99ac67d85bb19eb1e592993fea058221c434ff30b79231f71fe8be4fd0fbf1",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\stalls-browser-mode-worker13-sat-20261018-a1.vsync-dawn-depth.json": "6f796d5d1424870976cfe1fbeefbdf64b0739797fc7cc04418fb7a12f94a053b"
+  },
+  "bundles": {
+    "gameSha256": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+    "mapSha256": "e0c5eb5e46121e5691ec1129e95557b94aca754b27a2322bdb5c62327dcb6fb0",
+    "workerSha256": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+    "publicWorkerMatchesArchive": true,
+    "a1Overrides": {
+      "/build/game.js": {
+        "file": "artifacts/render-stability-worker13-sat-game.js",
+        "sha256": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+        "bytes": 2611181,
+        "fulfilled": 1,
+        "urls": [
+          "http://127.0.0.1:3177/build/game.js?v=1jyst-mvdd2hsm"
+        ]
+      },
+      "/build/body-worker.js": {
+        "file": "artifacts/render-stability-worker13-sat-worker.js",
+        "sha256": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+        "bytes": 524646,
+        "fulfilled": 1,
+        "urls": [
+          "http://127.0.0.1:3177/build/body-worker.js"
+        ]
+      }
+    },
+    "publicGameMatchedArchiveAtOriginalCheckpoint": true,
+    "publicMapMatchedArchiveAtOriginalCheckpoint": true
+  },
+  "worker": {
+    "supportedOrder": [
+      "sedan",
+      "taxi",
+      "police",
+      "v6",
+      "m3",
+      "hatch",
+      "bicycle",
+      "van",
+      "pickup",
+      "classic",
+      "cruiser",
+      "scooter",
+      "cargoBike"
+    ],
+    "protocol": "cached-panel-body-v1",
+    "panelFamilies": [
+      "sedan",
+      "taxi",
+      "police",
+      "v6",
+      "m3"
+    ],
+    "change": "Only worker eligibility expanded. DTO/generator/usesPanelBody/panel classification/budgets/fences/fairness unchanged.",
+    "realModuleWorker": {
+      "ok": true,
+      "browser": "Chrome/155.0.8059.80",
+      "records": 222,
+      "completeFloat32KeyRestCases": 213,
+      "addedCases": 162,
+      "actualFirstSightFlows": 9,
+      "controller": true,
+      "events": [],
+      "scope": "CPU-only headless actual module Worker, not a native-render/performance observation."
+    },
+    "old54ReportRetained": true,
+    "separateEvidence": "docs/render-evidence/remaining-ground-body-worker-20261018.json"
+  },
+  "sat": {
+    "change": "Hoist only the capturing passes function from occupancy boxesPenetrate into a private noncapturing passesAxis helper. Retain exact arithmetic, [a.axes,b.axes] outer array, iteration/read/coercion order and short circuits. No new cache, geometry, policy, rates, caps or navigation budget.",
+    "sourceBeforeSha256": "e8ac0b4f840d46b3feaae2a93e615014ab1b037c6843616e60c4ee233c75d550",
+    "sourceAfterSha256": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+    "distSha256": "ad64dbbfea51fbec5adda62752ec4582a7fcc020e75b3be483eb0d1e79989288",
+    "permanentOracle": {
+      "tests": 4,
+      "frozenBefore": "test/fixtures/box-overlap-before-axis-closure.mjs",
+      "numericCases": 12081,
+      "getterIteratorMutationReentryThrowCases": 388,
+      "depthCoercionCases": 4,
+      "actualWorldOccupancyCases": 1000,
+      "note": "Actual dist export is tested against frozen pre-change implementation, including exact getter/iterator traces and abrupt completions. Existing canonical compound test compares1200former physical state/contact/impulse steps."
+    },
+    "focusedEngine": {
+      "passed": 36,
+      "failed": 0
+    },
+    "focusedGame": {
+      "passed": 45,
+      "failed": 0,
+      "assertions": 8838
+    },
+    "isolatedMicrobenchmark": [
+      {
+        "name": "canonical uniform reservoir",
+        "rows": 4096,
+        "trueRows": 2,
+        "pairs": 7,
+        "beforeMedianMs": 313.2343000000001,
+        "candidateMedianMs": 186.24149999999997,
+        "ratioOfMedians": 1.6818716558876519
+      },
+      {
+        "name": "true-hit stress reservoir",
+        "rows": 256,
+        "trueRows": 256,
+        "pairs": 3,
+        "beforeMedianMs": 155.1646999999998,
+        "candidateMedianMs": 135.69850000000042,
+        "ratioOfMedians": 1.1434518436091727
+      }
+    ],
+    "measurementScope": "Existing isolated paired Bun call microbenchmark on captured numeric arguments only; no whole-authority, allocation/GC or native FPS gain established.",
+    "separateEvidence": "docs/render-evidence/occupancy-sat-closure-hoist-20261018.json"
+  },
+  "integratedValidation": {
+    "game": {
+      "passed": 342,
+      "failed": 0,
+      "assertions": 70409,
+      "files": 43,
+      "typecheckExit": 0,
+      "buildExit": 0
+    },
+    "engine": {
+      "total": 770,
+      "passed": 751,
+      "failed": 0,
+      "skipped": 19,
+      "typecheckExit": 0,
+      "buildExit": 0
+    },
+    "provenance": "Counts checked against saved final log tails. Typecheck/build success is the root-completed checkpoint; retained typecheck logs are empty, build/compiler logs and emitted archived/public bundle hashes are recorded."
+  },
+  "sampler": {
+    "unitTests": 3,
+    "assertions": 12,
+    "includedInGame342": true,
+    "fix": "First requestAnimationFrame callback establishes intervalStartMs and emits no interval. Scoring reset cancels the previous sampler and starts the same RAF-only baseline; host performance.now is not mixed with RAF timestamps.",
+    "blankBrowserScope": "CPU-only headless blank-page serialized QA collector correctness, not native FPS",
+    "browser": "Chrome/155.0.8059.80",
+    "hostBeforeMs": 152.5,
+    "firstBaselineMs": 140.1,
+    "firstIntervals": 19,
+    "resetBaselineMs": 473.4,
+    "resetIntervals": 19,
+    "minimumSavedIntervalMs": 16.5,
+    "limitation": "Serialized collector correctness only, not native FPS or game performance."
+  },
+  "adapterProvenance": {
+    "scope": "Native adapter/runtime metadata only; no device, render, game or FPS claim",
+    "browser": "Chrome/155.0.8059.80",
+    "adapter": {
+      "available": true,
+      "scope": "A second diagnostic adapter request with the Engine request options; not the private Engine adapter or proof of its Dawn backend",
+      "adapterFallback": null,
+      "infoFallback": false,
+      "info": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": ""
+      },
+      "infoProperties": [
+        "vendor",
+        "architecture",
+        "device",
+        "description",
+        "subgroupMinSize",
+        "subgroupMaxSize",
+        "isFallbackAdapter",
+        "subgroupMatrixConfigs",
+        "constructor"
+      ],
+      "features": [
+        "depth32float-stencil8",
+        "rg11b10ufloat-renderable",
+        "bgra8unorm-storage",
+        "texture-formats-tier1",
+        "chromium-experimental-multi-draw-indirect",
+        "texture-compression-bc",
+        "dual-source-blending",
+        "core-features-and-limits",
+        "chromium-experimental-sampling-resource-table",
+        "chromium-experimental-timestamp-query-inside-passes",
+        "float32-filterable",
+        "indirect-first-instance",
+        "float32-blendable",
+        "atomic-vec2u-min-max",
+        "subgroup-size-control",
+        "texture-compression-unaligned",
+        "depth-clip-control",
+        "texture-compression-bc-sliced-3d",
+        "shader-f16",
+        "timestamp-query",
+        "clip-distances",
+        "texture-formats-tier2",
+        "primitive-index",
+        "texture-component-swizzle",
+        "subgroups"
+      ]
+    },
+    "limitation": "Diagnostic request uses Engine request options but is a separate adapter, not the private renderer adapter. adapterFallback null is unavailable, not false; infoFallback false is independently recorded. ANGLE D3D11 metadata does not establish Dawn WebGPU backend."
+  },
+  "browserMode": {
+    "planned": "A1 headless, B1 headful, B2 headful, A2 headless; same archived runtime/quality intended.",
+    "state": "Incomplete and stopped: one valid A1 headless diagnostic; two headful boot attempts hidden/no RAF; blank-page capability check confirms headful visibility unavailable; no B2/A2 results.",
+    "a1": {
+      "label": "browser-mode-worker13-sat-20261018-a1",
+      "captureExit": 0,
+      "headful": false,
+      "profiledDiagnostic": true,
+      "frames": 1893,
+      "maxIntervalMs": 312.90000000000146,
+      "rendererScope": {
+        "engine": "the-engine",
+        "backend": "webgpu",
+        "settings": {
+          "environmentMode": "world",
+          "preset": "clear",
+          "hiz": false,
+          "taa": true,
+          "bloom": false,
+          "groundLitter": true,
+          "motionBlur": 0,
+          "dof": 0,
+          "renderScale": 0.55,
+          "drawDistance": 420,
+          "visual": {
+            "sunElevation": 0.9075712110370514,
+            "sunTemperature": 5700,
+            "skyTurbidity": 2.2,
+            "humidity": 0.42,
+            "cloudCoverage": 0.16,
+            "fogDensity": 0.00065,
+            "wetness": 0,
+            "exposureBias": -0.25,
+            "artificialLightIntensity": 0.02,
+            "sunIntensity": 4.2,
+            "skyIntensity": 0.7
+          }
+        },
+        "features": {
+          "taa": true,
+          "bloom": false,
+          "motionBlur": 0,
+          "dof": 0,
+          "gpuCulling": true,
+          "timestampQueries": true
+        },
+        "renderResolution": [
+          704,
+          396
+        ]
+      },
+      "focusStableDuringScore": true,
+      "windowAuditDropped": 0,
+      "workerPublications": 104,
+      "tracePath": "artifacts/stalls-browser-mode-worker13-sat-20261018-a1.browser-trace.json",
+      "traceAnalysis": {
+        "ownerFactsPath": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1.browser-trace-owner-facts.json",
+        "analysisPath": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1.browser-trace-analysis.json",
+        "reproduce": "node artifacts/analyze-browser-trace.mjs browser-mode-worker13-sat-20261018-a1",
+        "validity": {
+          "valid": true,
+          "parsedEventCount": 1673947,
+          "maxEvents": 2000000,
+          "droppedEvents": 0,
+          "parseErrors": 0,
+          "completion": {
+            "dataLossOccurred": false
+          },
+          "peakBufferFraction": 0.29866963624954224,
+          "rangeUs": [
+            340779841325,
+            340812810945
+          ]
+        },
+        "clock": {
+          "endpointOffsetDifferenceMs": 0.0910000205039978,
+          "firstIntervalMs": 9.200000000000728,
+          "negativeIntervals": [],
+          "limit": "Page times may be quantized. Two-anchor affine interpolation is alignment, not independent proof of physical clock drift. RAF-supplied timestamps precede actual dispatch."
+        },
+        "largestTwoGaps": [
+          {
+            "suppliedRafIntervalPageMs": [
+              25771.5,
+              26084.4
+            ],
+            "rafIntervalMs": 312.90000000000146,
+            "mainInstrumentedBusyUnionMs": 45.565946716308595,
+            "mainGcUnionMs": 0,
+            "selectedScopes": [
+              {
+                "name": "WaitForVSync Sleep",
+                "thread": "GpuVSyncThread",
+                "startPageMs": 25781.07933189683,
+                "endPageMs": 26073.38544748701,
+                "wallMs": 292.307,
+                "recordedThreadCpuMs": 0.04
+              },
+              {
+                "name": "WaitForVSync Sleep",
+                "thread": "GpuVSyncThread",
+                "startPageMs": 26073.845446095227,
+                "endPageMs": 26084.42741407812,
+                "wallMs": 10.582,
+                "recordedThreadCpuMs": 0.011
+              },
+              {
+                "name": "WaitForVSync Sleep",
+                "thread": "GpuVSyncThread",
+                "startPageMs": 25761.170392133892,
+                "endPageMs": 25771.53436077637,
+                "wallMs": 10.364,
+                "recordedThreadCpuMs": 0.036
+              },
+              {
+                "name": "WaitForVSync Sleep",
+                "thread": "GpuVSyncThread",
+                "startPageMs": 25771.611360543397,
+                "endPageMs": 25781.009332108624,
+                "wallMs": 9.398,
+                "recordedThreadCpuMs": 0.023
+              }
+            ],
+            "dawnMaxima": [
+              {
+                "name": "DawnCommands",
+                "count": 40,
+                "maxWallMs": 5.415
+              },
+              {
+                "name": "WebGPUDecoderImpl::HandleDawnCommands",
+                "count": 27,
+                "maxWallMs": 5.414
+              },
+              {
+                "name": "Queue::Submit",
+                "count": 4,
+                "maxWallMs": 4.905
+              },
+              {
+                "name": "DawnServiceSerializer::Flush",
+                "count": 16,
+                "maxWallMs": 0.023
+              },
+              {
+                "name": "WebGPUDecoderImpl::PerformPollingWork",
+                "count": 29,
+                "maxWallMs": 0.015
+              },
+              {
+                "name": "Queue::Tick",
+                "count": 40,
+                "maxWallMs": 0.012
+              },
+              {
+                "name": "DawnClientSerializer::Flush",
+                "count": 24,
+                "maxWallMs": 0.011
+              },
+              {
+                "name": "WebGPUImplementation::OnGpuControlReturnData",
+                "count": 12,
+                "maxWallMs": 0.011
+              },
+              {
+                "name": "D3D12Device::SignalFence",
+                "count": 4,
+                "maxWallMs": 0.009
+              },
+              {
+                "name": "DawnClientSerializer::GetCommandSpace",
+                "count": 24,
+                "maxWallMs": 0.008
+              },
+              {
+                "name": "DawnReturnCommands",
+                "count": 21,
+                "maxWallMs": 0.008
+              },
+              {
+                "name": "BufferD3D12::MapInternal",
+                "count": 7,
+                "maxWallMs": 0.006
+              },
+              {
+                "name": "DeviceBase::APITick::IsDeviceIdle",
+                "count": 37,
+                "maxWallMs": 0.003
+              }
+            ]
+          },
+          {
+            "suppliedRafIntervalPageMs": [
+              31077.3,
+              31244.5
+            ],
+            "rafIntervalMs": 167.20000000000073,
+            "mainInstrumentedBusyUnionMs": 19.779307495117187,
+            "mainGcUnionMs": 0,
+            "selectedScopes": [
+              {
+                "name": "WebGPU",
+                "thread": "CrGpuMain",
+                "startPageMs": 31074.64531553082,
+                "endPageMs": 31244.952800243576,
+                "wallMs": 170.308,
+                "recordedThreadCpuMs": 12.855
+              },
+              {
+                "name": "WebGPUDecoderImpl::HandleDawnCommands",
+                "thread": "CrGpuMain",
+                "startPageMs": 31099.1622413517,
+                "endPageMs": 31244.941800276858,
+                "wallMs": 145.78,
+                "recordedThreadCpuMs": 10.164
+              },
+              {
+                "name": "Queue::Submit",
+                "thread": "CrGpuMain",
+                "startPageMs": 31099.261241052165,
+                "endPageMs": 31244.380801974232,
+                "wallMs": 145.12,
+                "recordedThreadCpuMs": 9.508
+              },
+              {
+                "name": "WaitForVSync Sleep",
+                "thread": "GpuVSyncThread",
+                "startPageMs": 31068.234334928067,
+                "endPageMs": 31077.361307313236,
+                "wallMs": 9.127,
+                "recordedThreadCpuMs": 0.02
+              }
+            ],
+            "dawnMaxima": [
+              {
+                "name": "DawnCommands",
+                "count": 12,
+                "maxWallMs": 145.785
+              },
+              {
+                "name": "WebGPUDecoderImpl::HandleDawnCommands",
+                "count": 1,
+                "maxWallMs": 145.78
+              },
+              {
+                "name": "Queue::Submit",
+                "count": 1,
+                "maxWallMs": 145.12
+              },
+              {
+                "name": "WebGPUImplementation::OnGpuControlReturnData",
+                "count": 12,
+                "maxWallMs": 0.057
+              },
+              {
+                "name": "D3D12Device::SignalFence",
+                "count": 1,
+                "maxWallMs": 0.044
+              },
+              {
+                "name": "DawnServiceSerializer::Flush",
+                "count": 10,
+                "maxWallMs": 0.044
+              },
+              {
+                "name": "Queue::Tick",
+                "count": 1,
+                "maxWallMs": 0.037
+              },
+              {
+                "name": "DawnReturnCommands",
+                "count": 22,
+                "maxWallMs": 0.032
+              },
+              {
+                "name": "DawnClientSerializer::Flush",
+                "count": 22,
+                "maxWallMs": 0.029
+              },
+              {
+                "name": "DawnClientSerializer::GetCommandSpace",
+                "count": 22,
+                "maxWallMs": 0.005
+              }
+            ]
+          }
+        ],
+        "fullScoreDawnMaxima": [
+          {
+            "name": "DawnCommands",
+            "count": 37345,
+            "maxWallMs": 145.785
+          },
+          {
+            "name": "WebGPUDecoderImpl::HandleDawnCommands",
+            "count": 22811,
+            "maxWallMs": 145.78
+          },
+          {
+            "name": "Queue::Submit",
+            "count": 3788,
+            "maxWallMs": 145.12
+          },
+          {
+            "name": "WebGPUDecoderImpl::PerformPollingWork",
+            "count": 27185,
+            "maxWallMs": 0.427
+          },
+          {
+            "name": "WebGPUImplementation::OnGpuControlReturnData",
+            "count": 10847,
+            "maxWallMs": 0.348
+          },
+          {
+            "name": "DawnReturnCommands",
+            "count": 17596,
+            "maxWallMs": 0.344
+          },
+          {
+            "name": "DawnClientSerializer::Flush",
+            "count": 22821,
+            "maxWallMs": 0.192
+          },
+          {
+            "name": "DawnClientSerializer::GetCommandSpace",
+            "count": 21595,
+            "maxWallMs": 0.142
+          },
+          {
+            "name": "Queue::Tick",
+            "count": 38191,
+            "maxWallMs": 0.108
+          },
+          {
+            "name": "D3D12Device::SignalFence",
+            "count": 4019,
+            "maxWallMs": 0.106
+          },
+          {
+            "name": "DawnServiceSerializer::Flush",
+            "count": 10847,
+            "maxWallMs": 0.089
+          },
+          {
+            "name": "BufferD3D12::MapInternal",
+            "count": 6384,
+            "maxWallMs": 0.035
+          },
+          {
+            "name": "DeviceBase::APITick::IsDeviceIdle",
+            "count": 33762,
+            "maxWallMs": 0.032
+          }
+        ],
+        "interpretation": "Largest RAF timestamp interval overlaps a long GpuVSyncThread fallback Sleep with low recorded thread CPU. The separate second gap overlaps low-CPU wall time inside Dawn Queue::Submit/HandleDawnCommands. These are different observed scopes; neither establishes the blocking OS/driver call or hardware GPU duration. D3D12Device::SignalFence and BufferD3D12::MapInternal establish observed D3D12 paths. Actual callback dispatch starts differ from RAF-supplied timestamps.",
+        "traceSha256": "79bc1f08bb78f2eef74089d87f90732030133adfbe16342940f5f075eddf910c",
+        "depthReport": "../thegame/artifacts/stalls-browser-mode-worker13-sat-20261018-a1.vsync-dawn-depth.json",
+        "pinnedSourceFollowup": {
+          "vsyncScope": "Pinned ui/gl/vsync_thread_win.cc: WaitForVSync Sleep wraps high-resolution timer activation, Sleep(ceil(vsync_interval ms)), timer deactivation. Without fake-vsync, fallback means native wait failed or returned in under1ms. Trace does not record return status or requested interval.",
+          "compositor": {
+            "frameTimeTraceUs": 340785122307,
+            "deadlineTraceUs": 340785130640,
+            "actualBeginFrameTraceUs": 340785405724,
+            "lateFromFrameTimeMs": 283.417,
+            "lateFromDeadlineMs": 275.084
+          },
+          "submitScope": "Pinned Dawn Queue.cpp Queue::Submit spans validation/backend submit/buffer cleanup/device Tick. The long elapsed interval occurs before the short D3D12 SignalFence. Missing recording/validation categories leave the wait site unresolved; do not assign it to post-signal allocator reopening.",
+          "submitEntryToSignalFence": {
+            "wallMs": 142.081,
+            "recordedThreadCpuMs": 8.484
+          },
+          "signalFence": {
+            "wallMs": 0.044,
+            "recordedThreadCpuMs": 0.016
+          }
+        }
+      }
+    },
+    "b1": {
+      "label": "browser-mode-worker13-sat-20261018-b1",
+      "outcome": "FAILED boot: agent bridge not available using native-gpu, page readyState complete but opening-city UI remains; no scored result."
+    },
+    "headfulBoot2": {
+      "label": "browser-mode-worker13-sat-20261018-headful-boot2",
+      "requested": "--movement after optional bringToFront moved before boot wait and added failure RAF diagnostic",
+      "outcome": "FAILED boot, exit1. Despite bringToFront before boot wait: focused=true, hidden=true, visibility=hidden; one RAF not delivered;250ms timeout fired after1036.8ms. No scored movement or renderer result."
+    },
+    "a1FrozenSourceHashes": {
+      "../game-engine/dist/physics/box-overlap.js": "ad64dbbfea51fbec5adda62752ec4582a7fcc020e75b3be483eb0d1e79989288",
+      "../game-engine/src/render/webgpu.ts": "d4b6d0471139d70785d351861c11abe6433a28293b230b699b42389b69c24c71",
+      "tools/qa-browser-trace.ts": "1f5a7fd8b7c9f479161a6f50b054ac1aea90491d22f421c99fe43d7980297278",
+      "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+      "artifacts/render-stability-worker13-sat-worker.js": "f772c946fc6286adac4f3a3152dbd69ab35eecec1f8528b545c80ea58b68c693",
+      "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+      "artifacts/render-stability-worker13-sat-game.js": "1a3a65fe8dab9873e9c5dd1225272daff5f6de9b76af2678d433668e041f4013",
+      "tools/qa-frame-stalls.ts": "3821a0546c5daf59d00a57fbe8da1ac1d61266a05399d68e381a31612aa6acff",
+      "tools/qa-browser-info.ts": "674e95926579c11d7bc973f78b6b92057b5c28000d0dacb2b82cd840e7eb7cdd",
+      "tools/capture.ts": "33b419c564eef584232403b25df5ec6843f4b1cd9c47f36151866076af9ec0e7",
+      "artifacts/render-stability-worker13-sat-game.js.map": "e0c5eb5e46121e5691ec1129e95557b94aca754b27a2322bdb5c62327dcb6fb0",
+      "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+      "src/game/fleet.ts": "90dbd39fe63fc599325cf1d84f4734ee7652ff96647cf90cbe6cd1ff49ab77f4",
+      "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "tools/qa-frame-sampler.ts": "17fdba3002a5a03a8149a714442276cebf04886751b13a25f8e361bc4c8f48ac",
+      "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+      "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "src/game/render/body-worker-protocol.ts": "3871cd2d13123183ac7f6aee879b48485d484b0df515c3ec5f0651a00c98a3ec"
+    },
+    "currentRuntimeMatchesA1": {
+      "src/game/authority.ts": true,
+      "src/game/residents.ts": true,
+      "src/game/resident-navigation.ts": true,
+      "src/game/world.ts": true,
+      "src/game/fleet.ts": true,
+      "src/game/runtime/physics.js": true,
+      "src/game/render/body-worker-protocol.ts": true,
+      "../game-engine/src/physics/box-overlap.ts": true,
+      "../game-engine/dist/physics/box-overlap.js": true,
+      "../game-engine/src/render/webgpu.ts": true
+    },
+    "toolCaveat": "Root is revising headful QA after B1; A1 historical tool hashes are retained separately and current QA tooling is not claimed frozen or identical.",
+    "limitations": [
+      "No completed ABBA comparison or browser-mode effect is established.",
+      "A1 is a CPU/browser-traced diagnostic, not an unprofiled FPS score.",
+      "No native FPS improvement, whole-server gain or eliminated-freeze claim is established.",
+      "Trace task wall durations and recorded thread CPU are distinct; supplied RAF times are not exact OS dispatch times.",
+      "Neither the largest fallback VSync Sleep nor the second Dawn Submit scope identifies a proven root OS/driver wait."
+    ],
+    "visibilityCapability": {
+      "report": "../thegame/artifacts/headful-visibility-smoke-20261018.json",
+      "exitCode": 0,
+      "scope": "Owned fresh-profile blank page only; no game/server/GPUDevice or performance workload.",
+      "stages": 5,
+      "visibleStages": 0,
+      "rafDeliveredStages": 0,
+      "attempted": "normal bounds; set normal; on-screen bounds; bringToFront; minimized then normal and bringToFront",
+      "ownedProfileRemoved": true,
+      "conclusion": "Headful RAF timing unavailable in this execution environment; ABBA cannot establish browser-mode performance."
+    }
+  },
+  "updatedUtc": "2026-10-18T05:19:30.974Z",
+  "hashesScope": "Historical worker13/SAT checkpoint and recorded artifacts. Subsequent snow-volume-offsets phase changed snow-volume.ts and rebuilt public Game/map; the original archives remain intact.",
+  "supersededBy": "docs/render-evidence/snow-volume-offsets-20261018.json"
+}

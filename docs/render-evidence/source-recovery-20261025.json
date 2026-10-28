@@ -1,0 +1,166 @@
+{
+  "schema": "engine.source-recovery.v1",
+  "date": "2026-10-25",
+  "finding": "The running canonical game used the old main working copy while the completed render/streaming integration remained in another managed worktree.",
+  "canonical": {
+    "engine": "C:/Users/Roman/Documents/game-engine",
+    "game": "C:/Users/Roman/Documents/thegame",
+    "engineHead": "fbfd5ef136887e6d879bc35213d540959f38f434",
+    "gameHead": "702bc303569a1802e80689948205a1847c03dde4"
+  },
+  "reconciliation": {
+    "enginePreservedBase": "c4a0fffe3e9c7c190655ba5c86d40cb6c05e1f98",
+    "gamePreservedBase": "902ce2b883b9ea0f91402788550abebb2eb965c3",
+    "engineIntegration": "560e365a011d0b5e03932dc781c77fdaedaf955b",
+    "gameIntegration": "3362156b51570c89910eb88d66515e201273cdd2",
+    "origin": "C:/Users/Roman/Documents/thegame-migration-20261021/workspace",
+    "method": "Three-way content reconciliation against the preserved snapshots; current local changes retained; six conflict files resolved explicitly.",
+    "files": 697,
+    "deletionsApplied": false,
+    "backupAndHashes": "artifacts/freeze-20261025/reconciliation.json",
+    "originalFiles": "artifacts/freeze-20261025/backup",
+    "preservedRecentWork": [
+      "neutral mesh color packing",
+      "inclined water surface reconstruction",
+      "performance tracing and technology registry",
+      "host frame stall diagnostics"
+    ],
+    "inventory": "artifacts/freeze-20261025/worktree-inventory.json"
+  },
+  "restoredRuntimePaths": [
+    "game: src/game/render/the-engine-worker-renderer.ts",
+    "game: src/game/render/render-worker.ts",
+    "game: src/game/render/render-worker-resources.ts",
+    "game: src/game/streaming/terrain-mesh-queue.ts",
+    "game: src/game/streaming/live-world-streaming.ts",
+    "game: src/game/render/geometry-admission.ts",
+    "engine: src/render/mesh-preparation.ts",
+    "engine: src/scene/render-entity-preparation.ts",
+    "engine: src/procedural/copied-triangle.ts"
+  ],
+  "otherPreservedWork": {
+    "npcPresentation": {
+      "ref": "thegame:codex/npc-recording-preserved-20261021",
+      "sha": "51b8823",
+      "worktree": "C:/Users/Roman/Documents/thegame-npc-recording",
+      "status": "Still preserved separately. Its older social DTO/observer experiment conflicts with current authority and frame ownership; not silently substituted into the recovered runtime."
+    },
+    "literatureGpu": {
+      "ref": "game-engine:codex/literature-gpu-evidence",
+      "worktree": "C:/Users/Roman/.codex/worktrees/literature-gpu/game-engine",
+      "status": "Preserved, separate literary scene/native evidence work; not treated as the Game runtime."
+    },
+    "archives": "C:/Users/Roman/Documents/game-engine-branch-archive/2026-10-13"
+  },
+  "observedBeforeRecovery": {
+    "process": {
+      "pid": 18336,
+      "startedLocal": "2026-10-24 00:02:23",
+      "protocol": 13
+    },
+    "maximumCapturedHostCpuMs": 3244.3,
+    "capturedTerrainRebuildMs": 1078.1,
+    "capture": "artifacts/freeze-20261025/live-before-logs.json",
+    "fixture": "artifacts/freeze-20261025/live-fixture.json",
+    "interpretation": "Actual game host-phase timings. These locate blocked phases; no unsampled GC/GPU root cause is inferred. Not a controlled FPS baseline."
+  },
+  "validation": {
+    "engineFull": {
+      "passed": 1127,
+      "skipped": 19,
+      "failed": 0,
+      "log": "artifacts/freeze-20261025/engine-tests.log"
+    },
+    "gameFull": {
+      "status": "incomplete; heavy runs stopped under system memory pressure",
+      "runs": [
+        {
+          "log": "artifacts/freeze-20261025/game-tests.log",
+          "passed": 1692,
+          "failures": [
+            "(fail) rejoining an account in its NPC during a saved moving lift trip preserves its body instead of parking it outside the shaft [36400.94ms]",
+            "(fail) actual worker entry preparation RAFs retain frame banks and coordinate epochs until the next real frame [6.79ms]",
+            "(fail) full authority releases unattended brakes: rear W pushes at human pace, S pulls, release coasts [38463.84ms]"
+          ],
+          "status": "interrupted; not a completed suite"
+        },
+        {
+          "log": "artifacts/freeze-20261025/game-tests-isolated.log",
+          "passed": 465,
+          "failures": [],
+          "status": "interrupted; not a completed suite"
+        }
+      ],
+      "notes": [
+        "One lift timeout passed in isolation in 7.5 seconds.",
+        "Disposed worker module reuse across files was corrected; the combined worker fixtures and source-identity tests passed (12 tests).",
+        "No complete game-suite success is claimed."
+      ]
+    },
+    "focusedEngine": {
+      "passed": 24,
+      "failed": 0
+    },
+    "focusedGame": {
+      "passed": 30,
+      "failed": 0
+    },
+    "typechecks": "Both passed",
+    "builds": "Both passed; all 13 game JavaScript bundles generated",
+    "nativeFrozenReplay": {
+      "gpu": "AMD RDNA3",
+      "fallback": false,
+      "executor": "worker",
+      "renderResolution": [
+        1600,
+        720
+      ],
+      "taa": true,
+      "scale": 1,
+      "browserErrors": [],
+      "rendererErrors": [],
+      "state": "artifacts/freeze-20261025/recovered-functional/state.json",
+      "image": "artifacts/freeze-20261025/recovered-functional/frame.png",
+      "scope": "Functional saved-scene replay during test load. Its frame intervals are not performance evidence."
+    },
+    "focusedGameFinal": {
+      "passed": 12,
+      "failed": 0,
+      "log": "artifacts/freeze-20261025/final-game-focused.log"
+    },
+    "systemMemory": {
+      "visibleMB": 12085,
+      "freeMBUnderTest": 203,
+      "freeMBAfterStoppingOwnTests": 850,
+      "action": "Stopped owned test processes only; no QA Chrome process remains."
+    }
+  },
+  "activation": {
+    "requiredProtocol": 17,
+    "status": "Active: old server stopped after explicit user authorization; one canonical dev server plus its Bun watch supervisor",
+    "guard": "tools/start-game-office.ps1 checks checkout identity, wire protocol and SHA-256 of both actual source trees (including uncommitted files); -Check is read-only. Old listener rejected without starting a second server.",
+    "liveStallEliminationVerified": false,
+    "visualQualityAccepted": false,
+    "finalSourceCheck": "artifacts/freeze-20261025/runtime-source-check-active.json",
+    "activeRuntime": {
+      "protocol": 17,
+      "sourceRootId": "dc2b0768cbefb946bc3dc172d497a2d18a14f386e77cba151d9f02f48d9f26ed",
+      "sourceDigest": "706039724ad4a54cd12b216c19d926c15cfe7b2a238afd07ac55d3a3cdc822d9",
+      "pid": 6792
+    },
+    "runtimeProof": "artifacts/freeze-20261025/current-dev-runtime.json",
+    "browserProof": "artifacts/freeze-20261025/current-dev.jpg",
+    "liveClient": {
+      "url": "http://localhost:3007/",
+      "existingTabReloaded": true,
+      "network": "online",
+      "actualRenderWorkerFramesObserved": [
+        93,
+        94,
+        95
+      ],
+      "logs": "artifacts/freeze-20261025/current-dev-client-logs.json",
+      "scope": "Activation and worker liveness only; no live FPS, stall-elimination or visual-quality acceptance"
+    }
+  }
+}

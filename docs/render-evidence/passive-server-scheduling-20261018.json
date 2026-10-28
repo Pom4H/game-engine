@@ -1,0 +1,2054 @@
+{
+  "date": "2026-10-18",
+  "status": "passive_server_scheduling_observed_fresh_ack_gate_failed",
+  "goalStatus": "active",
+  "performanceTargetMet": false,
+  "productionRuntimeChanged": false,
+  "preparation": {
+    "tests": 8,
+    "assertions": 169,
+    "strictTypeScript": "exit0",
+    "independentReview": "clean",
+    "actualLoaderSmoke": "Legacy broad suffix filter reproduces exit1 on Game src/engine/world/spatial-index.ts; exact four-physical-path filter exits0 on Router import only, with no instance/server/browser."
+  },
+  "firstAttempt": {
+    "label": "independent-input-stage-passive-20261018-r5",
+    "captureStarted": false,
+    "error": "Owned server exited before readiness: 1",
+    "publicUnchanged": true,
+    "scope": "No valid authority/browser/network timing observation; original runner and archived v1 source/manifest are preserved."
+  },
+  "canonicalNativePolicy": {
+    "authorityTickHz": 60,
+    "vehicleStepHz": 120,
+    "residentLimit": 80,
+    "capacity": {
+      "cpuBudget": 12,
+      "maxPlayers": 32,
+      "workers": 2,
+      "physicsSubsteps": 2,
+      "snapshotHz": 20,
+      "populationHz": 30,
+      "vehicleInterestPeriod": 1,
+      "streamingPeriod": 2,
+      "worldInterestPeriod": 1,
+      "residentLimit": 80
+    },
+    "physics": {
+      "characterMotor": "the-engine",
+      "rigidBodySolver": "the-engine-compound",
+      "integrationSteps": 0,
+      "vehicleStepHz": 120,
+      "bodies": 40,
+      "sleeping": 0,
+      "awake": 40,
+      "maxSpeed": 0,
+      "substeps": 0,
+      "bodySubsteps": 0,
+      "islands": 0,
+      "recoveredVehicles": 0,
+      "quarantinedVehicles": 0,
+      "discardedRagdolls": 0,
+      "discardedDebris": 0
+    },
+    "limitsFromFrozenSources": {
+      "clientWindow": 48,
+      "inputByteLifetimeMs": 80,
+      "fixedClockMaxDebtMs": 250,
+      "fixedClockMaxSteps": 6
+    },
+    "noPolicyOverride": true
+  },
+  "analysis": {
+    "version": 1,
+    "scope": "One instrumented canonical native functional attempt. Post-run read-only analysis; no rerun, production change, FPS benchmark or UDP/native-ready attribution.",
+    "label": "independent-input-stage-passive-20261018-r5b",
+    "provenance": {
+      "script": {
+        "path": "artifacts/network-stability-20261018/analyze-passive-realtime-r5b-20261018.ts",
+        "sha256": "a17c882a6da611654b5842226031590212bb74c853db029de6c5818ab10792ce"
+      },
+      "inputs": [
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/observer-before.json",
+          "sha256": "8114bfef035d3297bc4cf032ee009f8951c87b4f28aa901850bbdb0853abd6f6"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/observer-after.json",
+          "sha256": "3e5716a61848d9df18dcd7a9ab1db3c67bb055fbd6b459d38b2fd66c3fcdd593"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/health-after.json",
+          "sha256": "0bbf8a6a9221afd1d0485aa4b5a23dbe73a2c7c60dbcbf90ec5992c676632a1a"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/runner-report.json",
+          "sha256": "27a2770fcf0b68ac253bbe0e29781189625701f3a57f36b685354b5ba923aaee"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/capture.log",
+          "sha256": "3e6debff7acfd6a2a354427a3a0f4109bfcaa397e6852d7c0eac1561eb5d4542"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/capture-error.log",
+          "sha256": "33a143567af3b41ff2757c9643243a4f7234dafc4aa5c682960e46349e5fae7b"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/server.log",
+          "sha256": "a633d7ba55f86da602a2a5ffedacd282fd1e4b4468baad8fdd2623d66daa510e"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/server-error.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/post-run-cleanup.json",
+          "sha256": "df5a9a5630439a7dcea043b5a16e949100190b719214e2bf8402e7dbe5e119af"
+        },
+        {
+          "path": "artifacts/input-clock-independent-input-stage-passive-20261018-r5b.json",
+          "sha256": "6216c364512b8f664e420cc5f8cb49827a4bf9cfb042edf501095e197c74ecbe"
+        },
+        {
+          "path": "artifacts/browser-audit-independent-input-stage-passive-20261018-r5b.json",
+          "sha256": "ebc0d6385609bb69d7be6616fb2479a20fa893dfc0a4a52a2b92cd01275e9272"
+        },
+        {
+          "path": "artifacts/capture-overrides-independent-input-stage-passive-20261018-r5b.json",
+          "sha256": "94ba9d81a7ee79bcba2c39ecac874c636cc66649c96fd8cb2b4f674f0d8f7a53"
+        }
+      ],
+      "sourceFences": {
+        "src/server/realtime-router.ts": {
+          "expected": "a6c51153b739781d520fb6f16563b349bc942efb516c386cc744124e038af148",
+          "actual": "a6c51153b739781d520fb6f16563b349bc942efb516c386cc744124e038af148"
+        },
+        "src/server/prefetched-datagrams.ts": {
+          "expected": "0069b28b670e06f50601617300aa68a0f4607217bd34ab4b2cb13df813512383",
+          "actual": "0069b28b670e06f50601617300aa68a0f4607217bd34ab4b2cb13df813512383"
+        },
+        "src/game/net/causal/native.ts": {
+          "expected": "d5804ea94b5f059a61e8127a2b67452d671a5f4dfc4ea5699ebced5b04380116",
+          "actual": "d5804ea94b5f059a61e8127a2b67452d671a5f4dfc4ea5699ebced5b04380116"
+        },
+        "src/server/index.ts": {
+          "expected": "a63804a49e8e2370b85abdaa0228d20b4d88ac29f525c53db2c59dac288ae0dc",
+          "actual": "a63804a49e8e2370b85abdaa0228d20b4d88ac29f525c53db2c59dac288ae0dc"
+        }
+      },
+      "engineClock": {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\core\\fixed-clock.ts",
+        "sha256": "0370108cc51fb2c00068bfdb40bfa281a83eedb2122fce6fa3871abee32aa5a7"
+      },
+      "originalRunnerReportPreserved": true
+    },
+    "gate": {
+      "valid": true,
+      "matches": false,
+      "freshAck": false,
+      "freshAckAdvance": 0,
+      "elapsedMs": 361.5,
+      "newCommands": 27,
+      "submittedAdvance": 27,
+      "ackAdvance": 4,
+      "before": {
+        "tick": 753,
+        "ack": 65,
+        "latestSeq": 69,
+        "pending": 4
+      },
+      "after": {
+        "tick": 759,
+        "ack": 69,
+        "latestSeq": 96,
+        "pending": 27
+      },
+      "heartbeats": 65,
+      "motorSteps": 0,
+      "visible": true,
+      "interpretation": "ACK65→69 retires exactly four preexisting rows; none of fresh70..96 is acknowledged during the hold. The strong gate fails. The48-row capacity is not saturated.",
+      "postHold": {
+        "elapsedMs": 629.8000000119209,
+        "target": 96,
+        "acked": true,
+        "firstObservedFreshAck": {
+          "atMs": 14853.699999988079,
+          "ack": 75,
+          "tick": 765,
+          "pending": 21
+        },
+        "last": {
+          "atMs": 15399.100000023842,
+          "ack": 96,
+          "tick": 789,
+          "pending": 0
+        }
+      }
+    },
+    "admissionClock": {
+      "beforeLastWake": 14250.800000011921,
+      "afterLastWake": 14764.199999988079,
+      "debtAtBeforeObservationMs": 152.3,
+      "debtAtAfterObservationMs": 0.4,
+      "wakeElapsedMs": 513.4,
+      "additionalCappedWallMs": 52.3,
+      "stepsPlusRemainderMs": 461.1,
+      "automaticSteps": 27,
+      "explanation": "The27 admissions include preexisting152.3ms clock debt plus the361.5ms observation interval, under the unchanged catchup cap;27 is not a measured continuous75Hz motor. No prediction motor steps ran during this held-RAF interval.",
+      "timerWorkDuringHold": {
+        "calls": 25,
+        "totalMs": 3.4,
+        "maxMs": 0.5,
+        "scope": "advanceOwned sample/send and scheduler; excludes onWork counters/trace callback overhead"
+      }
+    },
+    "coverage": {
+      "observerFaults": 0,
+      "observerDisabled": false,
+      "clock": "All pump/read/native-await spans use the same server performance.now domain. Client atMs and runner request times remain separate domains.",
+      "serverAnchors": {
+        "before": {
+          "performanceBefore": 4580.8439,
+          "wallDateNow": 1792311571538,
+          "performanceAfter": 4580.8444,
+          "timeOrigin": 1792311566957.6938
+        },
+        "after": {
+          "performanceBefore": 20879.915,
+          "wallDateNow": 1792311587837,
+          "performanceAfter": 20879.9164,
+          "timeOrigin": 1792311566957.6938
+        }
+      },
+      "pumps": {
+        "capacity": 512,
+        "total": 782,
+        "retained": 512,
+        "evicted": 270,
+        "start": 8945.704,
+        "end": 20879.4175,
+        "allReturned": true,
+        "completedStepsInRetained": 559
+      },
+      "reads": {
+        "total": 65,
+        "retained": 65,
+        "evicted": 0,
+        "start": 16496.8397,
+        "end": 20556.3465,
+        "allProcessed": true,
+        "totalBytes": 17373
+      },
+      "awaits": {
+        "total": 73,
+        "evicted": 0,
+        "completed": 65,
+        "pending": 8
+      },
+      "fullReadIntervalCoveredByPumpRing": true,
+      "limits": "270 earliest pumps were evicted. Lifetime maxima cannot reconstruct those spans; all65 callback and73 await records are retained, and their entire active motion interval is within retained pump coverage."
+    },
+    "sameClockObservations": {
+      "largestPumps": [
+        {
+          "id": 815,
+          "start": 17927.1874,
+          "end": 18317.3357,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 390.0735000000059,
+          "stepMaxMs": 150.3773000000001,
+          "firstStepAt": 17927.2342,
+          "lastStepEnd": 18317.3331,
+          "outcome": "returned",
+          "durationMs": 390.1483,
+          "outsideRecordedStepsMs": 0.0748,
+          "nextRead": {
+            "id": 817,
+            "start": 18317.614,
+            "delayAfterPumpMs": 0.2783,
+            "first": 58,
+            "last": 69
+          }
+        },
+        {
+          "id": 835,
+          "start": 18660.306,
+          "end": 19037.3199,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 376.98029999999926,
+          "stepMaxMs": 113.25080000000162,
+          "firstStepAt": 18660.3098,
+          "lastStepEnd": 19037.3164,
+          "outcome": "returned",
+          "durationMs": 377.0139,
+          "outsideRecordedStepsMs": 0.0336,
+          "nextRead": {
+            "id": 837,
+            "start": 19037.6669,
+            "delayAfterPumpMs": 0.347,
+            "first": 54,
+            "last": 69
+          }
+        },
+        {
+          "id": 769,
+          "start": 16149.7562,
+          "end": 16495.6874,
+          "startedSteps": 5,
+          "completedSteps": 5,
+          "stepTotalMs": 345.89400000000023,
+          "stepMaxMs": 131.2466000000004,
+          "firstStepAt": 16149.768,
+          "lastStepEnd": 16495.6847,
+          "outcome": "returned",
+          "durationMs": 345.9312,
+          "outsideRecordedStepsMs": 0.0372,
+          "nextRead": {
+            "id": 771,
+            "start": 16496.8397,
+            "delayAfterPumpMs": 1.1523,
+            "first": 0,
+            "last": 5
+          }
+        },
+        {
+          "id": 826,
+          "start": 18319.1465,
+          "end": 18657.0485,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 337.8722999999991,
+          "stepMaxMs": 132.73459999999977,
+          "firstStepAt": 18319.1488,
+          "lastStepEnd": 18657.0454,
+          "outcome": "returned",
+          "durationMs": 337.902,
+          "outsideRecordedStepsMs": 0.0297,
+          "nextRead": {
+            "id": 828,
+            "start": 18657.3085,
+            "delayAfterPumpMs": 0.26,
+            "first": 53,
+            "last": 69
+          }
+        },
+        {
+          "id": 803,
+          "start": 17399.0978,
+          "end": 17729.9123,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 330.742000000002,
+          "stepMaxMs": 178.26450000000114,
+          "firstStepAt": 17399.1015,
+          "lastStepEnd": 17729.9084,
+          "outcome": "returned",
+          "durationMs": 330.8145,
+          "outsideRecordedStepsMs": 0.0725,
+          "nextRead": {
+            "id": 805,
+            "start": 17731.9963,
+            "delayAfterPumpMs": 2.084,
+            "first": 44,
+            "last": 63
+          }
+        },
+        {
+          "id": 844,
+          "start": 19082.904,
+          "end": 19393.6068,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 310.65639999999985,
+          "stepMaxMs": 129.97989999999845,
+          "firstStepAt": 19082.9217,
+          "lastStepEnd": 19393.6029,
+          "outcome": "returned",
+          "durationMs": 310.7028,
+          "outsideRecordedStepsMs": 0.0464,
+          "nextRead": {
+            "id": 846,
+            "start": 19397.5068,
+            "delayAfterPumpMs": 3.9,
+            "first": 60,
+            "last": 69
+          }
+        },
+        {
+          "id": 855,
+          "start": 19415.7152,
+          "end": 19722.0086,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 306.2594999999965,
+          "stepMaxMs": 129.26840000000084,
+          "firstStepAt": 19415.7184,
+          "lastStepEnd": 19722.0029,
+          "outcome": "returned",
+          "durationMs": 306.2934,
+          "outsideRecordedStepsMs": 0.0339,
+          "nextRead": {
+            "id": 857,
+            "start": 19722.4409,
+            "delayAfterPumpMs": 0.4323,
+            "first": 66,
+            "last": 75
+          }
+        },
+        {
+          "id": 876,
+          "start": 19725.0115,
+          "end": 20008.9068,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 283.86279999999897,
+          "stepMaxMs": 80.23079999999754,
+          "firstStepAt": 19725.0155,
+          "lastStepEnd": 20008.9023,
+          "outcome": "returned",
+          "durationMs": 283.8953,
+          "outsideRecordedStepsMs": 0.0325,
+          "nextRead": {
+            "id": 878,
+            "start": 20009.346,
+            "delayAfterPumpMs": 0.4392,
+            "first": 77,
+            "last": 85
+          }
+        },
+        {
+          "id": 787,
+          "start": 16706.2392,
+          "end": 16902.0655,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 195.7906000000039,
+          "stepMaxMs": 59.483400000000984,
+          "firstStepAt": 16706.2457,
+          "lastStepEnd": 16902.062,
+          "outcome": "returned",
+          "durationMs": 195.8263,
+          "outsideRecordedStepsMs": 0.0357,
+          "nextRead": {
+            "id": 789,
+            "start": 16907.066,
+            "delayAfterPumpMs": 5.0005,
+            "first": 11,
+            "last": 27
+          }
+        },
+        {
+          "id": 778,
+          "start": 16500.6749,
+          "end": 16693.148,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 192.43850000000748,
+          "stepMaxMs": 42.33030000000144,
+          "firstStepAt": 16500.6796,
+          "lastStepEnd": 16693.1438,
+          "outcome": "returned",
+          "durationMs": 192.4731,
+          "outsideRecordedStepsMs": 0.0346,
+          "nextRead": {
+            "id": 780,
+            "start": 16697.0349,
+            "delayAfterPumpMs": 3.8869,
+            "first": 11,
+            "last": 17
+          }
+        },
+        {
+          "id": 796,
+          "start": 16925.6014,
+          "end": 17090.003,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 164.36519999999655,
+          "stepMaxMs": 35.34850000000006,
+          "firstStepAt": 16925.608,
+          "lastStepEnd": 17089.9992,
+          "outcome": "returned",
+          "durationMs": 164.4016,
+          "outsideRecordedStepsMs": 0.0364,
+          "nextRead": {
+            "id": 799,
+            "start": 17239.0141,
+            "delayAfterPumpMs": 149.0111,
+            "first": 22,
+            "last": 45
+          }
+        },
+        {
+          "id": 800,
+          "start": 17250.1738,
+          "end": 17397.8053,
+          "startedSteps": 6,
+          "completedSteps": 6,
+          "stepTotalMs": 147.59529999999359,
+          "stepMaxMs": 29.519000000000233,
+          "firstStepAt": 17250.1772,
+          "lastStepEnd": 17397.8023,
+          "outcome": "returned",
+          "durationMs": 147.6315,
+          "outsideRecordedStepsMs": 0.0362,
+          "nextRead": {
+            "id": 802,
+            "start": 17398.1368,
+            "delayAfterPumpMs": 0.3315,
+            "first": 33,
+            "last": 57
+          }
+        }
+      ],
+      "retainedPumpDurations": {
+        "count": 512,
+        "total": 4550.8842,
+        "mean": 8.888446,
+        "p50": 0.08239999999932479,
+        "p95": 0.4919999999983702,
+        "max": 390.14830000000075
+      },
+      "pumpStepCountHistogram": {
+        "0": 70,
+        "1": 416,
+        "2": 3,
+        "5": 1,
+        "6": 22
+      },
+      "motionActiveSpan": {
+        "start": 16496.8397,
+        "end": 20556.3465,
+        "durationMs": 4059.5068,
+        "pumpOccupiedMs": 3827.8722,
+        "pumpOccupiedFraction": 0.9429402113576973,
+        "interpretation": "Synchronous pump wall spans cover this fraction of the read interval; this is not a CPU-busy/GC breakdown or unprofiled benchmark."
+      },
+      "callbackDurations": {
+        "count": 65,
+        "total": 7.9733,
+        "mean": 0.122666,
+        "p50": 0.06290000000080909,
+        "p95": 0.2540000000008149,
+        "max": 1.4142999999967287
+      },
+      "readGaps": [
+        {
+          "previousReadId": 814,
+          "nextReadId": 817,
+          "start": 17910.4631,
+          "end": 18317.614,
+          "callbackStartGapMs": 407.2028,
+          "betweenCallbacksMs": 407.1509,
+          "pumpOccupiedMs": 390.1483,
+          "pumps": [
+            {
+              "id": 815,
+              "start": 17927.1874,
+              "end": 18317.3357,
+              "steps": 6,
+              "durationMs": 390.1483
+            }
+          ],
+          "nextRows": {
+            "first": 58,
+            "last": 69,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 834,
+          "nextReadId": 837,
+          "start": 18658.0932,
+          "end": 19037.6669,
+          "callbackStartGapMs": 379.6804,
+          "betweenCallbacksMs": 379.5737,
+          "pumpOccupiedMs": 377.0139,
+          "pumps": [
+            {
+              "id": 835,
+              "start": 18660.306,
+              "end": 19037.3199,
+              "steps": 6,
+              "durationMs": 377.0139
+            }
+          ],
+          "nextRows": {
+            "first": 54,
+            "last": 69,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 843,
+          "nextReadId": 846,
+          "start": 19038.4414,
+          "end": 19397.5068,
+          "callbackStartGapMs": 359.0946,
+          "betweenCallbacksMs": 359.0654,
+          "pumpOccupiedMs": 310.7028,
+          "pumps": [
+            {
+              "id": 844,
+              "start": 19082.904,
+              "end": 19393.6068,
+              "steps": 6,
+              "durationMs": 310.7028
+            }
+          ],
+          "nextRows": {
+            "first": 60,
+            "last": 69,
+            "count": 10
+          }
+        },
+        {
+          "previousReadId": 825,
+          "nextReadId": 828,
+          "start": 18317.9557,
+          "end": 18657.3085,
+          "callbackStartGapMs": 339.4049,
+          "betweenCallbacksMs": 339.3528,
+          "pumpOccupiedMs": 337.902,
+          "pumps": [
+            {
+              "id": 826,
+              "start": 18319.1465,
+              "end": 18657.0485,
+              "steps": 6,
+              "durationMs": 337.902
+            }
+          ],
+          "nextRows": {
+            "first": 53,
+            "last": 69,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 802,
+          "nextReadId": 805,
+          "start": 17398.2504,
+          "end": 17731.9963,
+          "callbackStartGapMs": 333.8595,
+          "betweenCallbacksMs": 333.7459,
+          "pumpOccupiedMs": 330.8145,
+          "pumps": [
+            {
+              "id": 803,
+              "start": 17399.0978,
+              "end": 17729.9123,
+              "steps": 6,
+              "durationMs": 330.8145
+            }
+          ],
+          "nextRows": {
+            "first": 44,
+            "last": 63,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 795,
+          "nextReadId": 799,
+          "start": 16909.2456,
+          "end": 17239.0141,
+          "callbackStartGapMs": 331.1828,
+          "betweenCallbacksMs": 329.7685,
+          "pumpOccupiedMs": 311.0739,
+          "pumps": [
+            {
+              "id": 796,
+              "start": 16925.6014,
+              "end": 17090.003,
+              "steps": 6,
+              "durationMs": 164.4016
+            },
+            {
+              "id": 797,
+              "start": 17092.0356,
+              "end": 17238.7079,
+              "steps": 6,
+              "durationMs": 146.6723
+            }
+          ],
+          "nextRows": {
+            "first": 22,
+            "last": 45,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 854,
+          "nextReadId": 857,
+          "start": 19398.2207,
+          "end": 19722.4409,
+          "callbackStartGapMs": 324.256,
+          "betweenCallbacksMs": 324.2202,
+          "pumpOccupiedMs": 306.2934,
+          "pumps": [
+            {
+              "id": 855,
+              "start": 19415.7152,
+              "end": 19722.0086,
+              "steps": 6,
+              "durationMs": 306.2934
+            }
+          ],
+          "nextRows": {
+            "first": 66,
+            "last": 75,
+            "count": 10
+          }
+        },
+        {
+          "previousReadId": 875,
+          "nextReadId": 878,
+          "start": 19723.4684,
+          "end": 20009.346,
+          "callbackStartGapMs": 285.9341,
+          "betweenCallbacksMs": 285.8776,
+          "pumpOccupiedMs": 283.8953,
+          "pumps": [
+            {
+              "id": 876,
+              "start": 19725.0115,
+              "end": 20008.9068,
+              "steps": 6,
+              "durationMs": 283.8953
+            }
+          ],
+          "nextRows": {
+            "first": 77,
+            "last": 85,
+            "count": 9
+          }
+        },
+        {
+          "previousReadId": 786,
+          "nextReadId": 789,
+          "start": 16697.4467,
+          "end": 16907.066,
+          "callbackStartGapMs": 209.6604,
+          "betweenCallbacksMs": 209.6193,
+          "pumpOccupiedMs": 195.8263,
+          "pumps": [
+            {
+              "id": 787,
+              "start": 16706.2392,
+              "end": 16902.0655,
+              "steps": 6,
+              "durationMs": 195.8263
+            }
+          ],
+          "nextRows": {
+            "first": 11,
+            "last": 27,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 777,
+          "nextReadId": 780,
+          "start": 16498.647,
+          "end": 16697.0349,
+          "callbackStartGapMs": 198.5478,
+          "betweenCallbacksMs": 198.3879,
+          "pumpOccupiedMs": 192.4731,
+          "pumps": [
+            {
+              "id": 778,
+              "start": 16500.6749,
+              "end": 16693.148,
+              "steps": 6,
+              "durationMs": 192.4731
+            }
+          ],
+          "nextRows": {
+            "first": 11,
+            "last": 17,
+            "count": 7
+          }
+        },
+        {
+          "previousReadId": 809,
+          "nextReadId": 812,
+          "start": 17732.5085,
+          "end": 17910.3006,
+          "callbackStartGapMs": 177.8336,
+          "betweenCallbacksMs": 177.7921,
+          "pumpOccupiedMs": 145.3838,
+          "pumps": [
+            {
+              "id": 810,
+              "start": 17764.743,
+              "end": 17910.1268,
+              "steps": 6,
+              "durationMs": 145.3838
+            }
+          ],
+          "nextRows": {
+            "first": 36,
+            "last": 69,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 908,
+          "nextReadId": 911,
+          "start": 20296.6889,
+          "end": 20456.2814,
+          "callbackStartGapMs": 159.6144,
+          "betweenCallbacksMs": 159.5925,
+          "pumpOccupiedMs": 137.2468,
+          "pumps": [
+            {
+              "id": 909,
+              "start": 20318.7401,
+              "end": 20455.9869,
+              "steps": 6,
+              "durationMs": 137.2468
+            }
+          ],
+          "nextRows": {
+            "first": 88,
+            "last": 96,
+            "count": 9
+          }
+        },
+        {
+          "previousReadId": 799,
+          "nextReadId": 802,
+          "start": 17239.2033,
+          "end": 17398.1368,
+          "callbackStartGapMs": 159.1227,
+          "betweenCallbacksMs": 158.9335,
+          "pumpOccupiedMs": 147.6315,
+          "pumps": [
+            {
+              "id": 800,
+              "start": 17250.1738,
+              "end": 17397.8053,
+              "steps": 6,
+              "durationMs": 147.6315
+            }
+          ],
+          "nextRows": {
+            "first": 33,
+            "last": 57,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 903,
+          "nextReadId": 906,
+          "start": 20147.7779,
+          "end": 20296.4908,
+          "callbackStartGapMs": 148.7698,
+          "betweenCallbacksMs": 148.7129,
+          "pumpOccupiedMs": 128.6418,
+          "pumps": [
+            {
+              "id": 904,
+              "start": 20160.9932,
+              "end": 20289.635,
+              "steps": 6,
+              "durationMs": 128.6418
+            }
+          ],
+          "nextRows": {
+            "first": 82,
+            "last": 96,
+            "count": 12
+          }
+        },
+        {
+          "previousReadId": 900,
+          "nextReadId": 903,
+          "start": 20010.0527,
+          "end": 20147.721,
+          "callbackStartGapMs": 137.7085,
+          "betweenCallbacksMs": 137.6683,
+          "pumpOccupiedMs": 134.1713,
+          "pumps": [
+            {
+              "id": 901,
+              "start": 20013.3825,
+              "end": 20147.5538,
+              "steps": 6,
+              "durationMs": 134.1713
+            }
+          ],
+          "nextRows": {
+            "first": 92,
+            "last": 96,
+            "count": 5
+          }
+        },
+        {
+          "previousReadId": 913,
+          "nextReadId": 916,
+          "start": 20456.5378,
+          "end": 20556.2836,
+          "callbackStartGapMs": 99.8638,
+          "betweenCallbacksMs": 99.7458,
+          "pumpOccupiedMs": 98.6535,
+          "pumps": [
+            {
+              "id": 914,
+              "start": 20457.4206,
+              "end": 20556.0741,
+              "steps": 6,
+              "durationMs": 98.6535
+            }
+          ],
+          "nextRows": {
+            "first": 94,
+            "last": 96,
+            "count": 3
+          }
+        }
+      ],
+      "clusters": [
+        {
+          "firstRead": 771,
+          "lastRead": 777,
+          "start": 16496.8397,
+          "end": 16498.647,
+          "count": 4,
+          "rows": 39,
+          "minFirst": 0,
+          "maxLast": 14,
+          "spanMs": 1.8073,
+          "priorPump": {
+            "id": 769,
+            "start": 16149.7562,
+            "end": 16495.6874,
+            "durationMs": 345.9312,
+            "steps": 5,
+            "callbackDelayMs": 1.1523
+          }
+        },
+        {
+          "firstRead": 780,
+          "lastRead": 786,
+          "start": 16697.0349,
+          "end": 16697.4467,
+          "count": 4,
+          "rows": 43,
+          "minFirst": 0,
+          "maxLast": 25,
+          "spanMs": 0.4118,
+          "priorPump": {
+            "id": 778,
+            "start": 16500.6749,
+            "end": 16693.148,
+            "durationMs": 192.4731,
+            "steps": 6,
+            "callbackDelayMs": 3.8869
+          }
+        },
+        {
+          "firstRead": 789,
+          "lastRead": 795,
+          "start": 16907.066,
+          "end": 16909.2456,
+          "count": 4,
+          "rows": 45,
+          "minFirst": 0,
+          "maxLast": 35,
+          "spanMs": 2.1796,
+          "priorPump": {
+            "id": 787,
+            "start": 16706.2392,
+            "end": 16902.0655,
+            "durationMs": 195.8263,
+            "steps": 6,
+            "callbackDelayMs": 5.0005
+          }
+        },
+        {
+          "firstRead": 799,
+          "lastRead": 799,
+          "start": 17239.0141,
+          "end": 17239.2033,
+          "count": 1,
+          "rows": 12,
+          "minFirst": 22,
+          "maxLast": 45,
+          "spanMs": 0.1892,
+          "priorPump": {
+            "id": 797,
+            "start": 17092.0356,
+            "end": 17238.7079,
+            "durationMs": 146.6723,
+            "steps": 6,
+            "callbackDelayMs": 0.3062
+          }
+        },
+        {
+          "firstRead": 802,
+          "lastRead": 802,
+          "start": 17398.1368,
+          "end": 17398.2504,
+          "count": 1,
+          "rows": 12,
+          "minFirst": 33,
+          "maxLast": 57,
+          "spanMs": 0.1136,
+          "priorPump": {
+            "id": 800,
+            "start": 17250.1738,
+            "end": 17397.8053,
+            "durationMs": 147.6315,
+            "steps": 6,
+            "callbackDelayMs": 0.3315
+          }
+        },
+        {
+          "firstRead": 805,
+          "lastRead": 809,
+          "start": 17731.9963,
+          "end": 17732.5085,
+          "count": 3,
+          "rows": 28,
+          "minFirst": 44,
+          "maxLast": 69,
+          "spanMs": 0.5122,
+          "priorPump": {
+            "id": 803,
+            "start": 17399.0978,
+            "end": 17729.9123,
+            "durationMs": 330.8145,
+            "steps": 6,
+            "callbackDelayMs": 2.084
+          }
+        },
+        {
+          "firstRead": 812,
+          "lastRead": 814,
+          "start": 17910.3006,
+          "end": 17910.4631,
+          "count": 2,
+          "rows": 24,
+          "minFirst": 36,
+          "maxLast": 69,
+          "spanMs": 0.1625,
+          "priorPump": {
+            "id": 810,
+            "start": 17764.743,
+            "end": 17910.1268,
+            "durationMs": 145.3838,
+            "steps": 6,
+            "callbackDelayMs": 0.1738
+          }
+        },
+        {
+          "firstRead": 817,
+          "lastRead": 825,
+          "start": 18317.614,
+          "end": 18317.9557,
+          "count": 5,
+          "rows": 54,
+          "minFirst": 42,
+          "maxLast": 69,
+          "spanMs": 0.3417,
+          "priorPump": {
+            "id": 815,
+            "start": 17927.1874,
+            "end": 18317.3357,
+            "durationMs": 390.1483,
+            "steps": 6,
+            "callbackDelayMs": 0.2783
+          }
+        },
+        {
+          "firstRead": 828,
+          "lastRead": 834,
+          "start": 18657.3085,
+          "end": 18658.0932,
+          "count": 4,
+          "rows": 41,
+          "minFirst": 48,
+          "maxLast": 69,
+          "spanMs": 0.7847,
+          "priorPump": {
+            "id": 826,
+            "start": 18319.1465,
+            "end": 18657.0485,
+            "durationMs": 337.902,
+            "steps": 6,
+            "callbackDelayMs": 0.26
+          }
+        },
+        {
+          "firstRead": 837,
+          "lastRead": 843,
+          "start": 19037.6669,
+          "end": 19038.4414,
+          "count": 4,
+          "rows": 34,
+          "minFirst": 54,
+          "maxLast": 69,
+          "spanMs": 0.7745,
+          "priorPump": {
+            "id": 835,
+            "start": 18660.306,
+            "end": 19037.3199,
+            "durationMs": 377.0139,
+            "steps": 6,
+            "callbackDelayMs": 0.347
+          }
+        },
+        {
+          "firstRead": 846,
+          "lastRead": 854,
+          "start": 19397.5068,
+          "end": 19398.2207,
+          "count": 5,
+          "rows": 50,
+          "minFirst": 60,
+          "maxLast": 69,
+          "spanMs": 0.7139,
+          "priorPump": {
+            "id": 844,
+            "start": 19082.904,
+            "end": 19393.6068,
+            "durationMs": 310.7028,
+            "steps": 6,
+            "callbackDelayMs": 3.9
+          }
+        },
+        {
+          "firstRead": 857,
+          "lastRead": 875,
+          "start": 19722.4409,
+          "end": 19723.4684,
+          "count": 10,
+          "rows": 96,
+          "minFirst": 66,
+          "maxLast": 84,
+          "spanMs": 1.0275,
+          "priorPump": {
+            "id": 855,
+            "start": 19415.7152,
+            "end": 19722.0086,
+            "durationMs": 306.2934,
+            "steps": 6,
+            "callbackDelayMs": 0.4323
+          }
+        },
+        {
+          "firstRead": 878,
+          "lastRead": 900,
+          "start": 20009.346,
+          "end": 20010.0527,
+          "count": 12,
+          "rows": 123,
+          "minFirst": 70,
+          "maxLast": 96,
+          "spanMs": 0.7067,
+          "priorPump": {
+            "id": 876,
+            "start": 19725.0115,
+            "end": 20008.9068,
+            "durationMs": 283.8953,
+            "steps": 6,
+            "callbackDelayMs": 0.4392
+          }
+        },
+        {
+          "firstRead": 903,
+          "lastRead": 903,
+          "start": 20147.721,
+          "end": 20147.7779,
+          "count": 1,
+          "rows": 5,
+          "minFirst": 92,
+          "maxLast": 96,
+          "spanMs": 0.0569,
+          "priorPump": {
+            "id": 901,
+            "start": 20013.3825,
+            "end": 20147.5538,
+            "durationMs": 134.1713,
+            "steps": 6,
+            "callbackDelayMs": 0.1672
+          }
+        },
+        {
+          "firstRead": 906,
+          "lastRead": 908,
+          "start": 20296.4908,
+          "end": 20296.6889,
+          "count": 2,
+          "rows": 16,
+          "minFirst": 82,
+          "maxLast": 96,
+          "spanMs": 0.1981,
+          "priorPump": {
+            "id": 904,
+            "start": 20160.9932,
+            "end": 20289.635,
+            "durationMs": 128.6418,
+            "steps": 6,
+            "callbackDelayMs": 6.8558
+          }
+        },
+        {
+          "firstRead": 911,
+          "lastRead": 913,
+          "start": 20456.2814,
+          "end": 20456.5378,
+          "count": 2,
+          "rows": 18,
+          "minFirst": 88,
+          "maxLast": 96,
+          "spanMs": 0.2564,
+          "priorPump": {
+            "id": 909,
+            "start": 20318.7401,
+            "end": 20455.9869,
+            "durationMs": 137.2468,
+            "steps": 6,
+            "callbackDelayMs": 0.2945
+          }
+        },
+        {
+          "firstRead": 916,
+          "lastRead": 916,
+          "start": 20556.2836,
+          "end": 20556.3465,
+          "count": 1,
+          "rows": 3,
+          "minFirst": 94,
+          "maxLast": 96,
+          "spanMs": 0.0629,
+          "priorPump": {
+            "id": 914,
+            "start": 20457.4206,
+            "end": 20556.0741,
+            "durationMs": 98.6535,
+            "steps": 6,
+            "callbackDelayMs": 0.2095
+          }
+        }
+      ],
+      "awaitDurations": {
+        "count": 65,
+        "total": 34152.7646,
+        "mean": 525.427148,
+        "p50": 488.7217000000019,
+        "p95": 1034.6552999999985,
+        "max": 1409.774599999997
+      },
+      "largestAwaits": [
+        {
+          "id": 794,
+          "source": 1,
+          "start": 16907.8149,
+          "end": 18317.5895,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1409.7746,
+          "pumpOverlapMs": 1325.052
+        },
+        {
+          "id": 798,
+          "source": 1,
+          "start": 17238.9896,
+          "end": 18317.7128,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1078.7232,
+          "pumpOverlapMs": 1013.9781
+        },
+        {
+          "id": 785,
+          "source": 1,
+          "start": 16697.3892,
+          "end": 17732.2771,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1034.8879,
+          "pumpOverlapMs": 985.3462
+        },
+        {
+          "id": 783,
+          "source": 1,
+          "start": 16697.3038,
+          "end": 17731.9591,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1034.6553,
+          "pumpOverlapMs": 985.3462
+        },
+        {
+          "id": 790,
+          "source": 1,
+          "start": 16907.2637,
+          "end": 17910.2503,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1002.9866,
+          "pumpOverlapMs": 934.9037
+        },
+        {
+          "id": 792,
+          "source": 1,
+          "start": 16907.5269,
+          "end": 17910.4008,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 1002.8739,
+          "pumpOverlapMs": 934.9037
+        },
+        {
+          "id": 808,
+          "source": 1,
+          "start": 17732.4516,
+          "end": 18657.2752,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 924.8236,
+          "pumpOverlapMs": 873.4341
+        },
+        {
+          "id": 801,
+          "source": 1,
+          "start": 17398.1108,
+          "end": 18317.7822,
+          "outcome": "resumed",
+          "pumpAtIssue": null,
+          "pumpAtResume": null,
+          "durationMs": 919.6714,
+          "pumpOverlapMs": 866.3466
+        }
+      ],
+      "callbacksInsidePump": 0,
+      "resumptionsInsidePump": 0
+    },
+    "firstFreshReadOrdering": {
+      "lastOldRead": {
+        "id": 854,
+        "source": 2,
+        "start": 19398.1849,
+        "end": 19398.2207,
+        "bytes": 296,
+        "packets": 1,
+        "rows": 10,
+        "first": 60,
+        "last": 69,
+        "outcome": "processed",
+        "pumpAtStart": null
+      },
+      "firstFreshRead": {
+        "id": 857,
+        "source": 2,
+        "start": 19722.4409,
+        "end": 19722.6704,
+        "bytes": 258,
+        "packets": 1,
+        "rows": 10,
+        "first": 66,
+        "last": 75,
+        "outcome": "processed",
+        "pumpAtStart": null
+      },
+      "interveningPump": {
+        "id": 855,
+        "start": 19415.7152,
+        "end": 19722.0086,
+        "startedSteps": 6,
+        "completedSteps": 6,
+        "stepTotalMs": 306.2594999999965,
+        "stepMaxMs": 129.26840000000084,
+        "firstStepAt": 19415.7184,
+        "lastStepEnd": 19722.0029,
+        "outcome": "returned",
+        "durationMs": 306.2934,
+        "outsideRecordedStepsMs": 0.0339,
+        "nextRead": {
+          "id": 857,
+          "start": 19722.4409,
+          "delayAfterPumpMs": 0.4323,
+          "first": 66,
+          "last": 75
+        }
+      },
+      "followingPump": {
+        "id": 876,
+        "start": 19725.0115,
+        "end": 20008.9068,
+        "startedSteps": 6,
+        "completedSteps": 6,
+        "stepTotalMs": 283.86279999999897,
+        "stepMaxMs": 80.23079999999754,
+        "firstStepAt": 19725.0155,
+        "lastStepEnd": 20008.9023,
+        "outcome": "returned",
+        "durationMs": 283.8953,
+        "outsideRecordedStepsMs": 0.0325,
+        "nextRead": {
+          "id": 878,
+          "start": 20009.346,
+          "delayAfterPumpMs": 0.4392,
+          "first": 77,
+          "last": 85
+        }
+      },
+      "healthTickBefore": 753,
+      "clientAfterTick": 759,
+      "interpretation": "After37 processed packets through69, the only intervening pump executes6steps before packet38 (through75) is delivered to application JS. Fresh packet38 cannot affect that already completed pump. The gate observes the resulting tick759/ACK69; later health tick765/ACK75 is consistent with the following6-step pump. This establishes execution order, not when the native datagram became ready or exact client↔server time alignment."
+    },
+    "healthPoints": [
+      {
+        "name": "beforeResume",
+        "clientRequest": {
+          "start": 14234.699999988079,
+          "end": 14245.899999976158,
+          "durationMs": 11.2
+        },
+        "serverSnapshotCausalBounds": {
+          "notBefore": 19398.2207,
+          "notAfter": 19722.4409,
+          "reason": "Snapshot includes this processed callback count; it precedes the next callback (or later observer snapshot). No precise client/server clock mapping is claimed."
+        },
+        "tick": 753,
+        "timing": {
+          "steps": 753,
+          "lastStepMs": 35.62840000000142,
+          "maxStepMs": 178.26450000000114,
+          "meanStepMs": 11.791591666666712,
+          "p95StepMs": 48.77280000000246,
+          "droppedMs": 1853.4178999999979
+        },
+        "receivedPackets": 37,
+        "budget": {
+          "processed": 37,
+          "dropped": 0,
+          "overloadStreak": 0,
+          "windowPackets": 5
+        },
+        "authority": {
+          "tick": 753,
+          "time": 1.1833333333333316,
+          "ack": 65,
+          "queue": 4,
+          "oldest": 66,
+          "newest": 69,
+          "buffer": {
+            "expected": 70,
+            "through": 69,
+            "skipped": 0,
+            "pending": []
+          },
+          "packets": 5,
+          "window": 1792311586355,
+          "lastSeen": 1792311586355,
+          "lastApplied": 1792311586315,
+          "revision": 0,
+          "forward": 0,
+          "right": 0,
+          "interact": false
+        },
+        "prefetch": {
+          "readers": 8,
+          "capacity": 16,
+          "queued": 0,
+          "reserved": 8,
+          "peakReserved": 9,
+          "received": 37
+        },
+        "lastObservedRead": {
+          "id": 854,
+          "start": 19398.1849,
+          "end": 19398.2207,
+          "first": 60,
+          "last": 69
+        },
+        "nextObservedRead": {
+          "id": 857,
+          "start": 19722.4409,
+          "first": 66,
+          "last": 75
+        }
+      },
+      {
+        "name": "afterPause",
+        "clientRequest": {
+          "start": 14769.5,
+          "end": 14843.5,
+          "durationMs": 74
+        },
+        "serverSnapshotCausalBounds": {
+          "notBefore": 20010.0527,
+          "notAfter": 20147.721,
+          "reason": "Snapshot includes this processed callback count; it precedes the next callback (or later observer snapshot). No precise client/server clock mapping is claimed."
+        },
+        "tick": 765,
+        "timing": {
+          "steps": 765,
+          "lastStepMs": 49.69300000000294,
+          "maxStepMs": 178.26450000000114,
+          "meanStepMs": 11.791591666666712,
+          "p95StepMs": 48.77280000000246,
+          "droppedMs": 2295.5254
+        },
+        "receivedPackets": 59,
+        "budget": {
+          "processed": 59,
+          "dropped": 0,
+          "overloadStreak": 0,
+          "windowPackets": 27
+        },
+        "authority": {
+          "tick": 765,
+          "time": 1.3833333333333309,
+          "ack": 75,
+          "queue": 19,
+          "oldest": 76,
+          "newest": 94,
+          "buffer": {
+            "expected": 95,
+            "through": 94,
+            "skipped": 0,
+            "pending": [
+              96
+            ]
+          },
+          "packets": 27,
+          "window": 1792311586355,
+          "lastSeen": 1792311586967,
+          "lastApplied": 1792311586916,
+          "revision": 0,
+          "forward": 1,
+          "right": 0,
+          "interact": false
+        },
+        "prefetch": {
+          "readers": 8,
+          "capacity": 16,
+          "queued": 0,
+          "reserved": 8,
+          "peakReserved": 9,
+          "received": 59
+        },
+        "lastObservedRead": {
+          "id": 900,
+          "start": 20010.0125,
+          "end": 20010.0527,
+          "first": 81,
+          "last": 96
+        },
+        "nextObservedRead": {
+          "id": 903,
+          "start": 20147.721,
+          "first": 92,
+          "last": 96
+        }
+      },
+      {
+        "name": "afterObservation",
+        "clientRequest": {
+          "start": 15399.100000023842,
+          "end": 15443.300000011921,
+          "durationMs": 44.2
+        },
+        "serverSnapshotCausalBounds": {
+          "notBefore": 20556.3465,
+          "notAfter": 20879.9164,
+          "reason": "Snapshot includes this processed callback count; it precedes the next callback (or later observer snapshot). No precise client/server clock mapping is claimed."
+        },
+        "tick": 795,
+        "timing": {
+          "steps": 795,
+          "lastStepMs": 11.025699999998324,
+          "maxStepMs": 178.26450000000114,
+          "meanStepMs": 33.379421666666666,
+          "p95StepMs": 129.26840000000084,
+          "droppedMs": 2627.962000000001
+        },
+        "receivedPackets": 65,
+        "budget": {
+          "processed": 65,
+          "dropped": 0,
+          "overloadStreak": 0,
+          "windowPackets": 3
+        },
+        "authority": {
+          "tick": 795,
+          "time": 1.883333333333329,
+          "ack": 96,
+          "queue": 0,
+          "oldest": null,
+          "newest": null,
+          "buffer": {
+            "expected": 97,
+            "through": 96,
+            "skipped": 0,
+            "pending": []
+          },
+          "packets": 3,
+          "window": 1792311587414,
+          "lastSeen": 1792311587514,
+          "lastApplied": 1792311587434,
+          "revision": 0,
+          "forward": 1,
+          "right": 0,
+          "interact": false
+        },
+        "prefetch": {
+          "readers": 8,
+          "capacity": 16,
+          "queued": 0,
+          "reserved": 8,
+          "peakReserved": 9,
+          "received": 65
+        },
+        "lastObservedRead": {
+          "id": 916,
+          "start": 20556.2836,
+          "end": 20556.3465,
+          "first": 94,
+          "last": 96
+        },
+        "nextObservedRead": null
+      }
+    ],
+    "nativeCounters": {
+      "before": {
+        "before": 4580.7386,
+        "after": 4580.8142,
+        "value": {
+          "nowMs": 1792311571538.47,
+          "sessionsActive": 0,
+          "sessionTasksActive": 0,
+          "streamTasksActive": 0,
+          "handshakesInFlight": 0,
+          "streamsActive": 0,
+          "datagramsIn": 0,
+          "datagramsOut": 0,
+          "datagramsDropped": 0,
+          "queuedBytesGlobal": 0,
+          "backpressureWaitCount": 0,
+          "backpressureTimeoutCount": 0,
+          "rateLimitedCount": 0,
+          "limitExceededCount": 0,
+          "sniCertSelections": 0,
+          "defaultCertSelections": 0,
+          "unknownSniRejectedCount": 0,
+          "handshakeLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 0,
+            "sumSecs": 0
+          },
+          "datagramEnqueueLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 0,
+            "sumSecs": 0
+          },
+          "streamOpenLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "count": 0,
+            "sumSecs": 0
+          }
+        },
+        "error": null,
+        "scope": "Explicit SDK counter snapshot only; no per-packet native arrival timestamps or loaded-binary symbol proof"
+      },
+      "after": {
+        "before": 20879.8473,
+        "after": 20879.91,
+        "value": {
+          "nowMs": 1792311587837.5547,
+          "sessionsActive": 1,
+          "sessionTasksActive": 0,
+          "streamTasksActive": 5,
+          "handshakesInFlight": 0,
+          "streamsActive": 3,
+          "datagramsIn": 65,
+          "datagramsOut": 57,
+          "datagramsDropped": 0,
+          "queuedBytesGlobal": 3414,
+          "backpressureWaitCount": 0,
+          "backpressureTimeoutCount": 0,
+          "rateLimitedCount": 0,
+          "limitExceededCount": 0,
+          "sniCertSelections": 0,
+          "defaultCertSelections": 1,
+          "unknownSniRejectedCount": 0,
+          "handshakeLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "count": 1,
+            "sumSecs": 0.0007874
+          },
+          "datagramEnqueueLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57,
+              57
+            ],
+            "count": 57,
+            "sumSecs": 0.0001719
+          },
+          "streamOpenLatency": {
+            "le": [
+              0.001,
+              0.005,
+              0.01,
+              0.025,
+              0.05,
+              0.1,
+              0.25,
+              0.5,
+              1,
+              2.5,
+              5,
+              10
+            ],
+            "cumulativeCount": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "count": 2,
+            "sumSecs": 0.0004751
+          }
+        },
+        "error": null,
+        "scope": "Explicit SDK counter snapshot only; no per-packet native arrival timestamps or loaded-binary symbol proof"
+      },
+      "interpretation": "Explicit endpoint SDK snapshots show0→65in,0→57out and0drops/rate/limit/backpressure-timeouts, while application processed65motion datagrams with0budget drops. These counters have no per-datagram native arrival/readiness timestamps and no loaded-binary symbol proof. Counts cover the whole attempt, not the361.5ms gate alone."
+    },
+    "finalAuthority": {
+      "receivedPackets": 65,
+      "maxWindowPackets": 30,
+      "windowPackets": 3,
+      "windowMs": 100.002199999999,
+      "maxGapMs": 407.20280000000275,
+      "lastPackets": [
+        {
+          "at": 20009.9631,
+          "first": 70,
+          "last": 96,
+          "count": 12
+        },
+        {
+          "at": 20010.0125,
+          "first": 81,
+          "last": 96,
+          "count": 12
+        },
+        {
+          "at": 20147.721,
+          "first": 92,
+          "last": 96,
+          "count": 5
+        },
+        {
+          "at": 20296.4908,
+          "first": 82,
+          "last": 96,
+          "count": 12
+        },
+        {
+          "at": 20296.667,
+          "first": 93,
+          "last": 96,
+          "count": 4
+        },
+        {
+          "at": 20456.2814,
+          "first": 88,
+          "last": 96,
+          "count": 9
+        },
+        {
+          "at": 20456.4198,
+          "first": 88,
+          "last": 96,
+          "count": 9
+        },
+        {
+          "at": 20556.2836,
+          "first": 94,
+          "last": 96,
+          "count": 3
+        }
+      ],
+      "budget": {
+        "processed": 65,
+        "dropped": 0,
+        "overloadStreak": 0,
+        "windowPackets": 3
+      },
+      "authority": {
+        "tick": 819,
+        "time": 2.283333333333328,
+        "ack": 96,
+        "queue": 0,
+        "oldest": null,
+        "newest": null,
+        "buffer": {
+          "expected": 97,
+          "through": 96,
+          "skipped": 0,
+          "pending": []
+        },
+        "packets": 3,
+        "window": 1792311587414,
+        "lastSeen": 1792311587514,
+        "lastApplied": 1792311587434,
+        "revision": 0,
+        "forward": 0,
+        "right": 0,
+        "interact": false
+      },
+      "prefetch": {
+        "readers": 8,
+        "capacity": 16,
+        "queued": 0,
+        "reserved": 8,
+        "peakReserved": 9,
+        "received": 65
+      }
+    },
+    "cleanup": {
+      "originalRunner": {
+        "capture": {
+          "pid": 24196,
+          "alreadyExited": true,
+          "exitCode": 1,
+          "forcedTree": false
+        },
+        "server": {
+          "pid": 20260,
+          "alreadyExited": false,
+          "exitCode": null,
+          "forcedTree": false,
+          "error": "Owned process did not terminate within cleanup bound"
+        },
+        "browserProfile": {
+          "status": "verified-absent",
+          "auditPath": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\browser-audit-independent-input-stage-passive-20261018-r5b.json",
+          "auditSha256": "ebc0d6385609bb69d7be6616fb2479a20fa893dfc0a4a52a2b92cd01275e9272",
+          "userData": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-cfXbqf\\0",
+          "profile": "C:\\Users\\Roman\\AppData\\Local\\Temp\\thegame-cdp-cfXbqf",
+          "parentMatches": true,
+          "present": false,
+          "limit": "Only the fresh-label audit argument and exact owned debug port are inspected. No profile directory is deleted by this runner."
+        }
+      },
+      "laterReadOnlyObservation": {
+        "scope": "Later read-only OS check after the runner cleanup bound; original report is preserved.",
+        "checkedAtUtc": "2026-10-18T08:22:22.3932757Z",
+        "runToken": "43f57ad9-8fec-43f4-a567-b415b0cbacea",
+        "serverPid": 20260,
+        "serverProcessPresent": false,
+        "ownedPorts": [
+          31490,
+          31491,
+          31492
+        ],
+        "tcpListeners": [],
+        "webTransportUdpEndpoints": [],
+        "browserProfilePresent": false,
+        "processTerminatedByThisCheck": false
+      },
+      "interpretation": "Original runner bounded cleanup retained exitCode:null for PID20260; it remains a failed cleanup-bound observation. The separate later OS check reports process/listener/UDP/profile absence without killing anything. Do not rewrite the original result into immediate cleanup success."
+    },
+    "conclusions": [
+      "The independent sender creates/submits fresh commands with RAF withheld and keeps the main-thread heartbeat live; strict fresh-command ACK criterion still fails in this attempt.",
+      "Current unchanged router can execute up to6 synchronous authority steps without an I/O yield. Retained wall spans reach390.1483ms, with390.0735ms accounted by original per-step timing; callbacks cluster within milliseconds after such pumps.",
+      "This directly establishes long server event-loop exclusion intervals. It does not establish whether packets were already available natively during them, nor how much of end-to-end delay is due to client writer, native scheduling/arrival, server work, GC or OS descheduling.",
+      "All target rows eventually ACK96 withqueue0/expected97/skipped0; observed failure is latency, without observed admission-budget drops or missing-duration gap retirement.",
+      "No adoption/rate/cap/quality change or another native attempt is justified by this analysis alone. A future isolated change needs exact policy preservation and separately coordinated verification."
+    ],
+    "limits": [
+      "No paired client/server monotonic clock anchors or page timeOrigin are present in this QA report. Health HTTP requests are causal brackets only; no exact overlap of the361.5ms client hold with individual server spans is claimed.",
+      "The largest390ms pump and178ms individual step predate the before-resume health snapshot; do not call those maxima measured inside the gate.",
+      "Observer/preload, native metrics requests, health fetches and snapshots add diagnostic work. Wall span includes GC/OS scheduling and synchronous dependencies; no allocation/CPU-cause decomposition exists here.",
+      "Existing timing.mean/p95 snapshots refresh only each60steps over the most recent120 durations; they are neither an exact gate histogram nor a whole-run latency statistic.",
+      "Cached GameNetwork causalStats remain unchanged while RAF/present is withheld; use direct ACK/tick/outgoing submission fields and passive server records, not cached selfAge or cached sentPackets for gate transport progress.",
+      "Prefetch snapshots reserve8of16 withpeak9 andqueue0; this is not a proof of no transient native backlog."
+    ]
+  },
+  "scope": "One passive canonical server/native functional run with B77/E8 overrides, preserved caps/rates and no repair Proxy. Synchronous server wall-time/I/O opportunities, not native-ready/UDP timestamps, CPU utilization, FPS gain or proven client/server clock alignment.",
+  "limitations": [
+    "Earliest270/782pumps evicted; retained512 fully cover all65 motion callbacks/73await records. Lifetime maxima are not automatically inside the350ms hold.",
+    "Native workers=2 differs from isolated navigation drills workers=0. Their hot-route footing owner is not established as this native pump cause.",
+    "390.1483ms pump and178.2645ms single step occur before the before-resume health snapshot; gate-adjacent retained pumps include306.2934ms and283.8953ms.",
+    "Original runner bounded cleanup reports server exitCode:null. Later read-only OS absence is separate evidence, not a rewrite of that failure.",
+    "SDK native counters65in/57out/drop0 have no per-packet readiness timestamps; an in-flight read includes network/native and delayed JS continuation."
+  ],
+  "next": "Prepare an ignored optional between-step catch-up budget that retains debt/maxDebt250/maxSteps6 and yields through the existing router timeout. It cannot split a long indivisible world step; validate conservation/default parity before native testing.",
+  "artifactHashes": {
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/manifest.json": "1812ebc9347125cc3ce3d71cd6d2afb275f3fffc711cc103dc0625c641707e3d",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/verification.json": "5cee052aabbcc0ff584efe00578e65f5a5646430848a21a2f14d1817911dbe7b",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5-1792310928154-dcc13cce/runner-report.json": "2bf1c78aff4dbf3b12d200d1c1499979cc867521a8f6172bc00e42070baef332",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5-1792310928154-dcc13cce/server-error.log": "7555a43cef87d83b19ac8e7ce4054c3c1eeb60a1bdd053033039cc4d9eb0d87c",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/runner-report.json": "27a2770fcf0b68ac253bbe0e29781189625701f3a57f36b685354b5ba923aaee",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/capture.log": "3e6debff7acfd6a2a354427a3a0f4109bfcaa397e6852d7c0eac1561eb5d4542",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/capture-error.log": "33a143567af3b41ff2757c9643243a4f7234dafc4aa5c682960e46349e5fae7b",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/observer-before.json": "8114bfef035d3297bc4cf032ee009f8951c87b4f28aa901850bbdb0853abd6f6",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/observer-after.json": "3e5716a61848d9df18dcd7a9ab1db3c67bb055fbd6b459d38b2fd66c3fcdd593",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/health-after.json": "0bbf8a6a9221afd1d0485aa4b5a23dbe73a2c7c60dbcbf90ec5992c676632a1a",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/post-run-cleanup.json": "df5a9a5630439a7dcea043b5a16e949100190b719214e2bf8402e7dbe5e119af",
+    "artifacts/network-stability-20261018/passive-realtime-scheduling/run-independent-input-stage-passive-20261018-r5b-1792311566924-43f57ad9/analysis.json": "46162095c48018940844344cec0530b9730cdbd6d3be0a14c4ff2a54e896197a",
+    "artifacts/network-stability-20261018/analyze-passive-realtime-r5b-20261018.ts": "a17c882a6da611654b5842226031590212bb74c853db029de6c5818ab10792ce",
+    "artifacts/network-stability-20261018/sdk-native-source-131dc476/provenance.json": "a8a26472f8fe08e18a0bc57722ed896ea9c0c2e80da4b66046e0896fd10fad4c",
+    "artifacts/input-clock-independent-input-stage-passive-20261018-r5b.json": "6216c364512b8f664e420cc5f8cb49827a4bf9cfb042edf501095e197c74ecbe",
+    "artifacts/browser-audit-independent-input-stage-passive-20261018-r5b.json": "ebc0d6385609bb69d7be6616fb2479a20fa893dfc0a4a52a2b92cd01275e9272",
+    "artifacts/capture-overrides-independent-input-stage-passive-20261018-r5b.json": "94ba9d81a7ee79bcba2c39ecac874c636cc66649c96fd8cb2b4f674f0d8f7a53"
+  }
+}

@@ -1,0 +1,1100 @@
+{
+  "date": "2026-10-16T14:27:05.427Z",
+  "scope": "Original Game drawUrban records and compiler in the Office Engine Scene; street assets only; whole integration remains active",
+  "sourceHashes": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\office-urban-assets.ts",
+      "sha256": "a7bc6c07048ab88c950336487933c9e1c912324d9742fb12309b571d5e2063ae"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\office-controller.ts",
+      "sha256": "bc533d1971ebf1dfe03cbbd9d07627fa0450816b4fd60c5390c72000cfc1519b"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\the-engine-projection.ts",
+      "sha256": "75d74db30150cc1eeae26e255be02cd059c3e82d226c077bfd87816f06be9a8f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\urban-scene.ts",
+      "sha256": "18d5d33d99a004868ea2bdb029037e50d39d14e34b576b33b015cfbe261310e6"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\runtime\\render.js",
+      "sha256": "2ce569531ef18c791773dc3eb34c34da683bc8287acb6d12dac074364a7bca9d"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\office-urban-assets.test.ts",
+      "sha256": "9effd0ee50a3b91aa779496a9030a2b548a2e87a062889090bac9c6b4329c3fd"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\tools\\qa-office-walking.ts",
+      "sha256": "cef913586e08dd232f3a4fa69a71dcae51eba02d76d8f97058d89dd054a50585"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-urban.ts",
+      "sha256": "ce563545827df2d1e27d10a8164a36c15edb69fcef399b5df0ab90f5d6697a26"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-world-view.ts",
+      "sha256": "ed99ca459a98d8c6b7ab966efd136730a4074996cd5cdd98d2125c92e2983b9b"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-connection.ts",
+      "sha256": "b53a58b8a113fcffebd18b13a50b7d53c7b396d1249821e3d06f1563bc6e8920"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\test\\canonical-world-view.test.ts",
+      "sha256": "f15908e5028a423910f3897df569398e91aec24f1548fe22ec1c788ce14b62bf"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\test\\canonical-connection.test.ts",
+      "sha256": "64a20f2777931f4933f44f1c8b8bbe89600825709165e373515dc827d49a8f10"
+    },
+    {
+      "path": "C:\\Users\\Roman\\voice-agent\\ui\\src\\office\\scene.ts",
+      "sha256": "3328d3af1a4926602431d822e2b4257d3f532f6827f21c4289321006cf2483b0"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\game.js",
+      "sha256": "bee8d9993d3ccc527653cdd5a3f663fcd2e2bd9f1f38d33f0518304e967f159c",
+      "bytes": 1586686,
+      "mode": "NODE_ENV=production"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\office-controller.js",
+      "sha256": "e9a0dc7e7c5a970bd5bd97061e7136cf287fec5a40542de4b7dde95a61e10142",
+      "bytes": 758725,
+      "mode": "NODE_ENV=production"
+    }
+  ],
+  "oracle": {
+    "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-urban\\oracle.json",
+    "sourceCounts": {
+      "boxes": 17,
+      "props": 12,
+      "junctions": 0
+    },
+    "rows": [
+      {
+        "floor": 2,
+        "records": 29,
+        "chunks": 8,
+        "triangles": 1644,
+        "quantization": 1e-7,
+        "sourceHash": "78e041771f17984a85ccdfeb0abe4de78ad1c4b44d36995b95e126d0c382c4ee",
+        "projectedHash": "78e041771f17984a85ccdfeb0abe4de78ad1c4b44d36995b95e126d0c382c4ee",
+        "equal": true
+      },
+      {
+        "floor": 3,
+        "records": 29,
+        "chunks": 8,
+        "triangles": 1644,
+        "quantization": 1e-7,
+        "sourceHash": "8fa1502670a8f2cb58e4b76c85442084b4b484617d717a41d90029715888552c",
+        "projectedHash": "8fa1502670a8f2cb58e4b76c85442084b4b484617d717a41d90029715888552c",
+        "equal": true
+      }
+    ]
+  },
+  "native": {
+    "log": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-20261016.log",
+    "report": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\report.json",
+    "browserMode": "native-gpu",
+    "gameOfficeParts": 231,
+    "walkDistance": 2.0214904777712865,
+    "entryContinuity": {
+      "expectedActorId": "player:253265b5-1b15-438e-a330-bcef014e620b",
+      "actor": "player:253265b5-1b15-438e-a330-bcef014e620b",
+      "matched": true
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "observer": {
+      "source": "thegame",
+      "chunks": 9,
+      "actors": 12,
+      "traffic": 7,
+      "facade": 53,
+      "core": 12,
+      "cityVisible": true,
+      "presentedTime": 1401.814400004033,
+      "lightingUpdates": 1,
+      "geometryKey": "office:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+      "view": "office",
+      "terrainBounds": {
+        "minX": -496,
+        "minZ": 176,
+        "maxX": -112,
+        "maxZ": 560
+      },
+      "subjectVisible": false,
+      "terrainPatches": 16,
+      "assets": "ready",
+      "assetMeshes": 262,
+      "assetGeometryBuilds": 21,
+      "urbanAssets": "ready",
+      "urbanRecords": 29,
+      "urbanMeshes": 22,
+      "urbanGeometryBuilds": 8
+    },
+    "returnedObserver": {
+      "source": "thegame",
+      "chunks": 9,
+      "actors": 5,
+      "traffic": 5,
+      "facade": 53,
+      "core": 12,
+      "cityVisible": true,
+      "presentedTime": 1443.857500004569,
+      "lightingUpdates": 82,
+      "geometryKey": "office:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+      "view": "office",
+      "terrainBounds": {
+        "minX": -496,
+        "minZ": 176,
+        "maxX": -112,
+        "maxZ": 560
+      },
+      "subjectVisible": false,
+      "terrainPatches": 16,
+      "assets": "ready",
+      "assetMeshes": 95,
+      "assetGeometryBuilds": 263,
+      "urbanAssets": "ready",
+      "urbanRecords": 29,
+      "urbanMeshes": 22,
+      "urbanGeometryBuilds": 16
+    },
+    "physicsAndGpu": true,
+    "transport": {
+      "ok": true,
+      "vehicle": {
+        "id": "vehicle:1001",
+        "type": "wagon",
+        "initial": [
+          -329.011,
+          0.455,
+          -62.751
+        ]
+      },
+      "exitFrames": 119,
+      "minimumCameraDistance": 7.999999999999995,
+      "maximumCameraDistance": 7.999999999999995,
+      "badCameraFrames": 0,
+      "clearanceRelease": {
+        "before": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "after": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "position": [
+          -326.3554056026912,
+          -64.82137393236026
+        ]
+      }
+    }
+  },
+  "performance": {
+    "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\performance-live-fps-current-urban-20261016.json",
+    "sha256": "7d21377db533277b2238ac7d2a4cda9b77d97804698cf38b8b7017e6bcb9e8db",
+    "fileTime": "2026-10-16T14:19:47.483Z",
+    "averageFPS": 46.91678526187386,
+    "frames": 900,
+    "warmupFrames": 180,
+    "durationSeconds": 19.182899999999997,
+    "p50Ms": 19.39999999999418,
+    "p95Ms": 30.099999999998545,
+    "browser": {
+      "mode": "native-gpu",
+      "batterySaverRequested": "default",
+      "backend": "webgpu",
+      "width": 1280,
+      "height": 720,
+      "renderResolution": [
+        704,
+        396
+      ]
+    },
+    "drawDistance": 420,
+    "renderScale": 0.55,
+    "adaptive": {
+      "enabled": false,
+      "objective": "balanced",
+      "worker": "background-worker",
+      "frame": {
+        "targetFrameMs": 9.725563499771576
+      },
+      "network": {
+        "frames": 8,
+        "snapshotAgeMs": -0.8999999940424459,
+        "headroomMs": 72.05040000076224,
+        "playbackTime": 1311.3779496028924,
+        "latestTime": 1311.4500000028931,
+        "underrun": false
+      },
+      "analysis": {
+        "samples": 240,
+        "targetFrameMs": 9.60481730251986,
+        "frame": {
+          "p50": 9.5,
+          "p95": 11.200000000000728,
+          "p99": 412.8999999999978,
+          "max": 3346.7999999999993
+        },
+        "mainThread": {
+          "p95": 1080,
+          "p99": 1080
+        },
+        "rendererCpu": {
+          "p95": 127.59999999403954,
+          "p99": 127.59999999403954
+        },
+        "gpu": {
+          "p95": 2.74776,
+          "p99": 2.74776,
+          "passes": {
+            "visibility": 0.20172,
+            "shadow": 0.14756,
+            "geometry": null,
+            "temporal": null,
+            "post": null
+          }
+        },
+        "network": {
+          "underruns": 0,
+          "snapshotAgeP95": -5.399999994038808,
+          "headroomP05": 105.39999999400607
+        },
+        "freezes": {
+          "display-hitch": 1,
+          "cpu-stall": 3,
+          "streaming-stall": 8
+        },
+        "causes": [
+          {
+            "key": "compute:streaming.chunk-total",
+            "count": 17,
+            "totalMs": 7171.699999988079,
+            "p95Ms": 422.30000001192093
+          },
+          {
+            "key": "streaming:initial-world-commit",
+            "count": 1,
+            "totalMs": 229,
+            "p95Ms": 229
+          },
+          {
+            "key": "streaming:gpu-world-commit",
+            "count": 8,
+            "totalMs": 110.39999994635582,
+            "p95Ms": 26.299999982118607
+          },
+          {
+            "key": "streaming:chunk-install",
+            "count": 2,
+            "totalMs": 6.199999988079071,
+            "p95Ms": 5.9000000059604645
+          },
+          {
+            "key": "streaming:render-mesh-terrain",
+            "count": 1,
+            "totalMs": 3.600000023841858,
+            "p95Ms": 3.600000023841858
+          },
+          {
+            "key": "network:self-reconcile",
+            "count": 1,
+            "totalMs": 2.0999999940395355,
+            "p95Ms": 2.0999999940395355
+          },
+          {
+            "key": "streaming:render-mesh-roads",
+            "count": 1,
+            "totalMs": 2.0999999940395355,
+            "p95Ms": 2.0999999940395355
+          },
+          {
+            "key": "compute:streaming.chunk-install",
+            "count": 1,
+            "totalMs": 0.29999998211860657,
+            "p95Ms": 0.29999998211860657
+          },
+          {
+            "key": "compute-broker:placement:streaming.chunk-total",
+            "count": 17,
+            "totalMs": 0,
+            "p95Ms": null
+          },
+          {
+            "key": "adaptive-policy:trial:balanced:hiz",
+            "count": 1,
+            "totalMs": 0,
+            "p95Ms": null
+          },
+          {
+            "key": "streaming:initial-world-staged",
+            "count": 1,
+            "totalMs": 0,
+            "p95Ms": 0
+          },
+          {
+            "key": "adaptive-policy:trial:balanced:distance-down",
+            "count": 1,
+            "totalMs": 0,
+            "p95Ms": null
+          },
+          {
+            "key": "streaming:world-staged",
+            "count": 1,
+            "totalMs": 0,
+            "p95Ms": 0
+          }
+        ],
+        "costs": [
+          {
+            "operation": "renderer.frame-submit",
+            "executor": "main",
+            "bucket": "c512:b0:k1",
+            "samples": 8,
+            "ewmaMs": 23.75343533459492,
+            "p95Ms": 127.59999999403954,
+            "bytesP50": null,
+            "updatedAt": 1792160362205
+          },
+          {
+            "operation": "streaming.chunk-install",
+            "executor": "main",
+            "bucket": "c4:b0:k1",
+            "samples": 1,
+            "ewmaMs": 0.29999998211860657,
+            "p95Ms": 0.29999998211860657,
+            "bytesP50": null,
+            "updatedAt": 1792160362205
+          },
+          {
+            "operation": "renderer.frame-submit",
+            "executor": "main",
+            "bucket": "c512:b65536:k1",
+            "samples": 1,
+            "ewmaMs": 21,
+            "p95Ms": 21,
+            "bytesP50": 55540,
+            "updatedAt": 1792160362205
+          },
+          {
+            "operation": "renderer.frame",
+            "executor": "gpu",
+            "bucket": "c512:b65536:k1",
+            "samples": 1,
+            "ewmaMs": 2.74776,
+            "p95Ms": 2.74776,
+            "bytesP50": 55540,
+            "updatedAt": 1792160362205
+          },
+          {
+            "operation": "streaming.chunk-total",
+            "executor": "worker",
+            "bucket": "c1:b0:k1",
+            "samples": 17,
+            "ewmaMs": 422.14351954699265,
+            "p95Ms": 422.30000001192093,
+            "bytesP50": null,
+            "updatedAt": 1792160361582
+          }
+        ]
+      },
+      "lastDecision": {
+        "key": "balanced:distance-down",
+        "objective": "balanced",
+        "reason": "balanced scene pressure: trim far draw distance; quality Δ -0.9%",
+        "options": {
+          "drawDistance": 280
+        },
+        "confidence": 0.6977272727272726,
+        "experimental": false
+      },
+      "appliedDecision": {
+        "key": "balanced:distance-down",
+        "objective": "balanced",
+        "reason": "balanced scene pressure: trim far draw distance; quality Δ -3.6%",
+        "options": {
+          "drawDistance": 340
+        },
+        "confidence": 0.6909090909090909,
+        "experimental": false
+      },
+      "trial": null,
+      "profile": {
+        "costs": 5,
+        "trials": 0,
+        "updatedAt": 1792160359806
+      },
+      "placements": [],
+      "freezes": [
+        {
+          "id": 369,
+          "at": 49742.5,
+          "durationMs": 29.099999999998545,
+          "classification": "cpu-stall",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 29.099999999998545,
+            "targetFrameMs": 9.68032460422516,
+            "mainThreadMs": 16.400000005960464,
+            "rendererCpuMs": 16.400000005960464,
+            "gpuFrameMs": 9.67104,
+            "snapshotAgeMs": 51.80000000596192,
+            "interpolationHeadroomMs": 12.045404351511024,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 370,
+          "at": 49772,
+          "durationMs": 29.5,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 29.5,
+            "targetFrameMs": 9.68032460422516,
+            "mainThreadMs": 15.900000005960464,
+            "rendererCpuMs": 15.900000005960464,
+            "gpuFrameMs": 9.694519999999999,
+            "snapshotAgeMs": 80.90000000596046,
+            "interpolationHeadroomMs": 0,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 371,
+          "at": 49971.3,
+          "durationMs": 27.700000000004366,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 27.700000000004366,
+            "targetFrameMs": 9.701587420115413,
+            "mainThreadMs": 13,
+            "rendererCpuMs": 13,
+            "gpuFrameMs": 9.760200000000001,
+            "snapshotAgeMs": 9.899999982117151,
+            "interpolationHeadroomMs": 96.93062012479459,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 372,
+          "at": 49999.9,
+          "durationMs": 28.599999999998545,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 28.599999999998545,
+            "targetFrameMs": 9.701587420115413,
+            "mainThreadMs": 15.599999994039536,
+            "rendererCpuMs": 15.599999994039536,
+            "gpuFrameMs": 9.760200000000001,
+            "snapshotAgeMs": -10.400000017878483,
+            "interpolationHeadroomMs": 117.20682377153935,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 373,
+          "at": 50187.8,
+          "durationMs": 37.900000000001455,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 37.900000000001455,
+            "targetFrameMs": 9.67194360358685,
+            "mainThreadMs": 11.300000011920929,
+            "rendererCpuMs": 11.300000011920929,
+            "gpuFrameMs": 9.7902,
+            "snapshotAgeMs": -8.69999999403808,
+            "interpolationHeadroomMs": 126.62592314836729,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 374,
+          "at": 50369.1,
+          "durationMs": 20.599999999998545,
+          "classification": "display-hitch",
+          "severity": "micro",
+          "evidence": {
+            "intervalMs": 20.599999999998545,
+            "targetFrameMs": 9.69378529547929,
+            "mainThreadMs": 10.699999988079071,
+            "rendererCpuMs": 10.699999988079071,
+            "gpuFrameMs": 9.7902,
+            "snapshotAgeMs": 43.400000005960464,
+            "interpolationHeadroomMs": 67.47661554368278,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 375,
+          "at": 50398.6,
+          "durationMs": 29.5,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 29.5,
+            "targetFrameMs": 9.69378529547929,
+            "mainThreadMs": 12.200000017881393,
+            "rendererCpuMs": 12.200000017881393,
+            "gpuFrameMs": 9.721000000000002,
+            "snapshotAgeMs": 64.00000000595901,
+            "interpolationHeadroomMs": 45.57977898298304,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 376,
+          "at": 50445.7,
+          "durationMs": 28.299999999995634,
+          "classification": "cpu-stall",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 28.299999999995634,
+            "targetFrameMs": 9.69378529547929,
+            "mainThreadMs": 18,
+            "rendererCpuMs": 18,
+            "gpuFrameMs": 9.721000000000002,
+            "snapshotAgeMs": -8.300000017879938,
+            "interpolationHeadroomMs": 97.41994763726325,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 377,
+          "at": 50590.7,
+          "durationMs": 28.89999999999418,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 28.89999999999418,
+            "targetFrameMs": 9.69378529547929,
+            "mainThreadMs": 15.299999982118607,
+            "rendererCpuMs": 15.299999982118607,
+            "gpuFrameMs": 9.721000000000002,
+            "snapshotAgeMs": 33.200000005963375,
+            "interpolationHeadroomMs": 49.97997380087327,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 378,
+          "at": 50634.2,
+          "durationMs": 43.5,
+          "classification": "cpu-stall",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 43.5,
+            "targetFrameMs": 9.69378529547929,
+            "mainThreadMs": 18.900000005960464,
+            "rendererCpuMs": 18.900000005960464,
+            "gpuFrameMs": 9.80052,
+            "snapshotAgeMs": -0.8999999940424459,
+            "interpolationHeadroomMs": 71.13315131550735,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 379,
+          "at": 50826.3,
+          "durationMs": 28.700000000004366,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 28.700000000004366,
+            "targetFrameMs": 9.729446906981051,
+            "mainThreadMs": 12.700000017881393,
+            "rendererCpuMs": 12.700000017881393,
+            "gpuFrameMs": 9.790560000000001,
+            "snapshotAgeMs": 55.00000000595901,
+            "interpolationHeadroomMs": 23.422888759569105,
+            "networkUnderrun": false
+          }
+        },
+        {
+          "id": 380,
+          "at": 50939.7,
+          "durationMs": 28,
+          "classification": "display-hitch",
+          "severity": "noticeable",
+          "evidence": {
+            "intervalMs": 28,
+            "targetFrameMs": 9.725563499771576,
+            "mainThreadMs": 15.199999988079071,
+            "rendererCpuMs": 15.199999988079071,
+            "gpuFrameMs": 9.790560000000001,
+            "snapshotAgeMs": 60.89999998807616,
+            "interpolationHeadroomMs": 0,
+            "networkUnderrun": false
+          }
+        }
+      ],
+      "events": [
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.2999999821186066,
+          "count": 37,
+          "at": 49936.09999999404
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.2999999821186066,
+          "count": 36,
+          "at": 49985
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.4000000059604645,
+          "count": 36,
+          "at": 50025.30000001192
+        },
+        {
+          "source": "renderer",
+          "reason": "frame",
+          "executor": "gpu",
+          "durationMs": 12,
+          "count": 1292,
+          "at": 50073.30000001192
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.300000011920929,
+          "count": 37,
+          "at": 50076.20000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.5,
+          "count": 36,
+          "at": 50111
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.100000023841858,
+          "count": 35,
+          "at": 50161.70000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.5999999940395355,
+          "count": 38,
+          "at": 50249.30000001192
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.100000023841858,
+          "count": 37,
+          "at": 50286.70000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.7999999821186066,
+          "count": 35,
+          "at": 50308.09999999404
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.300000011920929,
+          "count": 38,
+          "at": 50405.20000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.9000000059604645,
+          "count": 36,
+          "at": 50428.70000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.2999999821186066,
+          "count": 36,
+          "at": 50471
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.699999988079071,
+          "count": 37,
+          "at": 50531.40000000596
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.199999988079071,
+          "count": 37,
+          "at": 50595
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.0999999940395355,
+          "count": 40,
+          "at": 50675
+        },
+        {
+          "source": "renderer",
+          "reason": "frame",
+          "executor": "gpu",
+          "durationMs": 12.800000011920929,
+          "count": 1277,
+          "at": 50690.30000001192
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.0999999940395355,
+          "count": 38,
+          "at": 50744.80000001192
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 2.300000011920929,
+          "count": 41,
+          "at": 50853.20000001788
+        },
+        {
+          "source": "network",
+          "reason": "self-reconcile",
+          "executor": "main",
+          "durationMs": 3.4000000059604645,
+          "count": 40,
+          "at": 50944.20000001788
+        }
+      ],
+      "pending": {
+        "samples": 12,
+        "events": 3,
+        "freezes": 2
+      }
+    },
+    "profiled": false,
+    "worldMinute": 254926.933317062,
+    "weather": "overcast",
+    "scene": "Live Game entry, stationary canonical player at spawn; separate from staged Office screenshots",
+    "gpuErrors": [],
+    "scope": "One current live window, not a paired optimization comparison and not Office FPS"
+  },
+  "checks": {
+    "game": "30 tests / 3273 assertions: office-urban-assets, office-dynamic-assets, the-engine-renderer",
+    "adapter": "43 tests / 4359 assertions: canonical-world-view, canonical-connection",
+    "typecheck": [
+      "Game full TypeScript",
+      "Engine thegame app TypeScript",
+      "native Office UI TypeScript"
+    ],
+    "build": [
+      "Game production browser/library",
+      "Office UI production build; >1500 kB bundle warning remains"
+    ]
+  },
+  "images": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\entered.png",
+      "sha256": "0cad4f9dfe67b41c99e187730f0a0e73cf2b1dca5ab5a2a70ac53d5a7395e5ca"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\observer.png",
+      "sha256": "21ac557c50ebdb47123b2fe97a24431eafaea9fe81990c225b97e55e774f07b0"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\orbit-1.png",
+      "sha256": "df386ce795a5561acb031a32baeaa82ddba3b56804dd960bd2dbdbe97f30baf8"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\orbit-2.png",
+      "sha256": "ebe8c5e610f0dc1694b5b375db536838113121deabd416a14b4079a86b3b8b7a"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\orbit-3.png",
+      "sha256": "2c33e24865b954a4689704886e0319367049bd06e778f471c38bd777c4a453f9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\orbit-4.png",
+      "sha256": "ece34162eca3ad8c148ac7e07d5fd4820eff46e3814ccc52e1886376fcd1ca7a"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\returned-observer.png",
+      "sha256": "b766abc2b5434775be627afcd8d3a65144caf887f4fdb04136a86ac9dc2d4706"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-clearance-restored.png",
+      "sha256": "148c762575b26a7137422c8cfd0ed6f183722ee447554115be99df8e51379555"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-driver.png",
+      "sha256": "74db4be8df331f375cf876888d062d81c341fec738cb5b4ea2893f22abfe49a3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-driving.png",
+      "sha256": "37ac704005d71be379a54569ef8c639d5a5d2579e48eb6a1a7a7c51ae79d313e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-engine-off.png",
+      "sha256": "65e454daa82889c1a9aa320926f0b0ff030d362b0db70ee704477de5639c0a92"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-1.png",
+      "sha256": "baa9d0850f175b96cbc2eff64766766bcc1d2a5d297c0ecb9a22e362134eee7b"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-2.png",
+      "sha256": "35e0f4ac40dbbb33235af9c994d9f55ee55b4a0796308bc7a834ccece6700fb7"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-3.png",
+      "sha256": "78a0d06f62b3b9092fd7f9ad502508e16023154818054f4ad755acaf2e894944"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-4.png",
+      "sha256": "8e1f11ffd42a6b6638eb3beaa40814d89979f8a0c79f0979cac2b0c6a230c803"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-5.png",
+      "sha256": "18c71db29a4824886aab0bfd8007897d0503306ecb5c18053cc3dc13b28ccb3c"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-6.png",
+      "sha256": "6d5aa411eb5eb43fe8dce0c71837ec04944266726fe2e03b2d96fb8a63bb72c9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-7.png",
+      "sha256": "0cdb36af258f2c9bf01255a651d7678012b535428aac0410fe402398b4d121f2"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-8.png",
+      "sha256": "412eb1a9f98d0662f3237b727f37497939eb9e65b372fc44b8af81dda3769e8a"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited.png",
+      "sha256": "f328a41003b9f43b53d2316d52771d9e97f53b1177d0cc78e70382d79a9c2383"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-passenger.png",
+      "sha256": "11aa917a9bab1693d57836cae412d9a0fd1b3db6064f7ed1d3ae069439a1a24b"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\walk-KeyW.png",
+      "sha256": "c37c4b544461abef56003573c4d64f22f5c389a165ce2c3df560a5769dfbcc56"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\canonical-lobby.png",
+      "sha256": "87c0198a350c67424c2d689eae4dfc8db531b4306e4ca94cc81f91f9209f84d9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\entrance.png",
+      "sha256": "8f0b0dc23a0394b755f4a514fe0ff302c2900602242fe60c7b82858c44debdd4"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\office-entry.png",
+      "sha256": "9b6a8347ecb2c41de290769a88b9febb6b849d75f95ea4037a7cddbea5103020"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\upper-office.png",
+      "sha256": "827347ebba72b337b20eb86ddab762783a147c360abb08b8727240a19ea8e067"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\workplaces.png",
+      "sha256": "e80056836073e2dc68a075537bc0617de7df8334be15937137f426762ada6b38"
+    }
+  ],
+  "visualReview": [
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\observer.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\entered.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\walk-KeyW.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\transport-exited-8.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-final-20261016\\returned-observer.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-urban-final-game\\workplaces.png"
+  ],
+  "review": "Seven actual PNGs inspected. Office interior retained; outdoor night view is very dark. Current exit images show the body and wagon rather than a flat green frame. Other collected PNGs are not claimed individually reviewed.",
+  "initialFailure": {
+    "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-urban-20261016\\report.json",
+    "reason": "QA required a nonempty street record set around the controller parking spawn; authority sends zero there. Observer area has 29 records and 22 meshes. QA now checks loaded source generation and retains the recorded record/mesh counts; empty geometry unload is also unit tested."
+  },
+  "runtime": {
+    "pid": 1960,
+    "serverRestarted": false,
+    "officeOrBackendRestarted": false,
+    "microphoneEnabled": false,
+    "editorRevision": 53,
+    "geometryRevision": 1,
+    "health": {
+      "ok": true,
+      "seed": 29,
+      "revision": 13,
+      "players": 0,
+      "capacity": {
+        "cpuBudget": 2,
+        "maxPlayers": 16,
+        "workers": 1,
+        "physicsSubsteps": 2,
+        "snapshotHz": 20,
+        "populationHz": 30,
+        "vehicleInterestPeriod": 2,
+        "streamingPeriod": 3,
+        "worldInterestPeriod": 3,
+        "residentLimit": 48
+      },
+      "tick": 762575,
+      "simulationTime": 1459.2333333381082,
+      "engine": {
+        "committed": 759,
+        "cancelled": 28,
+        "failed": 0,
+        "deferred": 0,
+        "simulatedResidents": 1389,
+        "cohorts": 1389,
+        "unmetFoodDemand": 4,
+        "catalogOverflow": 0,
+        "migratedHomes": 0,
+        "locations": 11,
+        "pending": 0,
+        "trackedResidents": 1033,
+        "reservedTreasury": 0,
+        "tiers": {
+          "detailed": 7,
+          "active": 24,
+          "aggregate": 17,
+          "dormant": 0
+        },
+        "production": {
+          "factories": 0,
+          "orders": 0,
+          "units": 0,
+          "nextDueMinute": null
+        },
+        "workers": {
+          "submitted": 787,
+          "completed": 771,
+          "cancelled": 16,
+          "failed": 0,
+          "rejected": 0,
+          "maxInFlight": 1,
+          "maxQueue": 1,
+          "workers": 1,
+          "inFlight": 0,
+          "queued": 0,
+          "pending": 0,
+          "closed": false
+        },
+        "vehicles": {
+          "sleeps": 1124,
+          "wakes": 1084,
+          "pinned": 12,
+          "total": 58,
+          "active": 17,
+          "hibernating": 41,
+          "tracked": 58
+        }
+      },
+      "residents": {
+        "active": 48,
+        "limit": 48,
+        "minute": 255222.6999836598,
+        "navigation": {
+          "expanded": 193472,
+          "completed": 455,
+          "failed": 1808,
+          "maxWork": 24,
+          "dynamicRoutes": 197,
+          "pending": 0,
+          "cachedCells": 24000
+        }
+      },
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 175108,
+        "vehicleStepHz": 120,
+        "bodies": 58,
+        "sleeping": 35,
+        "awake": 11,
+        "maxSpeed": 3.5559423963541126,
+        "substeps": 192912,
+        "bodySubsteps": 1325053,
+        "islands": 14,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 3
+      },
+      "timing": {
+        "steps": 762575,
+        "lastStepMs": 0.025300001725554466,
+        "maxStepMs": 442.88529999926686,
+        "meanStepMs": 0.02359666662911574,
+        "p95StepMs": 0.04230000078678131,
+        "droppedMs": 19148.267133332964
+      },
+      "network": {
+        "receivedPackets": 29610,
+        "receivedBytes": 5217620,
+        "submittedPackets": 248508,
+        "submittedBytes": 194418478,
+        "sendErrors": 32,
+        "closedSessions": 32,
+        "transports": {
+          "webtransport": 0
+        },
+        "queuedBytes": 0,
+        "replaced": 0,
+        "expired": 0,
+        "scope": "application framing; send attempts, not delivered QUIC/UDP bytes"
+      },
+      "webTransport": 3009
+    }
+  },
+  "limits": [
+    "Street records only: original legacy hub trees/lamps and vector roads, outer-world props/buildings and terrain albedo, office facade/core/lift materials and sky/light fidelity still need migration.",
+    "No native rounded-junction record in the sampled office area; junction clipping/grout and parking source parity are CPU-tested.",
+    "Latest FPS is one Game live scene; no stable 60 FPS claim, no Office average, no attribution of change from the older 35.66 FPS window.",
+    "Native Office entry uses its running Vite UI through 8765; production UI was built/typechecked separately.",
+    "No new authority, simulation, world generator, actor teleport, audio or microphone session is created by the street factory."
+  ]
+}

@@ -1,9 +1,17 @@
 import {AnimationSystem,type WalkerSpec,type VehicleMotionSpec} from '../animation/locomotion.js';
 import {SnowSurface,type SnowSurfaceOptions} from '../environment/snow-surface.js';
 import {materialKinds} from '../materials/catalog.js';
+import {validateSurfaceAppearance} from '../materials/surface.js';
+import {validateFacade,validateFacadeNight} from '../render/facade-surface.js';
+import {validateGroundLitter,validateVariationSeed} from '../render/ground-litter.js';
+import {validateGroundCover} from '../render/ground-cover.js';
+import {validateRainResponse,validateSurfaceWeather} from '../render/rain-surface.js';
 import {compileWorldCouplings} from '../world-ir/couplings.js';
 import {finiteVec3} from '../math.js';
 import type {SceneSpec,EntitySpec} from './types.js';
+import {isOwnedValidatedTriangleMesh} from '../procedural/mesh.js';
+import {isTriangleStream,triangleStreamState} from '../procedural/triangle-stream.js';
+import {validateTransparentSort} from '../render/transparent-sort.js';
 import {validateFluidVolume,type FluidVolumeSpec} from '../physics/fluid.js';
 import {validateWindVolume,type WindVolumeSpec} from '../physics/wind.js';
 import {validateSoilVolume,type SoilVolumeSpec} from '../physics/soil.js';
@@ -21,6 +29,8 @@ export function validateScene(value:unknown):SceneSpec{
     for(const key of ['position','rotation','scale'] as const)if(entity[key]!==undefined){if(!Array.isArray(entity[key]))throw new TypeError(`${entity.id}.${key} must be a vec3`);finiteVec3(entity[key] as number[],`${entity.id}.${key}`);}
     validateEntity(entity);
     if(entity.renderOnly!==undefined&&typeof entity.renderOnly!=='boolean')throw new TypeError(`${entity.id}.renderOnly must be boolean`);
+    if(entity.renderVisible!==undefined&&typeof entity.renderVisible!=='boolean')throw new TypeError(`${entity.id}.renderVisible must be boolean`);
+    if(entity.renderCameraVisible!==undefined&&typeof entity.renderCameraVisible!=='boolean')throw new TypeError(`${entity.id}.renderCameraVisible must be boolean`);
     if(entity.renderOnly&&(entity.body!==undefined||entity.environmental!==undefined))throw new TypeError(`${entity.id}.renderOnly cannot own physics or environmental state`);
     if(entity.body!==undefined&&(!entity.body||typeof entity.body!=='object'))throw new TypeError(`${entity.id}.body must be an object`);
     if(entity.environmental!==undefined){if(!entity.environmental||typeof entity.environmental!=='object')throw new TypeError(`${entity.id}.environmental must be an object`);const use=(entity.environmental as Record<string,unknown>).surfaceUse;if(use!==undefined&&!['generic','road','sidewalk','curb'].includes(String(use)))throw new TypeError(`${entity.id}.environmental.surfaceUse is unknown`);}
@@ -69,9 +79,9 @@ export function validateScene(value:unknown):SceneSpec{
         optionalNumber(air,'temperatureC',`${path}.air`);
       }
       if(assembly.controls!==undefined){
-        const controls=object(assembly.controls,`${path}.controls`),unipolar=new Set(['brake','handbrake','collective','spoiler','clutch']);
+        const controls=object(assembly.controls,`${path}.controls`),unipolar=new Set(['brake','handbrake','collective','spoiler','clutch','starter']);
         for(const [key,value] of Object.entries(controls)){
-          if(!['handbrake','throttle','clutch','brake','steer','pitch','roll','flap','spoiler','collective','yaw'].includes(key))throw new TypeError(`${path}.controls.${key} is unknown`);
+          if(!['starter','handbrake','throttle','clutch','brake','steer','pitch','roll','flap','spoiler','collective','yaw'].includes(key))throw new TypeError(`${path}.controls.${key} is unknown`);
           number(value,`${path}.controls.${key}`,unipolar.has(key)?0:-1,1);
         }
       }
@@ -168,12 +178,15 @@ export function validateScene(value:unknown):SceneSpec{
   }
   if(scene.rendering!==undefined){
     const r=object(scene.rendering,'rendering');
+    if(r.surfaceWeather!==undefined)validateSurfaceWeather(r.surfaceWeather);
+    if(r.facadeNight!==undefined)validateFacadeNight(r.facadeNight);
     if(r.sunDirection!==undefined){vector(r.sunDirection,3,'rendering.sunDirection');if(Math.hypot(...r.sunDirection as number[])<1e-8)throw new TypeError('rendering.sunDirection must be nonzero');}
     for(const key of ['sunColor','skyColor','fogColor','ambientIrradiance','backgroundColor'])if(r[key]!==undefined)vector(r[key],3,`rendering.${key}`,0);
     optionalNumber(r,'fogHeightFalloff','rendering',0);optionalNumber(r,'fogBaseHeight','rendering');
     optionalNumber(r,'fogStartDistance','rendering',0);optionalNumber(r,'fogRampDistance','rendering',0);
     for(const key of ['sunIntensity','fogDensity','exposure'])optionalNumber(r,key,'rendering',0);
     optionalNumber(r,'shadowExtent','rendering',.1,10000);
+    optionalNumber(r,'environmentProbeGridM','rendering',.5,256);
     if(r.environmentRadiance!==undefined){
       const env=object(r.environmentRadiance,'rendering.environmentRadiance');
       for(const key of ['width','height']){number(env[key],`rendering.environmentRadiance.${key}`,1,4096);if(!Number.isInteger(env[key]))throw new TypeError(`rendering.environmentRadiance.${key} must be integer`);}
@@ -278,20 +291,25 @@ function optionalNumber(obj:Record<string,unknown>,key:string,path:string,min=-I
 function vector(value:unknown,length:number,path:string,min=-Infinity,max=Infinity):void{if(!Array.isArray(value)||value.length!==length)throw new TypeError(`${path} must have ${length} components`);value.forEach((v,i)=>number(v,`${path}[${i}]`,min,max));}
 function choice(value:unknown,values:readonly unknown[],path:string):void{if(value!==undefined&&!values.includes(value))throw new TypeError(`${path} is unknown`);}
 
-function assetUrl(value:unknown,path:string):void{
+function assetUrl(value:unknown,path:string,allowBlob=false):void{
   if(typeof value!=='string'||value.length===0||value.length>8192||/[\s\u0000-\u001f\u007f\\]/u.test(value))throw new TypeError(`${path} must be a nonempty HTTP(S) or relative asset URL`);
   const scheme=/^([a-z][a-z0-9+.-]*):/i.exec(value);
-  if(scheme&&!/^https?:\/\//i.test(value))throw new TypeError(`${path} must use HTTP(S) or a relative asset path`);
-  try{const parsed=new URL(value,'https://scene-assets.invalid/');if(!['http:','https:'].includes(parsed.protocol))throw new Error('unsupported scheme');}
+  if(scheme&&!/^https?:\/\//i.test(value)&&!(allowBlob&&/^blob:/i.test(value)))throw new TypeError(`${path} must use HTTP(S) or a relative asset path`);
+  try{const parsed=new URL(value,'https://scene-assets.invalid/');if(!['http:','https:',...(allowBlob?['blob:']:[])].includes(parsed.protocol))throw new Error('unsupported scheme');}
   catch{throw new TypeError(`${path} must be a valid HTTP(S) or relative asset URL`);}
 }
-function surfaceTexture(value:unknown,path:string):void{
+export function validateSurfaceTexture(value:unknown,path='texture'):void{
   const texture=object(value,path);
-  if(texture.url===undefined&&texture.normalUrl===undefined&&texture.ormUrl===undefined)throw new TypeError(`${path} requires url, normalUrl or ormUrl`);
-  if(texture.url!==undefined)assetUrl(texture.url,`${path}.url`);
+  choice(texture.projection,['triplanar','terrain-map'],`${path}.projection`);
+  const terrain=texture.projection==='terrain-map';
+  if(terrain&&(texture.url===undefined||texture.sizeM===undefined||texture.normalUrl!==undefined||texture.ormUrl!==undefined||texture.heightUrl!==undefined))throw new TypeError(`${path} terrain-map requires url and sizeM without additional maps`);
+  if(texture.url===undefined&&texture.normalUrl===undefined&&texture.ormUrl===undefined&&texture.heightUrl===undefined)throw new TypeError(`${path} requires url, normalUrl, ormUrl or heightUrl`);
+  if(texture.url!==undefined)assetUrl(texture.url,`${path}.url`,terrain);
   if(texture.normalUrl!==undefined)assetUrl(texture.normalUrl,`${path}.normalUrl`);
   if(texture.ormUrl!==undefined)assetUrl(texture.ormUrl,`${path}.ormUrl`);
-  optionalNumber(texture,'sizeM',path,.01,1000);
+  if(texture.heightUrl!==undefined){assetUrl(texture.heightUrl,`${path}.heightUrl`);number(texture.heightScaleM,`${path}.heightScaleM`,.00001,.25);}
+  else if(texture.heightScaleM!==undefined)throw new TypeError(`${path}.heightScaleM requires heightUrl`);
+  optionalNumber(texture,'sizeM',path,.01,terrain?1048576:1000);
   optionalNumber(texture,'bumpStrength',path,0,2);
   optionalNumber(texture,'albedoStrength',path,0,1);
   optionalNumber(texture,'normalStrength',path,0,2);
@@ -299,7 +317,12 @@ function surfaceTexture(value:unknown,path:string):void{
 }
 function materialSpec(value:unknown,path:string):void{
   const m=object(value,path);
-  if(m.texture!==undefined)surfaceTexture(m.texture,`${path}.texture`);
+  if(m.surfaceAppearance!==undefined)validateSurfaceAppearance(m.surfaceAppearance);
+  if(m.rainResponse!==undefined)validateRainResponse(m.rainResponse);
+  if(m.groundCover!==undefined)validateGroundCover(m.groundCover);if(m.facade!==undefined)validateFacade(m.facade);if(m.groundLitter!==undefined)validateGroundLitter(m.groundLitter);if(m.variationSeed!==undefined)validateVariationSeed(m.variationSeed);
+  if(m.decal!==undefined){const d=object(m.decal,`${path}.decal`);if(d.kind!=='coating-loss')throw new TypeError(`${path}.decal.kind is unknown`);number(d.severity,`${path}.decal.severity`,0,1);number(d.seed,`${path}.decal.seed`,0,1023);if(!Number.isInteger(d.seed))throw new TypeError(`${path}.decal.seed must be integer`);}
+  if(m.decal!==undefined&&(m.kind==='glass'||Array.isArray(m.color)&&Number(m.color[3])<.98||object(m.texture??{},`${path}.texture`).heightUrl!==undefined))throw new TypeError(`${path}.decal requires an opaque supporting overlay without height displacement`);
+  if(m.texture!==undefined)validateSurfaceTexture(m.texture,`${path}.texture`);
   if(m.label!==undefined&&(typeof m.label!=='string'||m.label.length>100))throw new TypeError(`${path}.label must be at most 100 characters`);
   if(m.labelColor!==undefined)vector(m.labelColor,3,`${path}.labelColor`,0,1);
   optionalNumber(m,'roughness',path,0,1);optionalNumber(m,'metalness',path,0,1);optionalNumber(m,'clearcoat',path,0,1);optionalNumber(m,'clearcoatRoughness',path,.02,1);
@@ -312,11 +335,20 @@ function materialSpec(value:unknown,path:string):void{
   if(m.color!==undefined)vector(m.color,4,`${path}.color`,0,1);
 }
 
+/** Keep large valid meshes allocation-free; format the coordinate path only
+ * when reporting an invalid scalar. Every element and original bound is checked. */
+function numericValues(values:readonly unknown[],path:string,min=-Infinity,max=Infinity):void{
+ for(let i=0;i<values.length;i++){const value=values[i];if(typeof value!=='number'||!Number.isFinite(value)||value<min||value>max)number(value,`${path}[${i}]`,min,max);}
+}
 function primitiveSpec(value:unknown,path:string):void{
+  if(isTriangleStream(value)){const state=triangleStreamState(value)!;if(!state.ready||state.disposed)throw new TypeError(`${path} triangle stream is not resident`);return;}
+  if(isOwnedValidatedTriangleMesh(value))return;
   const m=object(value,path);
+  if(m.uvs!==undefined){if(m.kind!=='triangle-mesh'||!Array.isArray(m.positions)||!Array.isArray(m.uvs)||m.uvs.length!==m.positions.length/3*2)throw new TypeError(`${path}.uvs requires one authored pair per triangle-mesh vertex`);numericValues(m.uvs,`${path}.uvs`);}
+  if(m.variationSeeds!==undefined){if(m.kind!=='triangle-mesh'||!Array.isArray(m.positions)||!Array.isArray(m.variationSeeds)||m.variationSeeds.length!==m.positions.length/3)throw new TypeError(`${path}.variationSeeds requires one value per vertex`);m.variationSeeds.forEach(validateVariationSeed);}
   if(!['box','sphere','plane','shard','polygon-prism','cylinder','snowdrift','triangle-mesh','torus'].includes(String(m.kind)))throw new TypeError(`${path}.kind is unknown`);
   if(m.kind==='torus'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.tube,`${path}.tube`,Number.MIN_VALUE);optionalNumber(m,'segments',path,8,128);}
-  if(m.kind==='triangle-mesh'){if(!Array.isArray(m.positions)||!Array.isArray(m.normals)||m.positions.length!==m.normals.length||m.positions.length<9||m.positions.length%3||m.positions.length>900000)throw new TypeError(`${path} requires matching vertex and normal triplets`);m.positions.forEach((v,i)=>number(v,`${path}.positions[${i}]`));m.normals.forEach((v,i)=>number(v,`${path}.normals[${i}]`));if(m.colors!==undefined){if(!Array.isArray(m.colors)||m.colors.length!==m.positions.length/3*4)throw new TypeError(`${path}.colors must contain one RGBA value per vertex`);m.colors.forEach((v,i)=>number(v,`${path}.colors[${i}]`,0,1));}if(!Array.isArray(m.indices)||!m.indices.length||m.indices.length%3||m.indices.length>1800000)throw new TypeError(`${path}.indices must contain triangles`);for(const index of m.indices)if(!Number.isInteger(index)||index<0||index>=m.positions.length/3)throw new TypeError(`${path}.indices out of bounds`);}
+  if(m.kind==='triangle-mesh'){if(!Array.isArray(m.positions)||!Array.isArray(m.normals)||m.positions.length!==m.normals.length||m.positions.length<9||m.positions.length%3||m.positions.length>900000)throw new TypeError(`${path} requires matching vertex and normal triplets`);numericValues(m.positions,`${path}.positions`);numericValues(m.normals,`${path}.normals`);if(m.colors!==undefined){if(!Array.isArray(m.colors)||m.colors.length!==m.positions.length/3*4)throw new TypeError(`${path}.colors must contain one RGBA value per vertex`);numericValues(m.colors,`${path}.colors`,0,1);}if(!Array.isArray(m.indices)||!m.indices.length||m.indices.length%3||m.indices.length>1800000)throw new TypeError(`${path}.indices must contain triangles`);for(const index of m.indices)if(!Number.isInteger(index)||index<0||index>=m.positions.length/3)throw new TypeError(`${path}.indices out of bounds`);}
   if(m.kind==='snowdrift'){vector(m.size,3,`${path}.size`,Number.MIN_VALUE);number(m.seed,`${path}.seed`);optionalNumber(m,'segments',path,4,128);optionalNumber(m,'offset',path);if(m.continuous!==undefined&&typeof m.continuous!=='boolean')throw new TypeError(`${path}.continuous must be boolean`);}
   if(m.kind==='cylinder'){number(m.radius,`${path}.radius`,Number.MIN_VALUE);number(m.height,`${path}.height`,Number.MIN_VALUE);optionalNumber(m,'topRadius',path,0);optionalNumber(m,'segments',path,3,128);}
   if(m.kind==='box'||m.kind==='shard'){if(m.size!==undefined||m.kind==='shard')vector(m.size,3,`${path}.size`,Number.MIN_VALUE);}
@@ -331,17 +363,28 @@ function primitiveSpec(value:unknown,path:string):void{
   }
 }
 
-export function validateEntity(value:unknown):EntitySpec{
+export function validateEntity(value:unknown,clone=true):EntitySpec{
   const e=object(value,'entity'),id=e.id;
+  if(isTriangleStream(e.mesh)||isTriangleStream(e.renderMesh)){
+    if(clone)throw new TypeError('Live triangle streams cannot be cloned; use Scene.add or prepareRenderEntity');
+    if(e.renderOnly!==true||e.body!==undefined||e.environmental!==undefined)throw new TypeError('Triangle streams require renderOnly without physics or environmental state');
+  }
   if(typeof id!=='string'||!id||id.length>180)throw new TypeError('entity requires a stable id');
+  if(e.visualOnly!==undefined&&typeof e.visualOnly!=='boolean')throw new TypeError(`${id}.visualOnly must be boolean`);
+  if(e.visualOnly&&(e.body!==undefined||e.environmental!==undefined))throw new TypeError(`${id}.visualOnly cannot own a physical body or surface`);
   for(const key of ['position','rotation','scale'])if(e[key]!==undefined)vector(e[key],3,`${id}.${key}`,key==='scale'?Number.MIN_VALUE:-Infinity);
   if(e.mesh!==undefined)primitiveSpec(e.mesh,`${id}.mesh`);
   if(e.renderMesh!==undefined)primitiveSpec(e.renderMesh,`${id}.renderMesh`);
   if(e.renderOnly!==undefined&&typeof e.renderOnly!=='boolean')throw new TypeError(`${id}.renderOnly must be boolean`);
+  if(e.renderVisible!==undefined&&typeof e.renderVisible!=='boolean')throw new TypeError(`${id}.renderVisible must be boolean`);
+  if(e.renderCameraVisible!==undefined&&typeof e.renderCameraVisible!=='boolean')throw new TypeError(`${id}.renderCameraVisible must be boolean`);
+  if(e.transparentSort!==undefined){if(e.renderOnly!==true)throw new TypeError('transparentSort requires renderOnly');validateTransparentSort(e.transparentSort);}
   if(e.body!==undefined){const b=object(e.body,`${id}.body`);for(const key of ['mass','friction'])optionalNumber(b,key,`${id}.body`,0);optionalNumber(b,'restitution',`${id}.body`,0,1);choice(b.motion,['dynamic','kinematic'],`${id}.body.motion`);choice(b.shape,['auto','box','sphere'],`${id}.body.shape`);if(b.collisionSize!==undefined)vector(b.collisionSize,3,`${id}.body.collisionSize`,Number.MIN_VALUE);for(const key of ['velocity','angularVelocity'])if(b[key]!==undefined)vector(b[key],3,`${id}.body.${key}`);if(b.fluid!==undefined){const p=object(b.fluid,`${id}.body.fluid`);number(p.enclosedVolumeM3,`${id}.body.fluid.enclosedVolumeM3`,0,1e6);optionalNumber(p,'leakAreaM2',`${id}.body.fluid`,0,100);}}
   if(e.material!==undefined)materialSpec(e.material,`${id}.material`);
   if(e.environmental!==undefined){const env=object(e.environmental,`${id}.environmental`);if(env.snowMaterial!==undefined)materialSpec(env.snowMaterial,`${id}.environmental.snowMaterial`);choice(env.surfaceUse,['generic','road','sidewalk','curb'],`${id}.environmental.surfaceUse`);optionalNumber(env,'snowDepthM',`${id}.environmental`,0,5);optionalNumber(env,'iceDepthM',`${id}.environmental`,0,1);optionalNumber(env,'waterDepthM',`${id}.environmental`,0,1);}
   if(e.light!==undefined){const l=object(e.light,`${id}.light`);if(l.kind!=='point')throw new TypeError(`${id}.light.kind is unknown`);optionalNumber(l,'intensity',`${id}.light`,0);optionalNumber(l,'range',`${id}.light`,Number.MIN_VALUE);if(l.color!==undefined)vector(l.color,3,`${id}.light.color`,0,1);
+    if(l.castShadow!==undefined&&typeof l.castShadow!=='boolean')throw new TypeError(`${id}.light.castShadow must be boolean`);
+    if(l.castShadow&&(!l.emission||(l.emission as Record<string,unknown>).boxHalfSize!==undefined||Number((l.emission as Record<string,unknown>).outerAngle)>=Math.PI/2))throw new TypeError(`${id}.light.castShadow requires a polar emission cone narrower than 90 degrees`);
     if(l.emission!==undefined){const path=`${id}.light.emission`,p=object(l.emission,path);vector(p.axis,3,`${path}.axis`);if(Math.hypot(...p.axis as number[])<1e-8)throw new TypeError(`${path}.axis must be nonzero`);
       number(p.innerAngle,`${path}.innerAngle`,0,Math.PI);number(p.outerAngle,`${path}.outerAngle`,Number.MIN_VALUE,Math.PI);if(Number(p.innerAngle)>=Number(p.outerAngle))throw new TypeError(`${path} angles must increase`);
       optionalNumber(p,'panelCount',path,0,16);if(p.panelCount!==undefined&&!Number.isInteger(p.panelCount))throw new TypeError(`${path}.panelCount must be integer`);
@@ -350,5 +393,6 @@ export function validateEntity(value:unknown):EntitySpec{
       optionalNumber(p,'frameWidthM',path,0,.2);
     }
   }
-  return structuredClone(value) as EntitySpec;
+  if(e.environmental!==undefined)optionalNumber(object(e.environmental,`${id}.environmental`),'fieldCellSizeM',`${id}.environmental`,.1,4);
+  return (clone?structuredClone(value):value) as EntitySpec;
 }

@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><title>Headlight occlusion regression</title>
+<style>body{margin:0;background:#151923;color:#eee;font:16px system-ui}canvas{width:960px;height:600px;display:block}pre{white-space:pre-wrap}</style>
+<p>Production spotlight: light must stop at the blocker, then return when it moves.</p>
+<canvas width="960" height="600"></canvas><pre id="result">Initializing production renderer…</pre>
+<script type="module">
+import {Scene} from '/dist/scene/scene.js';
+import {WebGPURenderer} from '/dist/render/webgpu.js';
+import {lookAt,multiply4,perspective} from '/dist/math.js';
+const result=document.querySelector('#result');
+try{
+ const canvas=document.querySelector('canvas'),camera={position:[6,4,7],target:[0,1,-1],fov:48};
+ const renderer=await WebGPURenderer.create(canvas,{visibility:'gpu',features:{screenSpace:false,temporalAA:false,bloom:false,planarReflections:false}});renderer.setResolution(960,600);
+ const scene=new Scene({version:1,camera,environment:{sunlight:0,snowfall:'none'},rendering:{sunIntensity:0,skyColor:[.005,.005,.005],ambientIrradiance:[.005,.005,.005],exposure:1},entities:[
+  {id:'floor',mesh:{kind:'plane',size:[20,20]},renderOnly:true,material:{color:[.55,.55,.55,1],roughness:.9}},
+  {id:'receiver',position:[0,1.5,-5],mesh:{kind:'box',size:[10,3,.2]},renderOnly:true,material:{color:[.8,.8,.8,1],roughness:.9}},
+  ...[0,5,-5,8].map((x,i)=>({id:'blocker'+i,position:[x,1,0],mesh:{kind:'box',size:[1,2,.5]},renderOnly:true,material:{color:[.35,.35,.35,1],roughness:.9}})),
+  {id:'headlight',position:[0,1,4],renderOnly:true,light:{kind:'point',color:[1,.85,.6],intensity:80,range:18,castShadow:false,emission:{axis:[0,-.04,1].map((v,i)=>i===2?-v:v),innerAngle:.15,outerAngle:.65}}}
+ ]});
+ const vp=multiply4(perspective(camera.fov*Math.PI/180,960/600,.05,10000),lookAt(camera.position,camera.target));
+ const pixel=p=>{const c=[0,1,2,3].map(row=>vp[row]*p[0]+vp[4+row]*p[1]+vp[8+row]*p[2]+vp[12+row]);return[Math.floor((c[0]/c[3]*.5+.5)*960),Math.floor((.5-c[1]/c[3]*.5)*600)];};
+ const points=[[0,1,-4.89],[2,1,-4.89]].map(pixel),snap=async()=>{renderer.render(scene);return(await renderer.sampleLinearPixels(points,'hdr')).map(p=>p.rgba[0]);};
+ await snap();const unshadowed=await snap();
+ scene.entities.get('headlight').light.castShadow=true;const blocked=await snap();
+ result.textContent='Measuring moving occluder…';scene.setVisualTransform('blocker0',[3,1,0]);const moved=await snap();
+ scene.setVisualTransform('blocker0',[0,1,0]);await snap();
+ const stats=renderer.inspect(false),checks={blockedIsDarker:blocked[0]<unshadowed[0]*.2,openAreaRetainsLight:blocked[1]>unshadowed[1]*.8,movingBlockerRestoresLight:moved[0]>unshadowed[0]*.8,twoSlotBudget:stats.spotLightShadows.active===1,sharedGeometry:stats.visibility.batches>0,noGpuErrors:stats.errors.length===0};
+ result.textContent=JSON.stringify({status:Object.values(checks).every(Boolean)?'passed':'failed',checks,points,unshadowed,blocked,moved,spotLightShadows:stats.spotLightShadows,errors:stats.errors},null,2);
+}catch(error){result.textContent=JSON.stringify({status:'failed',error:String(error)},null,2);}
+</script>

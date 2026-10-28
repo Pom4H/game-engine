@@ -9,6 +9,7 @@ export interface CombustionEngineSpec {
  readonly redlineRpm:number;
  readonly inertiaKgM2:number;
  readonly dragTorqueNm?:number;
+ readonly starterTorqueNm?:number;
  readonly torqueCurve:readonly TorqueCurvePoint[];
 }
 export interface ClutchSpec {
@@ -38,6 +39,7 @@ export interface DrivetrainSpec {
 }
 export interface DrivetrainInput {
  readonly throttle:number;
+ readonly starter?:number;
  /** 0 = open, 1 = fully engaged. This is a physical clutch command, not an automatic gearbox policy. */
  readonly clutch:number;
  readonly wheelOmega:(id:string)=>number;
@@ -64,6 +66,7 @@ export function validateDrivetrainSpec(spec:DrivetrainSpec):void{
  positive(e.idleRpm,'engine.idleRpm');positive(e.redlineRpm,'engine.redlineRpm',e.idleRpm);
  const stall=e.stallRpm??e.idleRpm*.55;if(!Number.isFinite(stall)||stall<0||stall>=e.idleRpm)throw new RangeError('engine.stallRpm');
  positive(e.inertiaKgM2,'engine.inertiaKgM2');if(!Number.isFinite(e.dragTorqueNm??0)||(e.dragTorqueNm??0)<0)throw new RangeError('engine.dragTorqueNm');
+ if(e.starterTorqueNm!==undefined)positive(e.starterTorqueNm,'engine.starterTorqueNm');
  if(!Array.isArray(e.torqueCurve)||e.torqueCurve.length<2)throw new RangeError('engine.torqueCurve');
  let last=-Infinity;for(const p of e.torqueCurve){if(!Number.isFinite(p.rpm)||p.rpm<0||p.rpm<=last||!Number.isFinite(p.torqueNm)||p.torqueNm<0)throw new RangeError('engine.torqueCurve points');last=p.rpm;}
  positive(c.maxTorqueNm,'clutch.maxTorqueNm');positive(c.stiffnessNmPerRadS,'clutch.stiffnessNmPerRadS');if(c.thermal)validateThermalSpec(c.thermal);
@@ -112,8 +115,10 @@ export class Drivetrain {
   const shaftOmega=ratio===0?0:meanOmega*ratio,slip=this.engineOmega-shaftOmega;
   const clutchPerformance=this.clutchThermal?.performance??1,clutchLimit=c.maxTorqueNm*engagement*clutchPerformance,clutchTorque=ratio===0?0:clamp(slip*c.stiffnessNmPerRadS,-clutchLimit,clutchLimit);
   const rpm=Math.max(0,this.engineOmega*RPM_PER_RAD_S),stall=e.stallRpm??e.idleRpm*.55,combustion=rpm>=stall&&rpm<e.redlineRpm?torqueAtRpm(e,rpm)*throttle:0;
+  const starter=(input.starter??0);if(!Number.isFinite(starter)||starter<0||starter>1)throw new RangeError('starter input');
+  const starterTorque=rpm<e.idleRpm*.8?(e.starterTorqueNm??60)*starter:0;
   const drag=(e.dragTorqueNm??0)*(this.engineOmega===0?0:Math.sign(this.engineOmega));
-  this.engineOmega=Math.max(0,this.engineOmega+(combustion-drag-clutchTorque)*dt/e.inertiaKgM2);
+  this.engineOmega=Math.max(0,this.engineOmega+(combustion+starterTorque-drag-clutchTorque)*dt/e.inertiaKgM2);
   // Hard redline is a fuel cut, not a tachometer clamp. Only numerical overshoot is bounded.
   this.engineOmega=Math.min(this.engineOmega,e.redlineRpm/RPM_PER_RAD_S*1.08);
   const total=clutchTorque*ratio*(g.efficiency??.94);

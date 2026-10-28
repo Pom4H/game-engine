@@ -1,0 +1,752 @@
+{
+  "date": "2026-10-17T05:02:54.879Z",
+  "scope": "Original Game client cold source/floor readiness, complete authoritative replay rollback, continued input/ACK while browser geometry delivery is delayed and real source route across a render-origin seam",
+  "tests": {
+    "broad": {
+      "pass": 74,
+      "assertions": 8073,
+      "files": 8,
+      "seconds": 88.06
+    },
+    "final": {
+      "pass": 17,
+      "assertions": 94,
+      "files": 3,
+      "seconds": 4,
+      "overlapping": true
+    }
+  },
+  "native": {
+    "label": "cold-client-native-20261017-r7",
+    "actor": "resident:building:-2:5:0:23974",
+    "owner": "resident:human:ec20bd8a-a73d-42f2-aa5e-8891423e6161",
+    "originalBody": "player:ec20bd8a-a73d-42f2-aa5e-8891423e6161",
+    "blockedSamples": 28,
+    "blockedMovement": 3.2273384876815165,
+    "worker": {
+      "source": "http://127.0.0.1:3007/build/chunk-worker.js",
+      "name": "thegame-chunks",
+      "held": true,
+      "queued": 0,
+      "received": 17,
+      "deliveryBeforeRelease": {
+        "source": "http://127.0.0.1:3007/build/chunk-worker.js",
+        "name": "thegame-chunks",
+        "held": true,
+        "queued": 28,
+        "received": 45
+      },
+      "delayMs": 2200
+    },
+    "originBefore": [
+      -256,
+      0,
+      640
+    ],
+    "originAfter": [
+      -256,
+      0,
+      512
+    ],
+    "records": 7,
+    "samples": 209,
+    "returned": true
+  },
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "pid": 8436
+  },
+  "debug": {
+    "ports": [
+      3256,
+      3257,
+      3258,
+      3259,
+      3260,
+      3261,
+      3262
+    ],
+    "live": []
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/cold-client-prediction/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/src/game/client.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/src/game/world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client-character-prediction.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/src/game/client-character-prediction.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/cold-character-prediction.test.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/test/cold-character-prediction.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-cold-client.ts",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/tools/qa-cold-client.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/cold-client-prediction/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/cold-client-prediction/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/cold-client-prediction/final-bundles/game.js",
+      "bytes": 2495922,
+      "sha256": "885cae2da884d265d167dcffd0fe8fbddf696eb11e494a92064370dbd112792f"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "archive": "artifacts/cold-client-prediction/final-bundles/office-controller.js",
+      "bytes": 1376370,
+      "sha256": "72a011b3d899729f67d45ad144126dcdd4c37c44f36e9c9b0aa9a6320e3b2896"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/chunk-worker.js",
+      "archive": "artifacts/cold-client-prediction/final-bundles/chunk-worker.js",
+      "bytes": 47360,
+      "sha256": "a92ee23776c6c1a653e627ee961aae5f79625f2dd58a5dad0b0adcc8bec9ce79"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-agG35DD3.js",
+      "archive": "artifacts/cold-client-prediction/final-bundles/index-agG35DD3.js",
+      "bytes": 1791869,
+      "sha256": "268a35b5549890d2c5008dc3c2493e7445870c76bd0cb80c8092f486dbb32aa1"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/cold-client-prediction/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    "artifacts/cold-client/cold-client-native-20261017-r7/cold-worker-blocked.png",
+    "artifacts/cold-client/cold-client-native-20261017-r7/source-ready.png",
+    "artifacts/cold-client/cold-client-native-20261017-r7/source-door-exited.png",
+    "artifacts/cold-client/cold-client-native-20261017-r7/seam-crossed.png",
+    "artifacts/cold-client/cold-client-native-20261017-r7/returned.png"
+  ],
+  "limits": [
+    "CPU fixture tests original distant upper-floor support; native saved NPC is a distinct real outer house/terrain route, not that far-town upper-floor fixture.",
+    "The native source-worker delivery delay is deliberate QA scheduling. Original generator/payload/order and authority simulation remain active. It is not a natural latency distribution or an FPS benchmark.",
+    "The broad 74-test run precedes only the final footprint-margin extension; final 17-test run covers that extension, negative seams and original input/ACK repairs. Counts overlap.",
+    "Native r1-r6 are preserved failures on QA setup/route assumptions and an original 0.345 m path threshold; their cold-phase observations are not substituted for the final passing full route.",
+    "Production Office UI/controller hashes are unchanged; the current original chunk worker is archived. Game bundle differs. No new FPS or physical microphone/playback-quality measurement.",
+    "Full integration remains active: long travel, all source scenes/layouts and lighting/temporal/water/audio parity plus first-person own shadows/reflections remain unfinished or unverified."
+  ],
+  "files": [
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 197366,
+      "sha256": "eba7680e009bc42f165dea97971deeab444f80176f6f914e9c7986ba74053d09"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 197366,
+      "sha256": "eba7680e009bc42f165dea97971deeab444f80176f6f914e9c7986ba74053d09"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client.ts",
+      "bytes": 50793,
+      "sha256": "7d649b7e574a48e068d8f61462748931a1d679999a94ecfa65ed89ea03a4c29b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/src/game/client.ts",
+      "bytes": 50793,
+      "sha256": "7d649b7e574a48e068d8f61462748931a1d679999a94ecfa65ed89ea03a4c29b"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world.ts",
+      "bytes": 26883,
+      "sha256": "837b29b52dbde1a5c18fb2a8bdefba9ac6205c388676a057dde888c0252f4fab"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/src/game/world.ts",
+      "bytes": 26883,
+      "sha256": "837b29b52dbde1a5c18fb2a8bdefba9ac6205c388676a057dde888c0252f4fab"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/client-character-prediction.ts",
+      "bytes": 1197,
+      "sha256": "2b7d8104cc3d24062bf5693257201dd6242883c58a27e6a575079e27f82787b1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/src/game/client-character-prediction.ts",
+      "bytes": 1197,
+      "sha256": "2b7d8104cc3d24062bf5693257201dd6242883c58a27e6a575079e27f82787b1"
+    },
+    {
+      "repo": "game",
+      "path": "test/cold-character-prediction.test.ts",
+      "bytes": 4917,
+      "sha256": "b0e6881b098a3484b4e624bb674732f385a333ca8592e06750e9f9203896aae1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/test/cold-character-prediction.test.ts",
+      "bytes": 4917,
+      "sha256": "b0e6881b098a3484b4e624bb674732f385a333ca8592e06750e9f9203896aae1"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/tools/capture.ts",
+      "bytes": 34215,
+      "sha256": "8253a480720f00eaa82ebbecf590e454b4646336ef51590b816bf64c7d708978"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-cold-client.ts",
+      "bytes": 12999,
+      "sha256": "b76b229cd0963e71bddc9be7409dc4634e9471116e041e34d94698fe9056fb33"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/tools/qa-cold-client.ts",
+      "bytes": 12999,
+      "sha256": "b76b229cd0963e71bddc9be7409dc4634e9471116e041e34d94698fe9056fb33"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 800259,
+      "sha256": "9699ea58d085126565b0615d45c2f0fb13637aa99e818921b07c37623fff9b10"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 800259,
+      "sha256": "9699ea58d085126565b0615d45c2f0fb13637aa99e818921b07c37623fff9b10"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 132207,
+      "sha256": "3d41d03d38de5380149febaea522706814379c4871f5e801630770ad280e6804"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-sources/office/VERIFICATION.md",
+      "bytes": 132207,
+      "sha256": "3d41d03d38de5380149febaea522706814379c4871f5e801630770ad280e6804"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r1/failure.png",
+      "bytes": 205759,
+      "sha256": "ad64e008d5e47817905cf0f83c4591b6778f048a0c1547ecce8922cb46e8b33b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r1/initial.png",
+      "bytes": 208350,
+      "sha256": "056d5e39754971e35c3eb87f94ab427aed294e2a416a96f6291e30b6af980045"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r1/report.json",
+      "bytes": 265082,
+      "sha256": "73e1a33dea1d284703f02a26cffd4178d4bc7782aa6daa468b6e912b21474426"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r1/returned.png",
+      "bytes": 206503,
+      "sha256": "edbdef4805860db2a31cbc994ad2cfd40e433a47da17652e1331f43df86abc29"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r1.log",
+      "bytes": 2229,
+      "sha256": "a2e7ec5f585a42e80da9d1b271c0de18c3794d1c1b9e97ad334b441aceab13d6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r2/failure.png",
+      "bytes": 415771,
+      "sha256": "87f5ffa38322c9ba61940be27048cd4898e98301c2e506016f53575b92e7e9c8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r2/initial.png",
+      "bytes": 359642,
+      "sha256": "90b70a7d458a4a403b357614c744d392657deb8c86b18d897aa483fb1019d472"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r2/report.json",
+      "bytes": 265301,
+      "sha256": "ef59d806415102a496785b851e4a41c67dcc7b9835c903c2763f0730af08c960"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r2/returned.png",
+      "bytes": 481986,
+      "sha256": "035681be1ba8502280aef29c23ebcc1987f92679ce737c039f0d36e8db3f3e20"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r2.log",
+      "bytes": 2972,
+      "sha256": "5d4eb1c2b87d7acd8b4eef308436e56d01a4da2d307e2afc5e375918b87333f4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r3/failure.png",
+      "bytes": 399693,
+      "sha256": "bce1a52917ab8cb0fd86284e008807b7ac7d7b6a740cf66ce6cc89536a4915de"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r3/initial.png",
+      "bytes": 357928,
+      "sha256": "b7b27d2fb65fe109373135359329edabc48d88edecd96e3d81e1432ed67ecc65"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r3/report.json",
+      "bytes": 257624,
+      "sha256": "2d75622f23b0a75cfff9f11693bac36111c4903ded33a93c3989a88f43c7bfcf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r3/returned.png",
+      "bytes": 464844,
+      "sha256": "39bb070529653491105637156fd5158c1ab8aca326889eab67761d8330721a52"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r3/worker-targets.json",
+      "bytes": 2273,
+      "sha256": "7aa33c119cffe262f65316d5aff493a8117f82776bcccc950f883fa022918aeb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r3.log",
+      "bytes": 2550,
+      "sha256": "a9ed415f075a6139f8194e9133b59bd92b0139cdd278fcb19fe63cf18464c0d4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/cold-worker-blocked.png",
+      "bytes": 118526,
+      "sha256": "437b60923d81977012b739689e0a2a2e32055291e49cfa5729ecf05d90f6d9da"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/directory.png",
+      "bytes": 414000,
+      "sha256": "e915aeafbad0e21b17be38a08a2a4bea6e2ad8ef0bd91dae1bee138b22938008"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/failure.png",
+      "bytes": 321869,
+      "sha256": "29d1b0cb9e15cafc08a28127b4cc320350a596baad0c44b24b89c05b4a270adf"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/initial.png",
+      "bytes": 356285,
+      "sha256": "3138f9ad1cd1176814a103e61ea93fda19c73c52a8122ad546f8c91f01a241fb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/report.json",
+      "bytes": 1893969,
+      "sha256": "cf44f3449a2cf98434ff9a706dc2542c4bcb315d2525dae6066d1bc8f29349f5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/returned.png",
+      "bytes": 275052,
+      "sha256": "d8766797596a2e8246efb2b9215bdcc45e7ae82bcb8a8d8ef41ef3ac8e10b804"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r4/source-ready.png",
+      "bytes": 148705,
+      "sha256": "5aabb837e2b6eb6867a52b2eeee1102bea19d55cf8e879561267914c04d698f4"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r4.log",
+      "bytes": 3179,
+      "sha256": "667b099972d2f0dbdc07d0ceb969fd336bfec64071e0df51132a91122bf9bf9c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/cold-worker-blocked.png",
+      "bytes": 107163,
+      "sha256": "69b417471b30d827a0ed9eca69c2b61ac63508a957a0b5b4b6a25a05a957ddf7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/directory.png",
+      "bytes": 418943,
+      "sha256": "427fd7906c185325dcacfffffc9178e099e0e8dbb3bca3c71912ecc92aa7983e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/failure.png",
+      "bytes": 173470,
+      "sha256": "33464eb069ab808d86b48b21324e80d991aae7173f6f389fed44441dd00429ee"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/initial.png",
+      "bytes": 347566,
+      "sha256": "4535c3928d97aa622f0f3c13b1d137de0e1e2ad0c31efe9ad3b0c2c18f6a7d32"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/report.json",
+      "bytes": 767125,
+      "sha256": "06dcf895e2483599246752cac3e70f6f2a94e5813c2baef3f4411ea308f7c73f"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/returned.png",
+      "bytes": 181673,
+      "sha256": "e17f82eb55db69f608fad2f6aafaf62223b6187c36f26e9418ae6ae38a8f8b2b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r5/source-ready.png",
+      "bytes": 193152,
+      "sha256": "55277e32310a3585e1571850d2c37e89b320c789757580817dc2a9ebe418d7d8"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r5.log",
+      "bytes": 3621,
+      "sha256": "a4a90ca10df5e53e12d2be42eb9741bd5c5a864355c9505cb03b83f70d9060e6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/cold-worker-blocked.png",
+      "bytes": 114904,
+      "sha256": "e0f29429ec9e2d92b2ebbe36b1e553dc8e3dbd91f38b9d77883e3962a79714b2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/directory.png",
+      "bytes": 431750,
+      "sha256": "010a3ec4c956b123f4f062d14d08ef91cabfeb7d6c7c8fef5af29e5712c572b2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/failure.png",
+      "bytes": 188364,
+      "sha256": "d7970eb79ddc0c76f6b6e0a4489d108f872a14004ccb1357c930711ee5b1e60e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/initial.png",
+      "bytes": 364773,
+      "sha256": "c33a498180d58ed1e7e6abd0601b417738e80e20f65d7ee0789e1255b9c11190"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/report.json",
+      "bytes": 1272161,
+      "sha256": "f412beb9a8c8b5fe7e7edae3135c47ba11a9bb0f49392ec7343e81f198b2507a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/returned.png",
+      "bytes": 189775,
+      "sha256": "96c4100f23ad68326d5f35d2c353d34fdbb266b2cbd032898128b384ee68ea8d"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r6/source-ready.png",
+      "bytes": 211233,
+      "sha256": "d2a22692d5799857901eb93bb0862c701f22fb4a3e5b7c355cf114dd168f5084"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r6.log",
+      "bytes": 3950,
+      "sha256": "c0df83da36e8eb0bb10efa0bfe659c0ab564e0ff0b4ba431cd9f1850fd7a87ce"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/cold-worker-blocked.png",
+      "bytes": 119840,
+      "sha256": "c4f82a75361192b928027f895a48b547df6075d16864d78ffc3d63e90a93c082"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/directory.png",
+      "bytes": 445941,
+      "sha256": "035f10daf46f503afd22a015f88f49976f97d8ca101647d774e25dd0d7b56379"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/initial.png",
+      "bytes": 381330,
+      "sha256": "e49e901603f8f76e860bd15c9dea0e89d89c7b5afd35563462fd44076af15354"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/report.json",
+      "bytes": 2405023,
+      "sha256": "d0094ecdb36a3fd6a2bfeaa746fbd96e07e21eec83d469cd8ba685c15b10265e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/returned.png",
+      "bytes": 201789,
+      "sha256": "66ca360e41cd07ac8495bb17ace7c6f9dc1025e403437dd69217bd30de712eac"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/seam-crossed.png",
+      "bytes": 153076,
+      "sha256": "d3eca488d42899a4bb9aaa41ffe52e3e13a852c2778f09170c835e4409a7c7f1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/source-door-exited.png",
+      "bytes": 191681,
+      "sha256": "e53475ed84637fc92f89236763caa966f2f735df7d630e5a3d8fbda79d139657"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client/cold-client-native-20261017-r7/source-ready.png",
+      "bytes": 182007,
+      "sha256": "0bb4518bef083ee64c5b7de761f3369679b6f066ab89c676200a5b6fab5f5604"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-client-native-20261017-r7.log",
+      "bytes": 821,
+      "sha256": "efde17ed593b3610cca2cf8240dbc5b2e0e5dcf975de01d4aaeefecad5ad5294"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-after-r1-20261017.log",
+      "bytes": 707,
+      "sha256": "3665f1185b74fac0bf2aeac6bfb16dfcab147070beb76aea4c06e175e3fb5b6a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-after-r2-20261017.log",
+      "bytes": 707,
+      "sha256": "851760c193a3acc478549ae0585bccb995595e0d66a898b6384be29deb1125e2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-before-20261017.log",
+      "bytes": 4272,
+      "sha256": "156997d1ff5a4bcbc4f20fa09c28b5c5f353fb76905d84c591207a22158025da"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-build-20261017.log",
+      "bytes": 585,
+      "sha256": "09a95216614261a5740aff67a9828a865fbdd786bf87f23428661eed0b58add5"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "f862bcc42451d43a73d1eae46532eb2c44f628ca40823108a0a69837063ba71b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-commit-race-before-20261017.log",
+      "bytes": 1987,
+      "sha256": "2885e67c6b0dae02f32ac37a4a2c8ac5e4ffa36cc74397013e96c3cfde491fc7"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-final-focused-20261017.log",
+      "bytes": 2016,
+      "sha256": "caae57cbf3d33fe3c023532120487325866e21530af1c31289f79081695ae5eb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-regression-r1-20261017.log",
+      "bytes": 9522,
+      "sha256": "ac033981754255cbb9e3028d3272ecc054e0c00f4e28ed1f43fadb43f60ff471"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/cold-character-prediction-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/before/game/src/game/client.ts",
+      "bytes": 50285,
+      "sha256": "02c423a872cdb32229551dc26b06e7b6695b854c0fbd20abcb4b5e30d0067344"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/before/game/src/game/world.ts",
+      "bytes": 25711,
+      "sha256": "ead4b85b7553fa52bf4dcb9eab3fd2a9a94141300356c6da6b309e99f44db2ae"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/complete-evidence.ts",
+      "bytes": 18211,
+      "sha256": "fcd37c8fae4d54ea45ccef3e382e8e8871cc6044fa0924333247e42e3664cb04"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-bundles/chunk-worker.js",
+      "bytes": 47360,
+      "sha256": "a92ee23776c6c1a653e627ee961aae5f79625f2dd58a5dad0b0adcc8bec9ce79"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-bundles/game.js",
+      "bytes": 2495922,
+      "sha256": "885cae2da884d265d167dcffd0fe8fbddf696eb11e494a92064370dbd112792f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-bundles/index-agG35DD3.js",
+      "bytes": 1791869,
+      "sha256": "268a35b5549890d2c5008dc3c2493e7445870c76bd0cb80c8092f486dbb32aa1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/final-bundles/office-controller.js",
+      "bytes": 1376370,
+      "sha256": "72a011b3d899729f67d45ad144126dcdd4c37c44f36e9c9b0aa9a6320e3b2896"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/fix-source-route.ts",
+      "bytes": 1373,
+      "sha256": "f5fae85cf2c8aa66bc3637147a19cbf51b1cd787d4c60ebfd5381d738b7d1beb"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-before-delivery-delay.ts",
+      "bytes": 10556,
+      "sha256": "4cd3dcd7a0158bea1d8bf6328124e0ac0ec2879278b125656f915c37dbc0f69c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-before-menu-shortcut.ts",
+      "bytes": 9521,
+      "sha256": "beaa84a94f9f55bdf5a9a466bfe6714995210715f93e07b962268cc7ffb8dbb7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-before-recipe-id-fix.ts",
+      "bytes": 12234,
+      "sha256": "a4670042d6cdb892c53cea5cc201450798701c96d3654d4e832433cef3be2894"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-before-source-exit.ts",
+      "bytes": 9826,
+      "sha256": "1ba3ecd6e5d06669e1ad515eb082a4b139cebb06e77748aae02fa2bc6d7de9be"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-before-threshold-jump.ts",
+      "bytes": 12445,
+      "sha256": "52d4e133835e810ca1998e2cd4245136499755fddf115093139463fb5f36e45b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-syntax-check.js",
+      "bytes": 10754,
+      "sha256": "fd189e2333be6ac3f8e8109a8dd8151ecef9a9572ddc33dfd87a1135288aefb9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/qa-syntax-check.log",
+      "bytes": 77,
+      "sha256": "a4a0d57b6bbe1cbb40d096d6294cfcb6f6a9e2253393341539f022d2b4f14df5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/run-native.ps1",
+      "bytes": 1116,
+      "sha256": "40994c77c793298aa5c9322b16cc22a9aefcf9437c76322abfb336f539770c95"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/saved-candidates.json",
+      "bytes": 4935,
+      "sha256": "51608dcd533bf0bbd0c29080675956b4a55d4b674209bbeceb1b03d496d01068"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/cold-client-prediction/source-door-colliders.json",
+      "bytes": 911,
+      "sha256": "e2670ba40e9c411e1969b8d8a66525088d1ffafde80f6b69c1da2ebdc5b2e97b"
+    }
+  ]
+}

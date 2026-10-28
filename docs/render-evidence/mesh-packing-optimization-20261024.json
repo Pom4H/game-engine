@@ -1,0 +1,291 @@
+{
+  "recordedAt": "2026-10-24T20:12:36.058Z",
+  "scope": "First measured engine optimization cycle",
+  "adopted": {
+    "file": "src/procedural/mesh.ts",
+    "change": "Fill implicit neutral colour bytes; bounded 64-channel neutral-run detection; retain original coloured-channel clamping and half-up rounding. Preserve original copies of frozen authored arrays because direct reads regressed.",
+    "law": "For a neutral channel c=1, round(clamp(c,0,1)*255)=255 exactly. Missing channels already default to 1. No physical or optical coefficient changes.",
+    "frozenLookAheadChannels": 64
+  },
+  "meshBenchmark": {
+    "runtime": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/156.0.8078.47",
+      "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "jsVersion": "15.6.75.19"
+    },
+    "byteIdentical": true,
+    "sourceHashes": {
+      "before": "1c72fa50c1d32aa30b88d21308245d50685ac0d9be1e09f4430f8bcecb18e1ba",
+      "after": "d8cca862222c62768f9b4e72f49a492c368da5d6da49a86ee3088de48bef7c0d",
+      "workload": "9acc2431cc4e2857c0655d305254677ea572d693de638f6dea3e37eb0bba28f0"
+    },
+    "cases": [
+      {
+        "vertices": 2048,
+        "colors": "absent",
+        "beforeMs": 0.10099999904632569,
+        "afterMs": 0.095,
+        "speedup": 1.063157884698165,
+        "medianPairedDeltaMs": -0.001000001430511474
+      },
+      {
+        "vertices": 2048,
+        "colors": "white",
+        "beforeMs": 0.11700000047683716,
+        "afterMs": 0.10299999952316284,
+        "speedup": 1.135922339985312,
+        "medianPairedDeltaMs": -0.014999998807907103
+      },
+      {
+        "vertices": 2048,
+        "colors": "varied",
+        "beforeMs": 0.11199999928474426,
+        "afterMs": 0.105,
+        "speedup": 1.0666666598547072,
+        "medianPairedDeltaMs": -0.007999998331069944
+      },
+      {
+        "vertices": 2048,
+        "colors": "late-white",
+        "beforeMs": 0.11299999952316284,
+        "afterMs": 0.095,
+        "speedup": 1.1894736791911877,
+        "medianPairedDeltaMs": -0.016000001430511473
+      },
+      {
+        "vertices": 24000,
+        "colors": "absent",
+        "beforeMs": 1.0333333333333334,
+        "afterMs": 0.8666666666666667,
+        "speedup": 1.1923076923076923,
+        "medianPairedDeltaMs": -0.16666666666666674
+      },
+      {
+        "vertices": 24000,
+        "colors": "white",
+        "beforeMs": 1.146666661898295,
+        "afterMs": 0.9799999952316284,
+        "speedup": 1.1700680280383817,
+        "medianPairedDeltaMs": -0.1800000031789145
+      },
+      {
+        "vertices": 24000,
+        "colors": "varied",
+        "beforeMs": 1.0733333349227905,
+        "afterMs": 1.053333330154419,
+        "speedup": 1.0189873463563899,
+        "medianPairedDeltaMs": -0.033333333333333326
+      },
+      {
+        "vertices": 24000,
+        "colors": "late-white",
+        "beforeMs": 1.1,
+        "afterMs": 1.0200000047683715,
+        "speedup": 1.078431367507489,
+        "medianPairedDeltaMs": -0.08000000317891454
+      },
+      {
+        "vertices": 70000,
+        "colors": "absent",
+        "beforeMs": 3.6266666730244954,
+        "afterMs": 2.3066666682561237,
+        "speedup": 1.5722543369330049,
+        "medianPairedDeltaMs": -0.753333330154419
+      },
+      {
+        "vertices": 70000,
+        "colors": "white",
+        "beforeMs": 3.1333333333333333,
+        "afterMs": 2.680000003178914,
+        "speedup": 1.169154227468915,
+        "medianPairedDeltaMs": -0.38666666348775225
+      },
+      {
+        "vertices": 70000,
+        "colors": "varied",
+        "beforeMs": 3.0599999984105426,
+        "afterMs": 2.9,
+        "speedup": 1.0551724132450147,
+        "medianPairedDeltaMs": -0.12000000476837158
+      },
+      {
+        "vertices": 70000,
+        "colors": "late-white",
+        "beforeMs": 3.1666666666666665,
+        "afterMs": 2.6933333317438763,
+        "speedup": 1.1757425749512842,
+        "medianPairedDeltaMs": -0.40666666030883825
+      }
+    ],
+    "artifact": "artifacts/engine-perf/optimization/mesh-chrome/report.json",
+    "nodeArtifact": "artifacts/engine-perf/optimization/mesh-production.json",
+    "scope": "Whole primitiveMesh conversion, frozen identical authored geometry, 3 warmup rounds and 10 alternating AB/BA rounds. Library conversion times, not game FPS."
+  },
+  "nativeCorrectness": {
+    "status": "passed",
+    "adapter": {
+      "vendor": "amd",
+      "architecture": "rdna-3",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "rendererErrors": [],
+    "probeReadbackChannels": 15040512,
+    "previousImageSha256": "dec5eeb4d91a0199e30385c8e4be25c2c0cc35219613a534b40bc20563db41ce",
+    "afterImageSha256": "dec5eeb4d91a0199e30385c8e4be25c2c0cc35219613a534b40bc20563db41ce",
+    "imageExact": true,
+    "materialShaderSourceUnchanged": true,
+    "artifact": "artifacts/engine-perf/optimization/native-after/report.json"
+  },
+  "validation": {
+    "engineTypecheck": "passed",
+    "engineBuild": "passed",
+    "engineTests": {
+      "total": 893,
+      "passed": 874,
+      "skipped": 19,
+      "failed": 0,
+      "log": "artifacts/engine-perf/optimization/full-tests.log"
+    },
+    "focusedTests": {
+      "passed": 19,
+      "failed": 0,
+      "log": "artifacts/engine-perf/optimization/mesh-tests.log"
+    },
+    "gameTypecheck": "passed",
+    "gameBuild": "passed; seven JS bundles plus game source map and 24 documentation stands"
+  },
+  "liveProfiles": {
+    "settings": "1920x1080, adaptive off, manual clear preset, render scale1, draw distance420, TAA on, bloom/motion blur/DOF off",
+    "before": [
+      {
+        "metric": "frame.interval.ms",
+        "count": 402,
+        "p95": 37.79999999999927
+      },
+      {
+        "metric": "render.cpu.ms",
+        "count": 403,
+        "p95": 5.099999904632568
+      },
+      {
+        "metric": "render.gpu.ms",
+        "count": 215,
+        "p95": 19.41916
+      },
+      {
+        "metric": "trace.dropped",
+        "count": 1,
+        "p95": 0
+      }
+    ],
+    "after": [
+      {
+        "metric": "frame.interval.ms",
+        "count": 408,
+        "p95": 38.099999999998545
+      },
+      {
+        "metric": "render.cpu.ms",
+        "count": 409,
+        "p95": 4.800000071525574
+      },
+      {
+        "metric": "render.gpu.ms",
+        "count": 204,
+        "p95": 18.62968
+      },
+      {
+        "metric": "trace.dropped",
+        "count": 1,
+        "p95": 0
+      }
+    ],
+    "beforeEvidenceIssues": [],
+    "afterEvidenceIssues": [],
+    "beforeBudgetPassed": false,
+    "afterBudgetPassed": false,
+    "causalFPSGainEstablished": false,
+    "scope": "Separate warmed live-world observations with CPU profiler enabled, uncontrolled trajectories. The candidate bundle also includes previously pending Engine/tooling changes. Not matched causal FPS evidence; frame budget remains failed.",
+    "artifacts": [
+      "artifacts/engine-perf/optimization/baseline/report.json",
+      "artifacts/engine-perf/optimization/after/report.json"
+    ]
+  },
+  "rejected": {
+    "pointLightShader": {
+      "adopted": false,
+      "gates": {
+        "nativeTimestamps": true,
+        "baselineExecuted": true,
+        "physicalReplay": true,
+        "opaqueExact": true,
+        "allStagesExact": false
+      },
+      "runs": [
+        {
+          "scenario": "static",
+          "before": {
+            "samples": 64,
+            "p50": 3.76696,
+            "p95": 4.28916,
+            "mean": 3.8417906250000002
+          },
+          "after": {
+            "samples": 64,
+            "p50": 3.80632,
+            "p95": 4.29836,
+            "mean": 3.8550862499999994
+          },
+          "delta": {
+            "samples": 64,
+            "p50": -0.0022799999999998377,
+            "p95": 0.4536000000000002,
+            "mean": 0.013295625000000005
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "before": {
+            "samples": 64,
+            "p50": 3.85628,
+            "p95": 4.21828,
+            "mean": 3.8756999999999997
+          },
+          "after": {
+            "samples": 64,
+            "p50": 3.85368,
+            "p95": 4.23444,
+            "mean": 3.882264374999999
+          },
+          "delta": {
+            "samples": 64,
+            "p50": -0.04139999999999988,
+            "p95": 0.5422000000000002,
+            "mean": 0.006564375000000011
+          }
+        }
+      ],
+      "reason": "128 pairs did not establish a consistent opaque GPU benefit; strict final temporal stages differed. No production shader edit.",
+      "artifact": "artifacts/engine-perf/optimization/point-light-paired/report.json"
+    },
+    "directFrozenArrayReads": {
+      "adopted": false,
+      "reason": "Direct frozen-array reads were slower than the original mutable copies in the V8 packing loop."
+    },
+    "wholeArrayNeutralScan": {
+      "adopted": false,
+      "reason": "One coloured channel near the end added a full redundant scan; replaced with bounded blocks."
+    }
+  },
+  "sourceHashes": {
+    "src/procedural/mesh.ts": "3dcbee7417fe550ddc448419418ddacc0a5b2194ebe0e35a037b703e37cdf3ee",
+    "test/mesh-colour-packing.test.mjs": "39aa8ff96c200c1cc3bdc1645c74de61150e5ccda1463b10e7f5ee7a766a1689",
+    "tools/engine-perf/mesh-packing-workload.mjs": "9acc2431cc4e2857c0655d305254677ea572d693de638f6dea3e37eb0bba28f0",
+    "tools/engine-perf/mesh-packing-benchmark.mjs": "4306075b95b00f4b370fcc802d1856f1a1a062fd57f9f25dd2b2ebdcbea933ae",
+    "tools/gpu-visibility/point-light-demand-diagnostic.mjs": "e72cdd1f0d8370c885a20e03727d58390ea25c5441f3dde9b0fe886f06733432"
+  }
+}

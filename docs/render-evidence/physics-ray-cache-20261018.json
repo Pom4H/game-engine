@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "source": "src/physics/compound.ts",
+  "change": "SolidWorld reuses unchanged dynamic-body geometry across ray queries in a private WeakMap. Public SolidBody.boxes() calls remain fresh.",
+  "causes": [
+    "Body position, quaternion, half extents and tag",
+    "Compound shape array, member and half/offset/quaternion vector identities",
+    "Every shape half/offset/quaternion component, tag and structure metadata"
+  ],
+  "contracts": [
+    "Ray candidate enumeration, tie handling and narrowphase arithmetic remain unchanged.",
+    "Direct public pose and compound edits invalidate cached geometry before use.",
+    "Custom boxes(), axes() and point() implementations remain uncached because they have no declared cause contract.",
+    "Static cachedBoxes retain their existing owner and precedence.",
+    "Cache lifetime follows physical bodies through weak references."
+  ],
+  "microbenchmark": {
+    "tool": "tools/render-stability/physics-ray-cache.mjs",
+    "artifact": "artifacts/render-stability/physics-ray-cache.json",
+    "scope": "Isolated wheel-ray workload under Bun; eight shapes per body, 64 warmup rays and 1000 measured queries. The uncached control invokes the former body.boxes() boundary on every query. This does not establish authority tick time or game FPS.",
+    "raysMatchExactly": "Hit count, summed ray distance and summed hit coordinates match exactly in all six scenarios.",
+    "scenarios": [
+      {"bodies":16,"movingBodies":0,"beforeMs":85.6663,"afterMs":11.4291,"beforeGeometryBuilds":16000,"afterGeometryBuilds":0,"speedup":7.49545},
+      {"bodies":43,"movingBodies":0,"beforeMs":239.7492,"afterMs":16.1870,"beforeGeometryBuilds":43000,"afterGeometryBuilds":0,"speedup":14.81122},
+      {"bodies":128,"movingBodies":0,"beforeMs":873.8600,"afterMs":70.4764,"beforeGeometryBuilds":128000,"afterGeometryBuilds":0,"speedup":12.39933},
+      {"bodies":16,"movingBodies":5,"beforeMs":100.2794,"afterMs":18.2495,"beforeGeometryBuilds":16000,"afterGeometryBuilds":1250,"speedup":5.49491},
+      {"bodies":43,"movingBodies":5,"beforeMs":288.7939,"afterMs":32.1045,"beforeGeometryBuilds":43000,"afterGeometryBuilds":1250,"speedup":8.99543},
+      {"bodies":128,"movingBodies":5,"beforeMs":1162.0299,"afterMs":123.9619,"beforeGeometryBuilds":128000,"afterGeometryBuilds":1250,"speedup":9.37409}
+    ]
+  },
+  "validation": {
+    "typecheck": "passed",
+    "newRegressionFile": "test/compound-ray-cache.test.mjs",
+    "newRegressionsPassed": 4,
+    "newRegressions": [
+      "Direct pose/shape/metadata mutations compared against an independent uncached query boundary",
+      "Replaced half vectors cannot retain links to obsolete mutable arrays",
+      "64 awake/sleeping bodies with eight shapes reuse geometry across 200 queries; mutating one body refreshes only that body",
+      "Public geometry and returned ray arrays remain fresh; custom builders continue observing external state"
+    ],
+    "canonical": {
+      "passed": 63,
+      "failed": 0,
+      "assertions": 8826,
+      "files": [
+        "../thegame/test/the-engine-compound.test.ts",
+        "../thegame/test/physics.test.js",
+        "../thegame/test/spatial.test.js",
+        "../thegame/test/sleeping.test.ts",
+        "../thegame/test/wheel-contact.test.ts",
+        "../thegame/test/vehicle-crash-regression.test.ts"
+      ],
+      "exactOracle": "Current Engine retains exactly matching former compound states, contacts and impulses."
+    }
+  },
+  "limitations": [
+    "No simulation frequency, body count, geometry fidelity, contact order or physics arithmetic was reduced.",
+    "A separate isolated authority profile is required to assess total server tick time."
+  ]
+}

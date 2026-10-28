@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-10-24T19:19:16.141Z",
+  "scope": "Engine performance tooling and revisioned technology/budget inventory",
+  "technologyAudit": {
+    "revision": "engine-technologies.v1",
+    "count": 15,
+    "missingReferences": [],
+    "artifact": "artifacts/engine-perf/audit/technologies.json"
+  },
+  "validation": {
+    "typecheck": "passed",
+    "build": "passed",
+    "fullSuite": {
+      "passed": 869,
+      "skipped": 19,
+      "failed": 0,
+      "log": "artifacts/engine-perf/full-tests.log",
+      "note": "Full suite before final counter-export and budget-parameter validation refinements; subsequent focused suites cover refinements."
+    },
+    "finalFocused": {
+      "passed": 33,
+      "failed": 0,
+      "log": "artifacts/engine-perf/final-focused-tests.log"
+    },
+    "finalCli": {
+      "passed": 12,
+      "failed": 0,
+      "log": "artifacts/engine-perf/final-cli-tests.log"
+    }
+  },
+  "nativeWebGPU": {
+    "status": "passed",
+    "adapter": {
+      "vendor": "amd",
+      "architecture": "rdna-3",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "trace": {
+      "events": 864,
+      "cpu": 19,
+      "gpu": 19
+    },
+    "rendererErrors": [],
+    "artifact": "artifacts/engine-perf/native/report.json"
+  },
+  "liveCapture": {
+    "completed": true,
+    "events": 1318,
+    "passedBudgets": false,
+    "evidenceIssues": [
+      "Quality settings changed during capture",
+      "Observed resolution differs from budget target"
+    ],
+    "scope": "Separate native headless Chrome, existing game, no input; CPU profiler enabled; live uncontrolled trajectory, not comparative FPS evidence",
+    "artifact": "artifacts/engine-perf/live-smoke/report.json"
+  },
+  "overhead": {
+    "replayIdentical": true,
+    "baselineMsPerTick": 1.8074094444444453,
+    "disabledMsPerTick": 1.8405772222222216,
+    "recordingMsPerTick": 1.8071583333333314,
+    "note": "Differences overlap run-to-run variability; no zero-cost or FPS-speedup claim.",
+    "artifact": "artifacts/engine-perf/overhead/overhead.json"
+  },
+  "limitations": [
+    "Existing game capture is client-side. Server and worker captures use explicit trace hooks, correlation IDs and clock calibration; no production transport protocol was changed.",
+    "GPU durations are measured counters tied to submission frames, not invented host-clock execution spans.",
+    "Timing budgets do not replace visual/physical correctness verification."
+  ],
+  "sourceHashes": {
+    "src/observability/trace.ts": "6d21f511555cb2456be4369919db0c7041c844b9bbf2b9830346a39ecf938b00",
+    "src/observability/technologies.ts": "33e657f95c686861ce86cc43dfd7e9b86c9a222ddaa4aeb9c6da4105a56f0dc3",
+    "src/observability/index.ts": "865d021354a8a14069eebc9b421662650010dc4e22aa077cd47cb9c77adbf8b3",
+    "src/core/kernel.ts": "05e9b6822a080b3570f6b4adfcba14df0a355bdbf88bcb652a13456be4728da1",
+    "src/scene/scene.ts": "d291e8333462e982233bc2712a2ae559506b646260d563682887f24c1aa11284",
+    "src/scene/system-runtime.ts": "636af0ebadaed45045d61b02760217933bfe3ebc0e028bd77c6f8ac0d53f4587",
+    "src/physics/compound.ts": "c954ff4d5b8760bd527b1bccdcfd7d5cf1507ff7b52806f935f4322ad1cc283d",
+    "src/render/profiler.ts": "20c2dc9a4e3b32c82381b0be0096c124a5c8f3a652c46a7eadc27f13f0b0824b",
+    "src/render/webgpu.ts": "8cec89bb84816162b6cd36850374f4c706254a519b0c73ec0edd8746b4db4b11",
+    "src/runtime/browser.ts": "0057e45be0888686e21c97bcad2b1e886f16459fda440fccbd3a16edfbdcf03f",
+    "tools/engine-perf/cli.mjs": "3d25024bfcc9a46b65f505a20984cd88eea67f7e33e3061ed772e46f5861013f",
+    "tools/engine-perf/capture-browser.mjs": "03366abb2fe8612c61a295d5404b4e8d2db84fa97e0307dd4c21583712ddd5fe"
+  }
+}

@@ -1,0 +1,424 @@
+{
+  "version": 1,
+  "status": "completed",
+  "sourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "258aca741086525ab09f2b1114b41a906137d1bacb6dc466e48976706e2db88b",
+    "distSha256": "0d3a3b23fcbe805c959f5d550677347dddf8c8553f79b63084f138e17e560bff",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "inspected": [
+    {
+      "view": "wet-front",
+      "file": "artifacts/engine-compare/moss-demand-after/images/2026-10-12T01-33-53.247Z/quality-wet-front.png",
+      "sha256": "ae74f5e120f3ef520b0a08ccb136c19f66a1cd7d8706d084ffb7ab40aca3c158",
+      "method": "Assistant personally viewed the original 1920x1080 PNG using view_image with original image detail."
+    },
+    {
+      "view": "wet-back",
+      "file": "artifacts/engine-compare/moss-demand-after/images/2026-10-12T01-33-53.247Z/quality-wet-back.png",
+      "sha256": "734b5c319b7d174420905c64213b90152b6fbfd3aad907bbd63b0edc18f6735a",
+      "method": "Assistant personally viewed the original 1920x1080 PNG using view_image with original image detail."
+    },
+    {
+      "view": "wet-low",
+      "file": "artifacts/engine-compare/moss-demand-after/images/2026-10-12T01-33-53.247Z/quality-wet-low.png",
+      "sha256": "f283defd206ba16a5b01e2d20dc4f598d549dd81ca3f59a04ff092da0f79c167",
+      "method": "Assistant personally viewed the original 1920x1080 PNG using view_image with original image detail."
+    },
+    {
+      "view": "prototype-zero",
+      "file": "artifacts/engine-compare/moss-demand-prototype-v4/after-zero-frame-31.png",
+      "sha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "method": "Assistant personally viewed the original 1920x1080 PNG using view_image with original image detail."
+    },
+    {
+      "view": "prototype-growth",
+      "file": "artifacts/engine-compare/moss-demand-prototype-v4/after-growth-frame-31.png",
+      "sha256": "88ccc1cee333d767c9c1608691036a54d589c713b2956e0151ef1d43970e9b6b",
+      "method": "Assistant personally viewed the original 1920x1080 PNG using view_image with original image detail."
+    }
+  ],
+  "observations": [
+    {
+      "view": "wet-front",
+      "finding": "Sunlit wet-road highlight remains smooth, with no apparent return of the previous self-shadow stripes. Colored cubes, vertex-color triangles, labels, glass and reflections remain visible."
+    },
+    {
+      "view": "wet-back",
+      "finding": "Emission spheres, textured concrete columns, labels, foreground snow and colored reflections retain the previously reviewed appearance."
+    },
+    {
+      "view": "wet-low",
+      "finding": "Nearby triangle geometry, colored reflections, glass and emission remain visible with the previous composition."
+    },
+    {
+      "view": "prototype-zero-growth",
+      "finding": "Authored 0.65 moss visibly greens portions of the concrete ground. The live guard keeps this positive contribution and restores the original opaque hash when moss returns to zero. Numeric opaque/HDR comparisons match the unguarded reference in all three states."
+    }
+  ],
+  "strictPixels": {
+    "canonicalCaptures": [
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 0,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 1,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 5000,
+        "scenario": "static",
+        "repetition": 2,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 0,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 1,
+        "changedChannels": 6,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 5000,
+        "scenario": "camera-motion",
+        "repetition": 2,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 6
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 0,
+        "changedChannels": 15,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 1,
+        "changedChannels": 4,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      },
+      {
+        "count": 10000,
+        "scenario": "static",
+        "repetition": 2,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 0,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 1,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      },
+      {
+        "count": 10000,
+        "scenario": "camera-motion",
+        "repetition": 2,
+        "changedChannels": 0,
+        "outsideObservedBaselineRange": 0,
+        "baselineVaryingChannels": 19
+      }
+    ],
+    "wet": [
+      {
+        "name": "wet-front",
+        "changedPresentationChannels": 0,
+        "changedFiniteHDRReflectionChannels": 0
+      },
+      {
+        "name": "wet-back",
+        "changedPresentationChannels": 0,
+        "changedFiniteHDRReflectionChannels": 0
+      },
+      {
+        "name": "wet-low",
+        "changedPresentationChannels": 0,
+        "changedFiniteHDRReflectionChannels": 0
+      }
+    ]
+  },
+  "pairedFinalStageGate": false,
+  "pairedQuality": [
+    {
+      "state": "zero",
+      "moss": 0,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "zero",
+      "moss": 0,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "zero",
+      "moss": 0,
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "growth",
+      "moss": 0.65,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "growth",
+      "moss": 0.65,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "growth",
+      "moss": 0.65,
+      "stage": "taa",
+      "changedChannels": 20,
+      "maxEncodedError": 1,
+      "coordinates": [
+        {
+          "x": 1250,
+          "y": 478,
+          "channel": 0,
+          "before": 10673,
+          "after": 10672
+        },
+        {
+          "x": 1249,
+          "y": 479,
+          "channel": 0,
+          "before": 10787,
+          "after": 10786
+        },
+        {
+          "x": 1250,
+          "y": 479,
+          "channel": 0,
+          "before": 10716,
+          "after": 10715
+        },
+        {
+          "x": 1250,
+          "y": 480,
+          "channel": 0,
+          "before": 10857,
+          "after": 10856
+        },
+        {
+          "x": 1251,
+          "y": 480,
+          "channel": 0,
+          "before": 10828,
+          "after": 10827
+        },
+        {
+          "x": 1252,
+          "y": 480,
+          "channel": 0,
+          "before": 10837,
+          "after": 10836
+        },
+        {
+          "x": 1253,
+          "y": 480,
+          "channel": 0,
+          "before": 10854,
+          "after": 10853
+        },
+        {
+          "x": 1254,
+          "y": 480,
+          "channel": 0,
+          "before": 10878,
+          "after": 10877
+        },
+        {
+          "x": 1255,
+          "y": 480,
+          "channel": 0,
+          "before": 10917,
+          "after": 10916
+        },
+        {
+          "x": 1250,
+          "y": 481,
+          "channel": 0,
+          "before": 11279,
+          "after": 11278
+        },
+        {
+          "x": 1251,
+          "y": 481,
+          "channel": 0,
+          "before": 11295,
+          "after": 11294
+        },
+        {
+          "x": 1251,
+          "y": 481,
+          "channel": 1,
+          "before": 11790,
+          "after": 11791
+        }
+      ]
+    },
+    {
+      "state": "restored",
+      "moss": 0,
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "restored",
+      "moss": 0,
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "state": "restored",
+      "moss": 0,
+      "stage": "taa",
+      "changedChannels": 25,
+      "maxEncodedError": 14,
+      "coordinates": [
+        {
+          "x": 1033,
+          "y": 507,
+          "channel": 0,
+          "before": 11276,
+          "after": 11273
+        },
+        {
+          "x": 1033,
+          "y": 507,
+          "channel": 1,
+          "before": 10778,
+          "after": 10781
+        },
+        {
+          "x": 1033,
+          "y": 507,
+          "channel": 2,
+          "before": 11452,
+          "after": 11451
+        },
+        {
+          "x": 1034,
+          "y": 507,
+          "channel": 0,
+          "before": 11153,
+          "after": 11144
+        },
+        {
+          "x": 1034,
+          "y": 507,
+          "channel": 1,
+          "before": 10894,
+          "after": 10899
+        },
+        {
+          "x": 1034,
+          "y": 507,
+          "channel": 2,
+          "before": 11443,
+          "after": 11442
+        },
+        {
+          "x": 1030,
+          "y": 508,
+          "channel": 1,
+          "before": 10595,
+          "after": 10596
+        },
+        {
+          "x": 1031,
+          "y": 508,
+          "channel": 0,
+          "before": 11301,
+          "after": 11297
+        },
+        {
+          "x": 1031,
+          "y": 508,
+          "channel": 1,
+          "before": 10620,
+          "after": 10625
+        },
+        {
+          "x": 1032,
+          "y": 508,
+          "channel": 0,
+          "before": 11290,
+          "after": 11281
+        },
+        {
+          "x": 1032,
+          "y": 508,
+          "channel": 1,
+          "before": 10673,
+          "after": 10683
+        },
+        {
+          "x": 1032,
+          "y": 508,
+          "channel": 2,
+          "before": 11451,
+          "after": 11450
+        }
+      ]
+    }
+  ],
+  "interpretation": "Direct visual inspection is qualitative. Full wet RGBA8 and finite HDR comparisons are byte exact; canonical channels stay within the original observed before range without extra tolerance, with 6/15/4 paired-channel differences on three captures. This preserves the existing pixel gates, but does not establish comparative quality against other native pipelines. Prototype/integration final TAA failures and the full 10k frame-budget failure remain failures. A finite fresh temporal pass does not erase earlier intermittent variation."
+}

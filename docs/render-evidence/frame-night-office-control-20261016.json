@@ -1,0 +1,1176 @@
+{
+  "date": "2026-10-16T11:29:17.503Z",
+  "scope": "Production Game frame fidelity, authenticated Office controller geometry, installed Office camera and authority render clock. Full integration goal remains active.",
+  "facade": {
+    "frameUniformBytes": 720,
+    "probeUniformBytes": 128,
+    "materialUniformBytes": 400,
+    "vertexAttributeBytes": 16,
+    "nightPacking": "raw float32 with separate presence flag; undefined retains authored material night",
+    "sceneRevisionPolicy": "Night/weather frame updates do not rebuild geometry, invalidate TAA or increment static appearance revisions.",
+    "kernels": {
+      "samples": 8192,
+      "frameControlCases": 27,
+      "max": 0,
+      "maxByChannel": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "lit": [
+        431,
+        750
+      ]
+    },
+    "world": {
+      "samples": 4096,
+      "substepDifference": {
+        "max": 0.0150146484375,
+        "mean": 0.00017148256301879883,
+        "changed": 136
+      },
+      "substepRestoredDifference": {
+        "max": 0,
+        "mean": 0,
+        "changed": 0
+      },
+      "geometryBuilds": [
+        {
+          "name": "day",
+          "builds": 122,
+          "night": 0.02
+        },
+        {
+          "name": "night",
+          "builds": 122,
+          "night": 1
+        },
+        {
+          "name": "wet",
+          "builds": 122,
+          "night": 0.02
+        },
+        {
+          "name": "restored",
+          "builds": 122,
+          "night": 0.02
+        },
+        {
+          "name": "substep-a",
+          "builds": 122,
+          "night": 0.311
+        },
+        {
+          "name": "substep-b",
+          "builds": 122,
+          "night": 0.319
+        },
+        {
+          "name": "substep-restored",
+          "builds": 122,
+          "night": 0.311
+        }
+      ],
+      "nightDifference": {
+        "max": 2.1975555419921875,
+        "mean": 0.3377287075854838,
+        "changed": 4096
+      },
+      "wetDifference": {
+        "max": 0.534149169921875,
+        "mean": 0.03875660337507725,
+        "changed": 3348
+      },
+      "restoredDifference": {
+        "max": 0,
+        "mean": 0,
+        "changed": 0
+      }
+    },
+    "probe": {
+      "scope": "Production single, CPU-instanced and GPU-instanced draws; native HDR, planar reflection and all six local-probe faces. Static optical fixture, no simulation or FPS claim.",
+      "reports": [
+        {
+          "mode": "single",
+          "substep": {
+            "main": {
+              "samples": 256,
+              "changed": 34,
+              "max": 0.00042724609375,
+              "mean": 0.000030517578125
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 12,
+              "max": 0.000213623046875,
+              "mean": 0.000005692243576049805
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 150,
+              "max": 0.00030517578125,
+              "mean": 0.000004875163237253825
+            }
+          },
+          "rain": {
+            "main": {
+              "samples": 256,
+              "changed": 91,
+              "max": 0.1033935546875,
+              "mean": 0.018405377864837646
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2160,
+              "max": 0.17535400390625,
+              "mean": 0.060969799757003784
+            }
+          },
+          "height": {
+            "main": {
+              "samples": 256,
+              "changed": 83,
+              "max": 0.00909423828125,
+              "mean": 0.0014826655387878418
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2208,
+              "max": 0.0126953125,
+              "mean": 0.0030201959113279977
+            }
+          },
+          "restored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "dry": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "heightRestored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "scene": {
+            "tick": 0,
+            "physicsBodies": 0
+          },
+          "errors": [],
+          "drawCalls": 17
+        },
+        {
+          "mode": "cpu-instances",
+          "substep": {
+            "main": {
+              "samples": 256,
+              "changed": 34,
+              "max": 0.00042724609375,
+              "mean": 0.000030517578125
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 12,
+              "max": 0.000213623046875,
+              "mean": 0.000005692243576049805
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 150,
+              "max": 0.00030517578125,
+              "mean": 0.000004875163237253825
+            }
+          },
+          "rain": {
+            "main": {
+              "samples": 256,
+              "changed": 91,
+              "max": 0.1033935546875,
+              "mean": 0.018405377864837646
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2160,
+              "max": 0.17535400390625,
+              "mean": 0.060969799757003784
+            }
+          },
+          "height": {
+            "main": {
+              "samples": 256,
+              "changed": 83,
+              "max": 0.00909423828125,
+              "mean": 0.0014826655387878418
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2208,
+              "max": 0.0126953125,
+              "mean": 0.0030201959113279977
+            }
+          },
+          "restored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "dry": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "heightRestored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "scene": {
+            "tick": 0,
+            "physicsBodies": 0
+          },
+          "errors": [],
+          "drawCalls": 2
+        },
+        {
+          "mode": "gpu-instances",
+          "substep": {
+            "main": {
+              "samples": 256,
+              "changed": 34,
+              "max": 0.00042724609375,
+              "mean": 0.000030517578125
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 12,
+              "max": 0.000213623046875,
+              "mean": 0.000005692243576049805
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 150,
+              "max": 0.00030517578125,
+              "mean": 0.000004875163237253825
+            }
+          },
+          "rain": {
+            "main": {
+              "samples": 256,
+              "changed": 91,
+              "max": 0.1033935546875,
+              "mean": 0.018405377864837646
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2160,
+              "max": 0.17535400390625,
+              "mean": 0.060969799757003784
+            }
+          },
+          "height": {
+            "main": {
+              "samples": 256,
+              "changed": 83,
+              "max": 0.00909423828125,
+              "mean": 0.0014826655387878418
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 2208,
+              "max": 0.0126953125,
+              "mean": 0.0030201959113279977
+            }
+          },
+          "restored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "dry": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "heightRestored": {
+            "main": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "reflection": {
+              "samples": 256,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "probe": {
+              "samples": 6144,
+              "changed": 0,
+              "max": 0,
+              "mean": 0
+            }
+          },
+          "scene": {
+            "tick": 0,
+            "physicsBodies": 0
+          },
+          "errors": [],
+          "drawCalls": 2
+        }
+      ]
+    },
+    "verifiedOld": {
+      "receipt": {
+        "file": "artifacts/game-before-frame-night.js",
+        "sha256": "22ef64a480c69a7b32832f94206071739e14e22d4584af67e9938d947d93332e",
+        "bytes": 2462112,
+        "fulfilled": 1,
+        "urls": [
+          "http://127.0.0.1:3187/build/game.js?v=1gsrw-mvatui7m"
+        ]
+      },
+      "substepDifference": {
+        "max": 0,
+        "mean": 0,
+        "changed": 0
+      },
+      "apiWitness": "frozen projection has no facadeNight field; current projection reports exact .311/.319 values"
+    },
+    "limits": [
+      "Other material lighting and wetness still use existing quantization. Whole-renderer parity is not proven.",
+      "Rain changed the local cube probe and main HDR; the horizontal test roof produced zero planar-rain difference. No universal planar-rain response is claimed."
+    ]
+  },
+  "overrideCorrection": {
+    "bug": "The old Fetch override glob did not include cache-busted ?v= script URLs; requested frozen clients could silently run the current bundle.",
+    "repair": "Wildcard matches the query suffix, exact pathname selects the body, SHA/bytes/URLs/fulfilment are saved, and a missed requested Game bundle fails before QA.",
+    "priorEvidence": "Earlier CAPTURE_BUNDLE-only browser reference version attribution is unproven. Preserve raw timings as observations, not paired version comparisons. Frozen CPU math oracles are unaffected.",
+    "rejectedReference": "artifacts/engine-facade-step-unverified and frame-night-step-reference.log retain the first unintercepted run; it is not baseline evidence."
+  },
+  "officeScope": {
+    "before": {
+      "distance": 0.5450027522866258,
+      "covered": false,
+      "bounds": {
+        "minX": -496,
+        "minZ": 176,
+        "maxX": -112,
+        "maxZ": 560
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Office view does not stream terrain around its controlled Game body"
+    },
+    "repair": "Controller view resolves only the active authenticated account peer; it rejects unauthenticated requests and ignores caller position/actor IDs. Observer stays Office-centred. View/cell/topology keys refresh cached geometry; credential scope and generation fences prevent stale controller responses.",
+    "projection": "Buildings, roads, props and exact 8 m terrain clip around the committed view centre; terrain is emitted before decorative batching and the controlled actor has a guaranteed detail slot.",
+    "intermediate": "Metadata-only scope repair passed but the Office renderer still clipped around the building and showed a void; that result was not accepted as a visual pass.",
+    "afterScope": {
+      "distance": 1.5314734597645456,
+      "terrainPatches": 16,
+      "renderedBounds": {
+        "minX": -512,
+        "minZ": -256,
+        "maxX": -128,
+        "maxZ": 128
+      },
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "cameraLimit": "entered/W still showed the inside of a brick wall; superseded by the camera run below."
+    }
+  },
+  "camera": {
+    "mechanism": "Follow the already interpolated canonical body immediately. Use Engine-selected visible meshes, exact renderModel and double-sided triangles, entity AABB rejection, weak geometry/pose caches and five near-plane rays. No second physics world. Recreate the query when Office replaces its Scene.",
+    "filter": "Ignore avatar parts and translucent Office cutaway surfaces below alpha .5. Query opaque displayed scenery. Radius .18 m, surface padding .12 m.",
+    "renderTime": "CanonicalWorldLayer assigns the presented authority time directly to Scene.time; no Scene.step, local time integration or local NPC simulation.",
+    "native": {
+      "command": "CAPTURE_GPU=1 CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3198 OFFICE_WALKING_QA=1 OFFICE_CAMERA_QA=1 PERF_LABEL=camera-final bun tools/capture.ts --office-entry",
+      "browserMode": "native-gpu",
+      "date": "2026-10-16T11:27:13.185Z",
+      "distance": 2.07891879813703,
+      "actor": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+      "records": [
+        {
+          "name": "observer",
+          "camera": {
+            "distance": 44,
+            "desiredDistance": 44,
+            "hit": null,
+            "body": null,
+            "anchor": [
+              0,
+              0.16,
+              -0.2
+            ],
+            "position": [
+              23.639336979553484,
+              26.78820185238574,
+              25.648029195196212
+            ]
+          },
+          "time": 169.56073333332552,
+          "presentedTime": 169.56073333332552,
+          "terrainPatches": 16,
+          "view": "office",
+          "subjectVisible": false,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 326
+          }
+        },
+        {
+          "name": "entered",
+          "camera": {
+            "distance": 6.473037656546607,
+            "desiredDistance": 8.000000000000007,
+            "hit": "batch:canonical:city:14791:52",
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              47.00000000000006,
+              -5.279999999999999,
+              433.4
+            ],
+            "position": [
+              51.146731324802396,
+              -3.24379880764152,
+              437.93417252949325
+            ]
+          },
+          "time": 170.61666666667583,
+          "presentedTime": 170.61666666667583,
+          "ack": 10,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 124
+          }
+        },
+        {
+          "name": "orbit-1",
+          "camera": {
+            "distance": 8.000000000000004,
+            "desiredDistance": 8.000000000000004,
+            "hit": null,
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              47.00000000000006,
+              -5.279999999999999,
+              433.4
+            ],
+            "position": [
+              52.60385367501691,
+              -2.7634675150710573,
+              428.27516944267444
+            ]
+          },
+          "time": 171.69658646660164,
+          "presentedTime": 171.69658646660164,
+          "ack": 75,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 119
+          }
+        },
+        {
+          "name": "orbit-2",
+          "camera": {
+            "distance": 7.999999999999987,
+            "desiredDistance": 7.999999999999987,
+            "hit": null,
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              47.00000000000006,
+              -5.279999999999999,
+              433.4
+            ],
+            "position": [
+              41.87513484769389,
+              -2.7634675150710573,
+              427.7961779629457
+            ]
+          },
+          "time": 172.98278188338483,
+          "presentedTime": 172.98278188338483,
+          "ack": 146,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 31
+          }
+        },
+        {
+          "name": "orbit-3",
+          "camera": {
+            "distance": 7.999999999999989,
+            "desiredDistance": 7.999999999999989,
+            "hit": null,
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              47.00000000000006,
+              -5.279999999999999,
+              433.4
+            ],
+            "position": [
+              41.39618665076769,
+              -2.7634675150710573,
+              438.52487465205365
+            ]
+          },
+          "time": 174.20946762017252,
+          "presentedTime": 174.20946762017252,
+          "ack": 211,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 37
+          }
+        },
+        {
+          "name": "orbit-4",
+          "camera": {
+            "distance": 6.4730549189262545,
+            "desiredDistance": 7.999999999999987,
+            "hit": "batch:canonical:city:14791:52",
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              47.00000000000006,
+              -5.279999999999999,
+              433.4
+            ],
+            "position": [
+              51.14673133543143,
+              -3.243793377474121,
+              437.9341947251489
+            ]
+          },
+          "time": 175.41438547873227,
+          "presentedTime": 175.41438547873227,
+          "ack": 277,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 171
+          }
+        },
+        {
+          "name": "walk-KeyW",
+          "camera": {
+            "distance": 8.000000000000012,
+            "desiredDistance": 8.000000000000012,
+            "hit": null,
+            "body": "player:158f74d0-3ef2-4563-95ea-1a3373b80280",
+            "anchor": [
+              45.59658485252873,
+              -5.414999999999999,
+              431.8662694848522
+            ],
+            "position": [
+              50.7215933394744,
+              -2.898467515071057,
+              437.46996043466663
+            ]
+          },
+          "time": 176.58243505049646,
+          "presentedTime": 176.58243505049646,
+          "ack": 342,
+          "terrainPatches": 16,
+          "view": "controller",
+          "subjectVisible": true,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 178
+          }
+        },
+        {
+          "name": "returned-observer",
+          "camera": {
+            "distance": 43.14826604605469,
+            "desiredDistance": 43.14826604605469,
+            "hit": null,
+            "body": null,
+            "anchor": [
+              0,
+              0.16,
+              -0.2
+            ],
+            "position": [
+              23.318987137701587,
+              26.00376399722506,
+              25.29701088575987
+            ]
+          },
+          "time": 177.1739000000031,
+          "presentedTime": 177.1739000000031,
+          "terrainPatches": 16,
+          "view": "office",
+          "subjectVisible": false,
+          "physics": {
+            "steps": 0,
+            "substeps": 0,
+            "contacts": 0,
+            "bodies": 0,
+            "sleeping": 0,
+            "collisionSurfaceIterations": 3
+          },
+          "renderer": {
+            "backend": "webgpu",
+            "errors": [],
+            "drawCalls": 325
+          }
+        }
+      ],
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      }
+    },
+    "limits": [
+      "The real initial body, four trusted mouse rotations and W movement were exercised; NPC possession/floor handoff is not a fresh native acceptance result of this run.",
+      "Camera assumes its presented-body anchor starts in free space; this is not a penetration recovery solver.",
+      "Office vehicle/character assets and some world materials still use approximations. Complete original-asset visual parity remains unfinished.",
+      "Physical microphone, fresh harness actions and Office GUI FPS were not measured here. Native Office/backend services were not restarted."
+    ]
+  },
+  "restart": {
+    "scope": "Restore last durable SQLite checkpoint; not a claim of graceful final in-memory NPC checkpoint",
+    "forcedFallback": true,
+    "stopReason": "ctrl-c-sent but process remained running",
+    "beforePid": 8820,
+    "afterPid": 1960,
+    "rowsBefore": 1818,
+    "rowsAfter": 1818,
+    "rightsRowsExact": 134,
+    "missingRows": 0,
+    "officeInstallationExact": true,
+    "officeBindingExceptEpochExact": true,
+    "epoch": 4115680946,
+    "oldEpoch": 1835750694,
+    "backups": "before.sqlite, after-signal.sqlite and stopped.sqlite are consistent SQLite serialization backups with successful integrity checks; no final in-memory NPC checkpoint claim."
+  },
+  "checks": {
+    "engine": "typecheck/build and 68 targeted renderer/query tests passed; artifacts/office-camera-render-tests-final.log",
+    "canonicalClient": "typecheck and 35 tests / 4291 assertions passed; artifacts/office-camera-app-tests.log",
+    "game": "Final typecheck passed, including the final camera QA assertions; earlier same-product phase had build and 55 tests / 6684 assertions passing.",
+    "officeUi": "TypeScript and Vite build passed; existing >1500 kB chunk warning remains.",
+    "firstQueryTestFailure": "The initial scale test authored a negative scale, outside the existing Scene authoring contract. It was corrected to test allowed positive nonuniform scales. No product validation was weakened.",
+    "earlierFixtureFailure": "First optical browser injection used IIFE/import.meta and failed. The native fixture is now injected as an ESM Blob module."
+  },
+  "runtime": {
+    "pid": 1960,
+    "ok": true,
+    "seed": 29,
+    "revision": 13,
+    "players": 0,
+    "characterMotor": "the-engine",
+    "rigidBodySolver": "the-engine-compound",
+    "vehicleStepHz": 120,
+    "editorRevision": 53,
+    "officeObjects": 45,
+    "gameBundleSha256": "c9957d15bd3cdbfcc573eeaebcfa2377652e0e8377d2927b4ce3c6f1760a34e3"
+  },
+  "fps": {
+    "separateReport": "fps-answer-20261016.json",
+    "averageFPS": 41.70760190557399,
+    "internalResolution": [
+      704,
+      396
+    ],
+    "distance": 420,
+    "scope": "900 stationary live frames in the real world. Camera work did not produce another Game FPS or Office FPS score. Sustained 60 FPS is not established."
+  },
+  "reviewedImages": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/day.png",
+      "sha256": "8a85a63ddba9dd440834eefd162e6ff56971c1a09676806bb16aa0c5c5b1fbd2"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/night.png",
+      "sha256": "342db879a5e0c16a32b9fb70f3f9178254bde673fca3f0a71f910c4474dcdd59"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/wet.png",
+      "sha256": "ccc8c0fd4d536678739fb4c397bb4e2354b1090d88dc9985508fc1eb3023de9e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/restored.png",
+      "sha256": "8a85a63ddba9dd440834eefd162e6ff56971c1a09676806bb16aa0c5c5b1fbd2"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/substep-a.png",
+      "sha256": "be7f03bd464d18540020332e2667ac9891529f3928ae4ff43c2e23110bbc3fed"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/substep-b.png",
+      "sha256": "9598b15215bc09e99fd4515700ddd0d9442d1c395d39f08ab8fcb57aaa4ad97e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade/substep-restored.png",
+      "sha256": "be7f03bd464d18540020332e2667ac9891529f3928ae4ff43c2e23110bbc3fed"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/engine-facade-step-reference/substep-a.png",
+      "sha256": "deb01bb1bf3a2f29f7616a63e81a91fe2a0ad8ea818704668092ef7296226bd0"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/after-aoi-final/observer.png",
+      "sha256": "babf9de42426771c6e356cf45bc5922e178f3a27a9c4160f403353b1b1b242f5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/after-aoi-final/entered.png",
+      "sha256": "b4e3629e7356a6db6031dc8fbeb214901639aecc53f650d761163bacb4fdf26d"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/after-aoi-final/walk-KeyW.png",
+      "sha256": "94bb05cbeb985ce51e57fb20ee475cb6d90d22b45f8874afb1f143ec567c1fe3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/after-aoi-final/walk-KeyD.png",
+      "sha256": "50533540ba1156aa9528e93162b797ed9463a836bdc982b16082f02ee54dcee3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/after-aoi-final/returned-observer.png",
+      "sha256": "e61e3c17eedd6711fc505e7efae3b753c9ed857182e6a62d865ff84f4322e851"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/before-aoi-verified/entered.png",
+      "sha256": "81594068a922941d17088b5e3f469be599da545ff5fc14fed16954d98d3f95b3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/observer.png",
+      "sha256": "69de4f76235257d568984ca9e1f9f58936623c1b5dbf65bf9af4923d5c76953f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/entered.png",
+      "sha256": "4cb8189c938dec8b46a17aa99782b5b545cf5f7eef90a6b9521a9b586bf66ae8"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/orbit-1.png",
+      "sha256": "491e6cbf6262c14af30b5c7c97676e549d098cf1df8692a021311b3e0382b815"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/orbit-2.png",
+      "sha256": "6a420747ecc4fc0f4bc1d90683335666eaee59384d6cb3d0e1fc04b332e53360"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/orbit-3.png",
+      "sha256": "a2b0db79696bc9f2604aa1a233d2a87276c50d436b1e9d44983177fd8b35b06e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/orbit-4.png",
+      "sha256": "80320a8db5266f6649c91964bac1af69eee2e8c7029c452cae21d77a3c8bc87f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/walk-KeyW.png",
+      "sha256": "1b14db9008810255847da3a434732c23939f7c7b2456f0d3881e1eafc41f0197"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame/artifacts/office-walking/camera-final/returned-observer.png",
+      "sha256": "f1cba8aca2c4bc5b6f30b64987ae1e10a6bd26a61414df82fbf853757d3fb3c5"
+    }
+  ],
+  "sources": {
+    "engine/src/render/facade-surface.ts": "193cc626fd51fa5682ee3f42be6d4984fb613191899f9bd0e689c5e55ce2a588",
+    "engine/src/render/rain-surface.ts": "1d51ca053aff61a7b49cb43c0b026a2a350be6a32d0f7a7faa2c7f4a94e6db5e",
+    "engine/src/render/webgpu.ts": "faada70428142d7443cf679d9bce23736b59c86cc06db5f443ae01de07f2cd62",
+    "engine/src/scene/types.ts": "026b4a3f8d71fad0019800e5b48ce83229c4607cdd93bed5bce9252d8591b98c",
+    "engine/src/scene/validate.ts": "3f40f00bde51212bd89c061109449be621e14d5530e3544436c0ca03c7a50971",
+    "engine/src/scene/scene.ts": "77560b16a83b2f5a5fbf092863f5f2fa6b4e8097517af1d84edcd38503033cfd",
+    "engine/test/facade-surface.test.mjs": "851898c8d899644ce6c516793fdc4c79a4a75fe7b287786bc8795bf36f8fe5d9",
+    "engine/src/render/mesh-ray.ts": "a707c4d15c27d734165a2a010b0b9fafc6359a6cc4b7af9668743623d661f6ac",
+    "engine/test/render-mesh-ray.test.mjs": "8933a6437aa0adc39b6c2f0b9bd0d4fad0558a34d72aab86073ef3e5a16ef219",
+    "engine/src/browser.ts": "da4a6cf83c72767cf20b44407ea8f6d09cf14140b69112a5f61c4bda4ee43d14",
+    "engine/src/index.ts": "c9804c968ef06bb822fc5da872e026e727af0fcba907df7f593692cb79a874d0",
+    "engine/apps/thegame/client/canonical-types.ts": "f3d16a6639a8ade86f25f0413a3777340847fd9278a290f336c08448a6fcf96a",
+    "engine/apps/thegame/client/canonical-connection.ts": "ab0c18a24260024131f6c8573b797db885e3a4c76f3316b59e3671058033f1f3",
+    "engine/apps/thegame/client/canonical-world-view.ts": "6a501a78d27b6c8a501a03d2622e474835156288f07c2c6dc8c4b10b31fc3917",
+    "engine/apps/thegame/test/canonical-connection.test.ts": "535c5eb5a9f5ef2b42db1985ac2695ac0cf21222ebb3714560b2845255bfb621",
+    "engine/apps/thegame/test/canonical-world-view.test.ts": "c24b5da08cd5be3fee83e4c1fb703da414e221fce4c95e8a16d56c88ecec6240",
+    "game/src/game/office-world.ts": "c3b13aca37822dfa52e3ca7f0d033a61aa7594d135f8b442fa92d8ec77703f12",
+    "game/src/server/office-world.ts": "08b3a1c0330b1900ed38ec80bc7402dfa4037e42063b4cd82787cec5c757162e",
+    "game/src/server/index.ts": "e4bba1576bfa22c1d853d0c7c1225f298dc016de93cabe365c90b60bb31651d3",
+    "game/src/game/render/the-engine-projection.ts": "c3df5b8ac7db6682df92f5f97359305f6233c3d54eed089bad034328fce76aee",
+    "game/test/office-world.test.ts": "f1103861fc6b2f7630cc3b4e97de9e4b1dd43667b6873aa124b601f6e0d9ceab",
+    "game/test/the-engine-renderer.test.ts": "5ac62497e25db30da937839bdaca873e4e751437db3b6fa9ff066755f18b471b",
+    "game/tools/capture.ts": "1a571e8b0a456653e328ce302f4ac0527ce9958c4d0029218a79756e606e1b60",
+    "game/tools/qa-engine-facade.ts": "588c0244ab14379fc0f0157d30f0ffdbd69617982ca4423885af4736d26cd03d",
+    "game/tools/frame-night-probe-browser.ts": "c6bbbdb056eaa0b053699334920e0fe10d2a6f86051ba4552aa02b0b01b8cb5a",
+    "game/tools/qa-office.ts": "a23cc68dc6025bfe3dc1d33a18c13b16803af0095031ddaa69459be77b76cfc5",
+    "game/tools/qa-office-walking.ts": "b6150aa4709fdd8745448837f829e7706b720aac7c19fc1c644c5ec1ddd88846",
+    "office/ui/src/office/scene.ts": "da83528fd00d9296b0e53e1d751944939261a016bddfa318120a435f28cef222"
+  },
+  "artifacts": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\report.json",
+      "sha256": "3407ea533b1d637b2f8f51aeb7ff5d4a6ccb869125c3acd7379d52bb7f5ab678"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\frame-probe.json",
+      "sha256": "c96605eb8e1a046f8925cc1144c4569eb5ef20670b7c760056d6670e824b9db8"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\kernel.json",
+      "sha256": "cdd262830b583d4c5762d15126808e5093e872392b8745a31c83e188ee49fed9"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade-step-reference\\report.json",
+      "sha256": "e206fff5bbb0ec48ecea41d27ff328c46663d7c9690cbc4c33aadde214c92f22"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\capture-overrides-frame-night-step-reference.json",
+      "sha256": "a8a97b5bd53662e7720e508d781ef3a4f4570f0a5f7cbdda319d44f4cb9560ea"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\before-aoi-verified\\report.json",
+      "sha256": "0214db2c74aaaf443653de07fd48fb68219e0786c5a55b3e49b9d205f3e36ce4"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi\\report.json",
+      "sha256": "d9003a9e1a9bf3a45f690736eac7628fcd3689d522d5432192d2c2151a1530dd"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\report.json",
+      "sha256": "362f3f325d2626168e71ddda2cfa4e1134d4dcfc0fe5ae5c684cfcd5491ca188"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\report.json",
+      "sha256": "3384d6a60772fae3b8478dcd9b20f913b92d5338a37221acef0b287ca99fdccd"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-controller-restart-20261016\\after.json",
+      "sha256": "81b8d27341d98498f2d5eb519af7ced210faa6669401dc191e7a8a5593ab3701"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-controller-restart-20261016\\stop.json",
+      "sha256": "a39eb6f228b422004bb45bc52b2b302a6c6b4e625a834fdccee1e7565a6fa183"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\day.png",
+      "sha256": "8a85a63ddba9dd440834eefd162e6ff56971c1a09676806bb16aa0c5c5b1fbd2"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\night.png",
+      "sha256": "342db879a5e0c16a32b9fb70f3f9178254bde673fca3f0a71f910c4474dcdd59"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\wet.png",
+      "sha256": "ccc8c0fd4d536678739fb4c397bb4e2354b1090d88dc9985508fc1eb3023de9e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\restored.png",
+      "sha256": "8a85a63ddba9dd440834eefd162e6ff56971c1a09676806bb16aa0c5c5b1fbd2"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\substep-a.png",
+      "sha256": "be7f03bd464d18540020332e2667ac9891529f3928ae4ff43c2e23110bbc3fed"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\substep-b.png",
+      "sha256": "9598b15215bc09e99fd4515700ddd0d9442d1c395d39f08ab8fcb57aaa4ad97e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade\\substep-restored.png",
+      "sha256": "be7f03bd464d18540020332e2667ac9891529f3928ae4ff43c2e23110bbc3fed"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\engine-facade-step-reference\\substep-a.png",
+      "sha256": "deb01bb1bf3a2f29f7616a63e81a91fe2a0ad8ea818704668092ef7296226bd0"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\observer.png",
+      "sha256": "babf9de42426771c6e356cf45bc5922e178f3a27a9c4160f403353b1b1b242f5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\entered.png",
+      "sha256": "b4e3629e7356a6db6031dc8fbeb214901639aecc53f650d761163bacb4fdf26d"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\walk-KeyW.png",
+      "sha256": "94bb05cbeb985ce51e57fb20ee475cb6d90d22b45f8874afb1f143ec567c1fe3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\walk-KeyD.png",
+      "sha256": "50533540ba1156aa9528e93162b797ed9463a836bdc982b16082f02ee54dcee3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\after-aoi-final\\returned-observer.png",
+      "sha256": "e61e3c17eedd6711fc505e7efae3b753c9ed857182e6a62d865ff84f4322e851"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\before-aoi-verified\\entered.png",
+      "sha256": "81594068a922941d17088b5e3f469be599da545ff5fc14fed16954d98d3f95b3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\observer.png",
+      "sha256": "69de4f76235257d568984ca9e1f9f58936623c1b5dbf65bf9af4923d5c76953f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\entered.png",
+      "sha256": "4cb8189c938dec8b46a17aa99782b5b545cf5f7eef90a6b9521a9b586bf66ae8"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\orbit-1.png",
+      "sha256": "491e6cbf6262c14af30b5c7c97676e549d098cf1df8692a021311b3e0382b815"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\orbit-2.png",
+      "sha256": "6a420747ecc4fc0f4bc1d90683335666eaee59384d6cb3d0e1fc04b332e53360"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\orbit-3.png",
+      "sha256": "a2b0db79696bc9f2604aa1a233d2a87276c50d436b1e9d44983177fd8b35b06e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\orbit-4.png",
+      "sha256": "80320a8db5266f6649c91964bac1af69eee2e8c7029c452cae21d77a3c8bc87f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\walk-KeyW.png",
+      "sha256": "1b14db9008810255847da3a434732c23939f7c7b2456f0d3881e1eafc41f0197"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\camera-final\\returned-observer.png",
+      "sha256": "f1cba8aca2c4bc5b6f30b64987ae1e10a6bd26a61414df82fbf853757d3fb3c5"
+    }
+  ],
+  "completion": "Not complete. Original asset/material/light parity, sustained performance, fresh physical microphone and remaining interactive flows still need verification against the full objective."
+}

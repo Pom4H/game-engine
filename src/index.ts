@@ -1,11 +1,17 @@
+export {type FacadeSpec} from './render/facade-surface.js';
+export {rareWindGust,type GroundLitterSpec} from './render/ground-litter.js';
+export type {GroundCover} from './render/ground-cover.js';
+export type {RainResponse,SurfaceWeatherSpec} from './render/rain-surface.js';
 export {FixedClock} from './core/fixed-clock.js';
 export {ScenePerformanceProfiler,type ScenePerformanceConfig,type ScenePerformanceReport,type ScenePerformanceSample} from './scene/performance.js';
 export {SpatialHash,SPATIAL_MAX_ITEM_CELLS,SPATIAL_QUERY_CAPACITY,SPATIAL_QUERY_REFERENCES,type SpatialItem} from './core/spatial-hash.js';
-export {EngineKernel,KernelProgram,ModuleScheduler,ENGINE_PHASES,ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,type EngineModule,type EnginePlugin,type EnginePhase,type ModuleDescription,type ModuleDepthRequirement,type ModuleFrame,type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationProfileSpec,type SimulationTier} from './core/kernel.js';
+export {EngineKernel,KernelProgram,ModuleScheduler,ENGINE_PHASES,ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,type KernelSchedulingOptions,type EngineModule,type EnginePlugin,type EnginePhase,type ModuleDescription,type ModuleDepthRequirement,type ModuleFrame,type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationProfileSpec,type SimulationTier} from './core/kernel.js';
 export {DepthVariantRegistry,compileDepthVariants,type DepthRange,type DepthVariant,type DepthVariantPlugin,type CompiledDepthVariant,type CompiledDepthVariants} from './core/variants.js';
 export {ENGINE_DOMAINS,ENGINE_SLOTS,type EngineDomain,type EngineSlot} from './core/domains.js';
 export {PhysicsWorld,RigidBody,applyInvInertiaWorld,type PhysicsForceDriver,type CollisionShape,type Contact,type PhysicsStats,type RigidBodyOptions,type CollisionHit,type RigidContactKernel,type BatchedRigidContact,type ContactModel,type ContactDecision,type ContactCandidate} from './physics/world.js';
 export {CollisionSolverFamily,type CollisionSolverProgram,type CollisionSolverPlugin} from './physics/depth.js';
+export {SolidWorld,SolidBody,SolidBodyOverlapQuery,COMPOUND_PHYSICS_BACKEND,Qrotate,Qmul,Qaxis,Qeuler,Qangles,Qunit,QinverseRotate,Vadd,Vsub,Vscale,Vdot,Vcross,Vunit,Vlen,rayBox3,solidInside,intersectBoxes3,type SolidBodyOptions,type SolidWorldOptions,type SolidShape,type SolidBox,type SolidPlane,type SolidPlaneOptions,type SolidRayHit,type SolidContact,type SolidImpact,type SolidJoint,type SolidPolicies,type DeformableSolid,type SolidPositionAnchor,type SolidBodyOverlapSource} from './physics/compound.js';
+export {boxBounds,withBoxBounds,boxBoundsOverlap,boxesPenetrate,staticQueryRadius,STATIC_COLLISION_CELL_SIZE,type OrientedBox,type BoxBounds} from './physics/box-overlap.js';
 export {PhysicsCauseTrace,physicsCause,PHYSICS_CAUSE_TRACE_SCHEMA,PHYSICS_CAUSE_TRACE_VERSION,type PhysicsCauseRef,type PhysicsCauseWriter,type PhysicsCauseManifestWriter,type PhysicsTraceRecord,type PhysicsSourceKind,type PhysicsComponentKind,type PhysicsLawKind,type PhysicsEffectKind} from './physics/cause-trace.js';
 export {ForceFrame} from './physics/force-frame.js';
 export {physicsAccounting,rigidBodyMechanicalEnergyJ,type PhysicsAccountingState} from './physics/accounting.js';
@@ -18,9 +24,10 @@ export {FluidField,validateFluidVolume,type FluidVolumeSpec,type FluidSample} fr
 export {WindField,validateWindVolume,type WindVolumeSpec,type AirSample} from './physics/wind.js';
 export {SoilField,soilWheelSupport,validateSoilVolume,type SoilVolumeSpec,type SoilSample,type SoilContactInput,type SoilContactResult} from './physics/soil.js';
 export {PlasticDeformationSystem,type DeformableBodySpec,type SceneDeformationSpec,type PlasticDent} from './physics/deformation.js';
-export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type StructuralConstraintSpec,type StructuralDistanceSpec,type StructuralVolumeSpec,type StructuralStats,type BakedStructuralState} from './physics/structure.js';
+export {StructuralBody,type StructuralDefinition,type StructuralNodeSpec,type StructuralConstraintSpec,type StructuralDistanceSpec,type StructuralVolumeSpec,type StructuralStats,type StructuralDissipation,type BakedStructuralState} from './physics/structure.js';
 export {bindStructuralSkin,applyStructuralSkin,type StructuralSkinBinding} from './physics/structural-skin.js';
 export {StructuralStaticContactSolver,type StructuralStaticBox,type StructuralContactStats} from './physics/structural-contact.js';
+export {StructuralSolidContactSolver,type StructuralContactSphere,type StructuralContactSection,type StructuralMaterialContactSample} from './physics/structural-solid-contact.js';
 export {AdaptiveStructuralController,type ReducedRigidState,type StructuralActivationPolicy,type StructuralActivation,type AdaptiveStructuralStats} from './physics/adaptive-structure.js';
 export {generatePassengerVehicle,generatePassengerWheelParts,passengerPartMaterial,passengerStructuralDefinition,interpolateSection,validatePassengerVehicleProfile,type PassengerVehicleProfile,type PassengerSideSection,type PassengerRoofSection,type ParametricPassengerGeometry,type ParametricVehiclePart,type ParametricVehiclePartRole} from './vehicles/passenger.js';
 export {M3_PARAMETRIC_PROFILE,M3_REFERENCE_PROVENANCE,M3_VEHICLE_DEFINITION,generateM3Vehicle,generateM3ProceduralWheelVehicle,m3PartMaterial,m3PartBody,m3StructuralBlueprint,type M3StructuralBlueprint} from './vehicles/m3.js';
@@ -30,19 +37,22 @@ export {M3_FBX_PARTS_FIDELITY,M3_FBX_PART_SOURCES,m3FbxParts,type M3FbxPartSourc
 export {decodePackedShell,type PackedShell} from './vehicles/packed-shell.js';
 export {encodePackedMesh,decodePackedMesh,type PackedMesh} from './assets/packed-mesh.js';
 export {ElasticPlasticPanelResponse,FourCornerSuspension,DoorHinge,M3InteractionRig,type PanelImpactInput,type PanelImpactResult,type SuspensionPose,type VehicleInteractionImpact,type VehicleInteractionState} from './vehicles/interaction-physics.js';
-export {Scene,type RuntimeEntity} from './scene/scene.js';
+export {Scene,type RuntimeEntity,type PreparedRenderEntitySpec,type PreparedRenderEntityUpdate,type RenderEntityPreparation} from './scene/scene.js';
+export {RenderMeshQuery,avoidCameraObstacles,type RenderMeshHit,type RenderMeshFilter,type CameraObstruction} from './render/mesh-ray.js';
 export {syncSceneAcousticBoundaries,type SceneAcousticBoundaryStats} from './scene/acoustic-boundary.js';
 export {validateScene} from './scene/validate.js';
 export {defineScene} from './scene/define.js';
 export {encodeScene,decodeScene,sceneURL,sceneFromURL,type URLSceneOptions} from './scene/url.js';
-export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,SceneVehicleVisualSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color} from './scene/types.js';
-export {primitiveMesh,primitiveKey,surfaceGridPrimitive,type MeshData} from './procedural/mesh.js';
+export type {SceneSpec,SceneSnapshot,EntitySpec,BodySpec,SceneAnimationSpec,SceneSurfaceContactsSpec,SceneVehicleAssemblySpec,SceneVehicleVisualSpec,Primitive,MaterialSpec,CameraSpec,CameraRailSpec,LightSpec,LightEmissionSpec,RenderingSpec,ReflectionProbeSpec,Color,TransparentSortSpec} from './scene/types.js';
+export {primitiveMesh,primitiveKey,surfaceGridPrimitive,compactTriangleMesh,prepareCopiedTriangleMesh,isOwnedValidatedTriangleMesh,ownedTriangleMeshBounds,type MeshData,type CompactTriangleMeshInput,type CopiedTriangleMeshPreparation} from './procedural/mesh.js';
+export type {AggregateTriangleStream,TriangleStreamPrimitive,TriangleStreamUpdate,TriangleStreamUpdatePreparation} from './procedural/triangle-stream.js';
+export type {TriangleStreamOptions,TriangleStreamPreparation} from './render/triangle-stream-preparation.js';
 export {hillyTerrainHeight,hillyTerrainMesh,polygonSurfaceGrid,type HillyTerrainOptions,type TerrainCorridorSpec} from './procedural/terrain.js';
 export {clothLoftMesh,type ClothRing,type ClothLoftOptions} from './procedural/cloth.js';
 export type {Vec3,MutableVec3,Mat4} from './math.js';
 
 export {material,materialKinds,thermalLinearScale,type MaterialKind,type PhysicalMaterial,type MechanicalMaterial,type ThermalMaterial,type OpticalMaterial,type AcousticMaterial,type SurfaceMaterialProperties} from './materials/catalog.js';
-export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent} from './scene/events.js';
+export type {EngineEvent,ImpactEvent,FractureEvent,MechanismEvent,HornEvent} from './scene/events.js';
 export {renderAudio,synthesizeEvent,wavBytes,type AudioChannels} from './audio/synth.js';
 export {DiaphragmBreathSupport,PressureDrivenVocalFolds,CompliantVelopharyngealValve,type BreathSupportControl,type BreathSupportSample,type VocalFoldControl,type VocalFoldSample,type VelopharyngealControl} from './audio/vocal-source.js';
 export {VTL_EXTERNAL_BACKEND,planVtlNpcSpeech,serializeVtlSegmentSequence,type VtlSeedSyllable,type VtlExternalSegment,type VtlExternalPlan,planVtlDialogue,type VtlDialoguePlan,type VtlDialogueSpeaker,type VtlDialogueTurn,type VtlPitchPoint,type VtlPressurePoint} from './audio/vtl-external.js';
@@ -65,7 +75,7 @@ export {renderSceneAudio,type SceneAudioOptions,type SceneAudioRender} from './a
 export {fracturePlate,type PlateFractureInput,type PlateFracturePattern,type PlateFragment,type Vec2} from './materials/glass-fracture.js';
 
 export {resolveEnvironment,resolveEnvironmentAt,environmentTimeScale,environmentHistorySteps,type EnvironmentSpec,type EnvironmentState,type EnvironmentClockSpec,type WeatherKeyframe,type EnvironmentHistoryKeyframe,type EnvironmentHistoryStep,type Precipitation,type Snowfall} from './environment/types.js';
-export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState} from './materials/surface.js';
+export {deriveSurfaceState,effectiveFriction,type MaterialFinish,type MaterialTreatment,type MaterialSurfaceSpec,type SurfaceState,type SurfaceAppearance} from './materials/surface.js';
 export {SurfaceEnvironmentSystem,type SurfaceEnvironmentState,type BodyEnvironmentState,type SurfaceEnvironmentField,type SurfaceContactWork,type SnowpackState,type SnowLayerState,type SnowDiagnosticClass} from './environment/surface-state.js';
 export {DeformableSurfaceField,surfaceFieldResolution,type DeformableSurfaceCell,type DeformableSurfaceStamp} from './environment/deformable-surface.js';
 
@@ -81,6 +91,7 @@ export {SoftTongueRig,softTonguePrimitive,addSoftTongueToScene,hideLegacyTongue,
 export {SOFT_MOUTH_MOTOR_LEAD_S,sampleSoftMouthMotorPlan,SoftMouthRig,SoftVocalFaceRig,softVocalFaceSceneSpec,type SoftMouthAperture,type SoftMouthDiagnostics} from './animation/soft-mouth.js';
 export {VocalFaceRig,vocalFaceSceneSpec,vocalFaceCollisionDiagnostics,VOCAL_FACE_IDS,type VocalFacePose,type VocalFaceCollisionDiagnostics} from './animation/vocal-face.js';
 export {AnimationSystem,sampleWalker,bindHumanoid,solveTwoBone,humanoidMeasurements} from './animation/locomotion.js';
+export {VehicleRoute,type VehicleRouteSpec,type RoutePose} from './animation/route.js';
 export {ConversationFaceRig,conversationFaceEntities,conversationHeadMesh,sampleConversationArticulation,type ConversationFaceOptions,type ConversationFaceFrame,type ConversationArticulation,type ConversationFacePose} from './animation/conversation-face.js';
 export type {WalkerSpec,HumanoidProportions,HumanoidMeasurements,HumanoidJoint,HumanoidBinding,HumanoidPose,RigTransform,VehiclePart,VehicleMotionSpec,GroundSampler} from './animation/locomotion.js';
 export {compileCharacter,characterSpec,DEFAULT_CHARACTER_SPEC,CHARACTER_PRESETS,type CharacterSpec,type CompiledCharacter} from './characters/character.js';
@@ -150,3 +161,20 @@ export {CodexActivityAdapter} from './observability/adapters/codex.js';
 export {compileLiteraryDraft,literaryView,LITERARY_DRAFT_VERSION,type LiteraryDraft,type LiteraryCompilation,type LiteraryClaim,type LiteraryFact,type LiteraryVisual,type LiteraryShot,type LiteraryReading} from './literature/index.js';
 
 export {compileGeneratedLiterature,type GenerativeLiteraryDraft} from './literature/generative.js';
+
+export {stepCharacterMotion,advanceCharacterMotion,CHARACTER_MOTION_MODE,CHARACTER_MOTION_EVENT,CHARACTER_MOTION_TUNING,CHARACTER_MOTION_BACKEND,type CharacterMotionState,type CharacterMotionInput,type CharacterMotionWorld,type CharacterMotionTuning} from './runtime/character-motion.js';
+
+export type {PostProcessingSettings} from './render/camera-post.js';
+
+export {SimulationInterestPlanner,type SimulationInterestConfig,type SimulationInterestSubject,type SimulationInterestDecision,type SimulationPoint} from './world/simulation-interest.js';
+export {LocationWorkScheduler,type LocationWorkCandidate,type LocationWorkBudget,type LocationWorkPlan} from './world/location-work.js';
+export {LocationWorkerPool,SimulationPoolError,type PoolErrorCode,type LocationWorkerToken,type LocationWorkerJob,type LocationWorkerResult,type LocationWorkerRequest,type LocationWorkerResponse,type LocationPoolWorker,type LocationWorkerCodec,type LocationWorkerPoolOptions} from './world/location-worker-pool.js';
+
+export * from './physics/material-mechanics.js';
+export * from './physics/contact-excitation.js';
+export * from './physics/structural-graph.js';
+export * from './world/causal-runtime.js';
+export * from './assets/blueprints.js';
+
+export * from "./observability/index.js";
+export {appendWaterSurfaceCell,type WaterSurfaceCell,type WaterSurfaceMesh} from './procedural/water-surface.js';

@@ -1,0 +1,198 @@
+{
+  "status": "pass",
+  "scope": "Native HTML versus actual transferred OffscreenCanvas/DedicatedWorker image+numeric+glyph/asset/resize oracle, NOT FPS or GC evidence.",
+  "rawReport": "artifacts/canvas-target-native-20261022/r6/report.json",
+  "rawSHA256": "c89198da1f8c2a36a09ad220ac75c7de26983183fad15e105a720dccc2e21dac",
+  "baselineRevision": "a36d4df03f82f238eeb40ee67abab3973a4109d9",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/156.0.8078.47",
+    "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "jsVersion": "15.6.75.19"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "sources": [
+    {
+      "path": "src/render/webgpu.ts",
+      "sha256": "2ea9b01efc88ffcb35979c13a9ac53f6aef129ce41588268f4392e2e91cec1f8"
+    },
+    {
+      "path": "src/render/canvas-target.ts",
+      "sha256": "2c0e91a1fba0eeab236544fca8f5dbd3325133e415b582a1662ad0c061be97cc"
+    },
+    {
+      "path": "src/render/surface-textures.ts",
+      "sha256": "4b8bfb851e252e3d5327b6fa3e325e03d908e793464e539f0f3b6c3f5a7ce581"
+    },
+    {
+      "path": "src/render/attachment-views.ts",
+      "sha256": "2a2977888acac61f2447b5ba11be2674827839b05b5658ffe67472f8e58ec6e6"
+    },
+    {
+      "path": "src/render/frame.ts",
+      "sha256": "11dcbc1be30197ad2137a313bc5ca34eeb272435bd568106666d48b41f6d7478"
+    },
+    {
+      "path": "src/render/visibility-plan.ts",
+      "sha256": "0f687db49a40eab34c6e9796471bd8a580659501eb4beafd4abe13591bddbc99"
+    },
+    {
+      "path": "src/procedural/mesh.ts",
+      "sha256": "80de42ad913bb0e47fca033235f591f65a64386a12def940309afd515140ed5f"
+    }
+  ],
+  "sourceChanges": [],
+  "comparisons": [
+    {
+      "name": "dry",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "retainedPNGExact": true,
+      "retainedHDRExact": true,
+      "retainedDepthExact": true
+    },
+    {
+      "name": "wet-night",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "retainedPNGExact": true,
+      "retainedHDRExact": true,
+      "retainedDepthExact": true
+    },
+    {
+      "name": "mirrored",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "retainedPNGExact": true,
+      "retainedHDRExact": true,
+      "retainedDepthExact": true
+    },
+    {
+      "name": "rebased",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "retainedPNGExact": true,
+      "retainedHDRExact": true,
+      "retainedDepthExact": true
+    },
+    {
+      "name": "overlap-pages",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "retainedPNGExact": true,
+      "retainedHDRExact": true,
+      "retainedDepthExact": true
+    },
+    {
+      "name": "glyph-assets",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true,
+      "glyphsExact": true,
+      "texturesResident": true
+    },
+    {
+      "name": "viewport-640x360",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true
+    },
+    {
+      "name": "viewport-1280x720",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "geometryExact": true
+    }
+  ],
+  "fontEvidence": [
+    {
+      "mode": "worker",
+      "font": {
+        "available": true,
+        "checked": true,
+        "loadCompleted": true,
+        "readyAwaited": false,
+        "status": "loaded",
+        "document": "undefined",
+        "window": "undefined",
+        "worker": true
+      }
+    },
+    {
+      "mode": "html",
+      "font": {
+        "available": true,
+        "checked": true,
+        "status": "loaded",
+        "document": "object",
+        "window": "object",
+        "worker": false
+      }
+    }
+  ],
+  "glyphRasters": [
+    {
+      "sha256": "19fccaf48d9e07367b17fc27334b0948b909df5b8e6ac7b94e8bd8a673843a9f",
+      "bytes": 524288,
+      "font": "58px Georgia",
+      "width": 465.8125,
+      "longWidth": 2943.7548828125
+    },
+    {
+      "sha256": "c7135e999e1f18b673f82815df8e609f4df6ec7091b5910e6d2005c5506d92c0",
+      "bytes": 524288,
+      "font": "58px Georgia",
+      "width": 465.8125,
+      "longWidth": 2943.7548828125
+    }
+  ],
+  "textureScope": {
+    "authoredScene": [
+      "relative color",
+      "root-relative normal",
+      "absolute HTTP ORM",
+      "root-relative height"
+    ],
+    "blob": "standalone SurfaceTextures load only; ordinary Scene surface-map slots reject blob URLs, while terrain-map url retains its existing blob exception"
+  },
+  "fullCheck": {
+    "command": "npm run check",
+    "pass": 1041,
+    "skip": 19,
+    "fail": 0,
+    "total": 1060,
+    "durationMs": 67925.9733,
+    "log": "artifacts/canvas-target-full-check.log",
+    "timingScope": "correctness runtime, not performance"
+  },
+  "cleanup": {
+    "browserPID": 28292,
+    "browserExitCode": 0,
+    "serverStopped": true
+  },
+  "limitations": [
+    "Native image/glyph compatibility does not establish FPS or input isolation in the whole Game.",
+    "Worker font load+check and actual raster equality are tested; self.fonts.ready did not resolve in the preserved r4 startup.",
+    "Runtime sources are fenced; subsequent Game host/protocol changes are outside this fixture."
+  ]
+}

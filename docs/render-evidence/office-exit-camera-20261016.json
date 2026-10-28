@@ -1,0 +1,498 @@
+{
+  "date": "2026-10-16T14:00:40.239Z",
+  "scope": "Repair the actual one-frame Office camera collapse on leaving the original vehicle. Full Game/Engine/Office integration remains active.",
+  "cause": {
+    "observed": "A submitted frame after the presented seat/boarding cleared admitted the previous vehicle as a camera obstacle. Its rendered triangle crossed the near-plane corner rays; padding reduced the boom to 0.001 m. The neighbouring rendered frames had the same body position and an 8 m boom. The earlier interpolation hypothesis was not supported; networking was not changed.",
+    "baseline": {
+      "label": "office-exit-trace-first",
+      "frames": 139,
+      "collapses": [
+        {
+          "frame": 1306,
+          "time": 1113.057783195112,
+          "distance": 0.001,
+          "hit": "canonical:original:instance:custom:vehicle:1001:0:1",
+          "body": {
+            "x": -327.738,
+            "y": 0.035,
+            "z": -64.647,
+            "seat": null,
+            "boarding": null
+          }
+        }
+      ]
+    },
+    "oldGreen": {
+      "path": "../thegame/artifacts/office-walking/office-controls-final/transport-exited.png",
+      "sha256": "1f2cb28925eb1944e9d0d2c3c7757b65c1303af4cc01e371c8b3a90b232a3dc9",
+      "pixels": {
+        "mean": [
+          26.082912457912457,
+          45.926767676767675,
+          29.59722222222222
+        ],
+        "spatialSD": [
+          2.653309845033289,
+          3.372856444596773,
+          1.7555277855494789
+        ],
+        "flat": true
+      }
+    }
+  },
+  "implementation": {
+    "clearance": "RenderMeshQuery.withinDistance measures distance to the actual selected render triangles in world coordinates, with cached immutable meshes, live poses, nonuniform scaling, edge/degenerate handling and broad bounds.",
+    "camera": "CanonicalWorldLayer keeps the exited vehicle excluded only while its actual opaque geometry lies within the near-plane anchor clearance. The radius is sqrt(2)*0.18 + 0.12 metres, derived from the existing corner rays and padding. Subject/world epoch changes reset the remembered vehicle. Other vehicles and walls keep their obstacle role.",
+    "authority": "No pose, seat, input ownership, vehicle/NPC simulation or server rule changed; no Office physics body or step was added.",
+    "diagnostics": "Opt-in traceFrames records at most 160 submitted frames. It is disabled by default. Debug tracing compares the previous camera policy on the same meshes without using that result to drive the camera, and can save the actually intersected triangle."
+  },
+  "regression": {
+    "fixture": "test/fixtures/office-exit-camera.json",
+    "source": "Actually intersected original wagon triangle saved from office-exit-clearance-first frame 1485",
+    "oldDistance": 0.001,
+    "newDistance": 8,
+    "limits": "The isolated triangle fixture reproduces the collision; it is not an alternate playable asset or a whole-world rendering oracle."
+  },
+  "verification": {
+    "node": {
+      "command": "node --test test/render-mesh-ray.test.mjs",
+      "tests": 9,
+      "exit": 0,
+      "log": "artifacts/office-exit-debug/mesh-clearance-tests.log"
+    },
+    "canonical": {
+      "command": "bun test apps/thegame/test/canonical-connection.test.ts apps/thegame/test/canonical-world-view.test.ts",
+      "tests": 42,
+      "bunAssertions": 4345,
+      "exit": 0,
+      "log": "artifacts/office-exit-debug/canonical-tests.log"
+    },
+    "checks": [
+      "Engine TypeScript/build",
+      "Canonical Office TypeScript",
+      "Game TypeScript/browser build",
+      "Installed Office UI TypeScript/Vite build"
+    ],
+    "logs": [
+      "artifacts/office-exit-debug/types-engine.log",
+      "artifacts/office-exit-debug/engine-build.log",
+      "artifacts/office-exit-debug/clearance-types-app.log",
+      "artifacts/office-exit-debug/clearance-types-ui.log",
+      "artifacts/office-exit-debug/build-ui.log",
+      "../thegame/artifacts/office-exit-types-game.log",
+      "../thegame/artifacts/office-exit-build-game.log"
+    ],
+    "rejectedSetup": "The first new mesh tests omitted required normals and failed Scene validation; fixtures were corrected without loosening validation. An initial UI typecheck from the Game cwd used a different TypeScript and rejected the pre-existing baseUrl option; the actual installed UI compiler was then used. One opt-in trace type error was corrected before native acceptance."
+  },
+  "native": {
+    "command": "bun tools/capture.ts --office",
+    "env": {
+      "CAPTURE_EXISTING": "1",
+      "CAPTURE_PORT": "3007",
+      "CAPTURE_DEBUG_PORT": "3198",
+      "CAPTURE_GPU": "1",
+      "OFFICE_WALKING_QA": "1",
+      "OFFICE_CAMERA_QA": "1",
+      "OFFICE_TRANSPORT_QA": "1",
+      "OFFICE_EXIT_TRACE": "1",
+      "OFFICE_EXIT_ASSERT": "1",
+      "PERF_LABEL": "office-exit-clearance-final"
+    },
+    "exit": {
+      "submittedFrames": 128,
+      "minBoom": 8.000000000000009,
+      "maxBoom": 8.000000000000009,
+      "previousPolicyOnSameFrames": [
+        {
+          "frame": 1582,
+          "time": 1267.1079118652153,
+          "previous": 0.001,
+          "current": 8.000000000000009,
+          "exclusion": {
+            "vehicle": "vehicle:1001",
+            "occupied": false
+          }
+        }
+      ],
+      "clearanceRelease": {
+        "before": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "after": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "position": [
+          -326.78379354701616,
+          -64.7331404199896
+        ]
+      },
+      "screenshots": [
+        {
+          "name": "transport-exited-1.png",
+          "mean": [
+            5.202441077441078,
+            6.668139730639731,
+            7.714856902356902
+          ],
+          "spatialSD": [
+            9.515883095024758,
+            10.567072296041523,
+            11.780537642707156
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-2.png",
+          "mean": [
+            5.211489898989899,
+            6.674242424242424,
+            7.718434343434343
+          ],
+          "spatialSD": [
+            9.564490177700304,
+            10.612499849027447,
+            11.822616298204814
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-3.png",
+          "mean": [
+            5.214015151515151,
+            6.674978956228956,
+            7.719486531986532
+          ],
+          "spatialSD": [
+            9.575659494467166,
+            10.628863973550704,
+            11.837156833092681
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-4.png",
+          "mean": [
+            5.2139099326599325,
+            6.674242424242424,
+            7.718644781144781
+          ],
+          "spatialSD": [
+            9.592201217162883,
+            10.642380093555605,
+            11.85067576168126
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-5.png",
+          "mean": [
+            5.2094907407407405,
+            6.669928451178452,
+            7.712226430976431
+          ],
+          "spatialSD": [
+            9.59856005930241,
+            10.657891580467908,
+            11.860226674773624
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-6.png",
+          "mean": [
+            5.206965488215488,
+            6.6647727272727275,
+            7.705597643097643
+          ],
+          "spatialSD": [
+            9.603283466285152,
+            10.661456892923228,
+            11.867420770205245
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-7.png",
+          "mean": [
+            5.205281986531986,
+            6.661300505050505,
+            7.700862794612795
+          ],
+          "spatialSD": [
+            9.604491875584069,
+            10.663848696214577,
+            11.868361838248736
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited-8.png",
+          "mean": [
+            5.205281986531986,
+            6.662878787878788,
+            7.699600168350169
+          ],
+          "spatialSD": [
+            9.61332863375031,
+            10.67273079495924,
+            11.875712624730575
+          ],
+          "flat": false
+        },
+        {
+          "name": "transport-exited.png",
+          "mean": [
+            5.15625,
+            6.610585016835016,
+            7.650357744107744
+          ],
+          "spatialSD": [
+            9.398967504266318,
+            10.44463807686725,
+            11.664092152732678
+          ],
+          "flat": false
+        }
+      ]
+    },
+    "browserMode": "native-gpu",
+    "actor": "player:c560b94f-35df-4f8f-b2cc-7f939edc3de8",
+    "entryContinuity": {
+      "expectedActorId": "player:c560b94f-35df-4f8f-b2cc-7f939edc3de8",
+      "actor": "player:c560b94f-35df-4f8f-b2cc-7f939edc3de8",
+      "matched": true
+    },
+    "officeParts": 231,
+    "editorRevision": 53,
+    "editorObjects": 45,
+    "geometryRevision": 1,
+    "walkingDistance": 2.08321141593469,
+    "vehicleTravel": 1.2000004166665972,
+    "passengerTravel": 0,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "gpuErrors": [],
+    "renderErrors": [],
+    "officePhysicsBodies": 0,
+    "officePhysicsSteps": 0,
+    "record": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\report.json",
+    "transportRecord": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-report.json",
+    "log": "..\\thegame\\artifacts\\office-exit-clearance-final.log"
+  },
+  "runtime": {
+    "pid": 1960,
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13,
+      "tick": 667510
+    },
+    "bundles": [
+      {
+        "name": "game.js",
+        "sha256": "90827d63363d17582f6d4b059bf06372aa09f6d04161ce3e18d3c3cc8a6cb3a2",
+        "bytes": 2465291
+      },
+      {
+        "name": "office-controller.js",
+        "sha256": "acd398dcd5da403de4c5a6df6f507f54b2dfa04ccaeed3b36805d1dc673f2fde",
+        "bytes": 1218387
+      }
+    ],
+    "services": "Canonical server, native Office, backend and microphone services were not restarted; no physical microphone capture was enabled."
+  },
+  "sources": [
+    {
+      "path": "src\\render\\mesh-ray.ts",
+      "sha256": "72f4c930ea460f5fc964c1d4cd9070624c6c8d0eb180348885347d6ad97123da"
+    },
+    {
+      "path": "apps\\thegame\\client\\canonical-world-view.ts",
+      "sha256": "5c8a70c98ccf08f71db6c5e6ab852f4d456e55ecdc6a54f0f41b28236ae624f3"
+    },
+    {
+      "path": "apps\\thegame\\test\\canonical-world-view.test.ts",
+      "sha256": "0c302fde183b80eff90b41ef0ba251d3de1930a8faf1f00d8739d7bb59863538"
+    },
+    {
+      "path": "test\\render-mesh-ray.test.mjs",
+      "sha256": "273232ae92ac40d9498b390324122e4ffb20d914f913883a5853bf8489a9f93e"
+    },
+    {
+      "path": "test\\fixtures\\office-exit-camera.json",
+      "sha256": "d8b44d6dc62926c9771a23f52bab9e42036f58269a6bbb4bf7b324eb5bd1b9ed"
+    },
+    {
+      "path": "..\\..\\voice-agent\\ui\\src\\office\\scene.ts",
+      "sha256": "affeb25b8790d5d9d8e51e29eb0ef8be7d402359883e75abbf74ea4bd81fb006"
+    },
+    {
+      "path": "..\\thegame\\tools\\qa-office-transport.ts",
+      "sha256": "bf6836b11b99ee60f1ad476285c4740effe8be438fbc1052c51c09e90a81cd22"
+    },
+    {
+      "path": "..\\thegame\\tools\\qa-office-walking.ts",
+      "sha256": "15a596ef586bb24dff15f886a19fd1521ca79707cf82c37a6f5ef71968d5c8f0"
+    },
+    {
+      "path": "..\\thegame\\tools\\capture.ts",
+      "sha256": "229a71a7b0b427f3896af18fa2ddcbacee1ab22c645e0e4c28aff9cfc244e1d3"
+    },
+    {
+      "path": "..\\thegame\\src\\game\\office-dynamic-assets.ts",
+      "sha256": "72f81c8a7ba0295b59d5ba87aaecd73c0d818224f5ab262b27f093ba7516ba95"
+    }
+  ],
+  "images": [
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\entered.png",
+      "sha256": "6e03579eac5b10487898a6023749833c6895eff5efee604926e0e3ea15a3522f",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\observer.png",
+      "sha256": "af9ed696134fb364ee5d0cc6d8e4d8eb5a46c8702bdc4403db9e6e9f7e1c3839",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\orbit-1.png",
+      "sha256": "7290870a4b284b6c80053c29886582a9096c5b3e30e28b655623eb0715741a57",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\orbit-2.png",
+      "sha256": "a4202a31d4d033fa2f552eb764115222be71f5d7f6d16ff99e6bf1080abf69c6",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\orbit-3.png",
+      "sha256": "d51db3d36058a7d87c8bad5acac673d72fd6a3b73dca475e5607cdaa78939b56",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\orbit-4.png",
+      "sha256": "e2d58df95e6023917806a6f685f00b4f6ac87b8f7d8c612ff850f44420a291e8",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\returned-observer.png",
+      "sha256": "4ec2543bcfa44cd60a6b90af0d771bfd797f9edc8d67e8ce31ca819a51448a36",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-clearance-restored.png",
+      "sha256": "7f36c313c4d75cbf69bbbe7adf80d405373dcde916949a19a9bcd453dd2f80ab",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-driver.png",
+      "sha256": "dac60e175776bcd799465cddca94e5e9a370bfe32dd65f869e26a3a79202dc75",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-driving.png",
+      "sha256": "527bf019354eda1eec6fdd000aa76b91ad64897d0e696ff52bdc9d00386631a5",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-engine-off.png",
+      "sha256": "75af25b8a6e43f7714a2e6a5d75db363393fdced0287b7c85761b5e0afc2f30b",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-1.png",
+      "sha256": "c16e65c2d8a7623860832aa73067b534874a0a12a334ecca311109792d78033f",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-2.png",
+      "sha256": "02bedbac99186d06a03ff5e206a7227f0cf42fcdf57f0b0732bccd1366e791f0",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-3.png",
+      "sha256": "5b1760ddfde315f527ebe8562b36eb9a4c1d470a732c0b4db9e948861f2c37da",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-4.png",
+      "sha256": "5100c0af7468ad0ebfa03a54656a0a4e560a5b4e20f294fe80c50ba8c120aa4c",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-5.png",
+      "sha256": "ec9420d1e0514a605fcfae2a235c23a5a875fce66ce4eb4072398e2ece4a7958",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-6.png",
+      "sha256": "2c5dd71e331020b9137904865298c000091fd87278822191e16a9b17a9650c43",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-7.png",
+      "sha256": "20bc8a1b524d3d32b57761da72bc88f4288c992c39926709fadb8387f16a7934",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited-8.png",
+      "sha256": "e376f17ca23ca90fceaa2690125d003cbd3fd0379117e0a74cccbbe93a024252",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-exited.png",
+      "sha256": "47565ba1b9b63093fb409326a2d2d2eee9670ca3af7bf5823636e785532cfb73",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\transport-passenger.png",
+      "sha256": "689bf1d001edad1b3f8361807a3192d5f23936dd50ba42bb9b437b10f6bb80f5",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-walking\\office-exit-clearance-final\\walk-KeyW.png",
+      "sha256": "654a0cc8ef6d4610cc1859258f2a43e7b02382e96ba034684c98ddbfb53f9b10",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-exit-clearance-final-game\\canonical-lobby.png",
+      "sha256": "5d3f098287e712eeb8956ff3e6466c5b0add668492312041b74f6209d7352598",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-exit-clearance-final-game\\entrance.png",
+      "sha256": "0948727d8d47e97345f0d8db19cdd11bffd6579e3906551f84b6b9826635acf7",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-exit-clearance-final-game\\office-entry.png",
+      "sha256": "cb64ed6618f2904f4cfe39c83cfe260568e16621edc5ad1352a4782d7dbe6cdb",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-exit-clearance-final-game\\upper-office.png",
+      "sha256": "8b59d9735ba18841e425ad4a64897814fe37560b725a6af67cb972cde558ce52",
+      "reviewed": true
+    },
+    {
+      "path": "..\\thegame\\artifacts\\office-exit-clearance-final-game\\workplaces.png",
+      "sha256": "525b839cfdeb952dd76e235b03bfed15e954d942b552e8029d186b45f409ef83",
+      "reviewed": true
+    }
+  ],
+  "limits": [
+    "This verifies the captured city wagon exit, not every possible vehicle/camera/environment contact.",
+    "No new averaged FPS measurement was made, and diagnostic tracing changes the CPU workload. Staged HUD FPS is not a benchmark.",
+    "The previous-policy comparison is a CPU camera calculation on the same current meshes; the actual failing older submitted frame and prior green screenshot are separate evidence.",
+    "All 27 final PNGs were inspected. Exterior night scenes remain dark; static city/material/sky/light fidelity and broad startup readiness are still open.",
+    "The final browser log still contains Office favicon.ico HTTP 404 and autoplay/powerPreference/atomFamily warnings. No all-network-error-free claim.",
+    "Remaining interactive/audio/aircraft/combat/gamepad flows, Office NPC selection and the full integration completion audit remain open.",
+    "No commit or PR was created; unrelated existing dirty work was preserved."
+  ]
+}

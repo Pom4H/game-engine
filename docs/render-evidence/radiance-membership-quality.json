@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "status": "personally-inspected-rejected-candidate",
+  "retainedInProduction": false,
+  "comparison": "docs/render-evidence/radiance-membership-comparison.json",
+  "sourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "117362617d0cacc35908c49a8dc4a01851d0e945f9b1e4c24c4fae44002e1d51",
+    "distSha256": "432e3a5b4c768830ada604472c27b5b64d9d40c17c9608763df7d79234bd0142",
+    "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb"
+  },
+  "images": [
+    {
+      "path": "artifacts/engine-compare/radiance-membership-before/images/2026-10-12T06-05-09.531Z/10000-static-engine-r1.png",
+      "sha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Engine control: complete cube layout, haze, soft far detail, shadow and emission are visible."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/10000-static-engine-r1.png",
+      "sha256": "b355d511ef2c5a1280d528572bf4394d96005465b75a46a3a4215112f6eaa959",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Engine candidate: no visible gross change from the control at full resolution. Numeric comparison still detects three RGB channels outside the baseline range, each differing by one 8-bit level."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/10000-static-three-r1.png",
+      "sha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Three.js: sharper distant cube edges with visible stair steps; contrast and sky differ from Engine."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/10000-static-babylon-r1.png",
+      "sha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Babylon.js: sharper distant cube edges with visible stair steps; lighting and sky differ from Engine."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/quality-wet-front.png",
+      "sha256": "ae74f5e120f3ef520b0a08ccb136c19f66a1cd7d8706d084ffb7ab40aca3c158",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Front: glass remains transparent; colored triangles/cubes and ground reflections are visible, together with patch detail and a broad sun highlight."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/quality-wet-back.png",
+      "sha256": "734b5c319b7d174420905c64213b90152b6fbfd3aad907bbd63b0edc18f6735a",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Back: brick blocks, emission, white panels and reflected geometry remain visible."
+    },
+    {
+      "path": "artifacts/engine-compare/radiance-membership-after/images/2026-10-12T06-12-55.526Z/quality-wet-low.png",
+      "sha256": "f283defd206ba16a5b01e2d20dc4f598d549dd81ca3f59a04ff092da0f79c167",
+      "inspection": "view_image original, full 1920x1080 native capture",
+      "observation": "Low: thin/edge-on triangles and glass remain visible; ground reflections retain the grazing-angle view."
+    }
+  ],
+  "wetChecks": [
+    {
+      "name": "wet-front",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0,
+      "coordinates": [],
+      "bounds": null
+    },
+    {
+      "name": "wet-back",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0,
+      "coordinates": [],
+      "bounds": null
+    },
+    {
+      "name": "wet-low",
+      "presentationChannels": 8294400,
+      "reflectionChannels": 3240000,
+      "changedPresentationChannels": 0,
+      "changedReflectionChannels": 0,
+      "maxPresentationError": 0,
+      "maxReflectionError": 0,
+      "coordinates": [],
+      "bounds": null
+    }
+  ],
+  "canonicalFailure": [
+    {
+      "count": 10000,
+      "scenario": "static",
+      "repetition": 1,
+      "comparedChannels": 8294400,
+      "changedChannels": 3,
+      "maxError": 1,
+      "outsideBaselineRange": 3,
+      "coordinates": [
+        {
+          "x": 1553,
+          "y": 407,
+          "channel": 0,
+          "before": 100,
+          "after": 99,
+          "minimum": 100,
+          "maximum": 100
+        },
+        {
+          "x": 1552,
+          "y": 414,
+          "channel": 0,
+          "before": 106,
+          "after": 105,
+          "minimum": 106,
+          "maximum": 106
+        },
+        {
+          "x": 1552,
+          "y": 414,
+          "channel": 1,
+          "before": 112,
+          "after": 111,
+          "minimum": 112,
+          "maximum": 112
+        }
+      ],
+      "baselineCaptures": 6,
+      "baselineVaryingChannels": 0
+    }
+  ],
+  "gates": {
+    "historyRecordsResident": true,
+    "canonicalPixels": false,
+    "wetPixels": true,
+    "frameBudget": false,
+    "equalPixelQualityEstablished": false,
+    "competitiveAdvantageEstablished": false,
+    "performanceIsolationEstablished": false,
+    "staticMembershipObserved": true,
+    "pairedEnvironmentCausesExact": true,
+    "pairedGPUWorkExact": true,
+    "pairedOpaqueHDRExact": true,
+    "pairedAllFinalStagesExact": false
+  },
+  "interpretation": [
+    "All three wet views match control presentation RGBA and finite reflection HDR channels exactly.",
+    "Engine edges look smoother but distant details look softer than the two peer captures. Static pictures do not establish temporal quality or overall superiority.",
+    "Visual inspection does not override numeric image failures. No candidate speed/quality win is established."
+  ]
+}

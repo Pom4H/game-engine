@@ -1,0 +1,124 @@
+{
+  "measuredAt": "2026-10-17T02:34:44.0700820+00:00",
+  "command": "bun tools/capture.ts --live",
+  "exitCode": 0,
+  "environment": {
+    "CAPTURE_PORT": "3007",
+    "PERF_LIVE_FRAMES": "900",
+    "CAPTURE_DEBUG_PORT": "3249",
+    "PERF_PROFILE": "0",
+    "CAPTURE_EXISTING": "1",
+    "PERF_FIXED_SETTINGS": "1",
+    "PERF_WARMUP_FRAMES": "180",
+    "PERF_LABEL": "fps-live-20261017-subject-camera",
+    "CAPTURE_GPU": "1"
+  },
+  "hardware": [
+    {
+      "Name": "AMD Radeon 760M Graphics",
+      "DriverVersion": "32.0.31041.1004"
+    }
+  ],
+  "frames": 900,
+  "warmupFrames": 180,
+  "profiled": false,
+  "averageFPS": 47.5282661160429,
+  "p50Ms": 19.30000000000291,
+  "p95Ms": 30,
+  "derivedIntervalSumMs": 18936.100000000002,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [
+      704,
+      396
+    ]
+  },
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "hiz": false,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "motionBlur": 0,
+    "dof": 0,
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "visual": {
+      "sunElevation": 0.9075712110370514,
+      "sunTemperature": 5700,
+      "skyTurbidity": 2.2,
+      "humidity": 0.42,
+      "cloudCoverage": 0.16,
+      "fogDensity": 0.00065,
+      "wetness": 0,
+      "exposureBias": -0.25,
+      "artificialLightIntensity": 0.02,
+      "sunIntensity": 4.2,
+      "skyIntensity": 0.7
+    }
+  },
+  "adaptiveEnabled": false,
+  "cameraDepth": {
+    "encoding": "logarithmic",
+    "near": 0.05,
+    "far": 2000,
+    "logarithmicDenominator": 10.966505451905741
+  },
+  "actualLiveEnvironment": {
+    "worldMinute": 266579.76664768223,
+    "projectionHour": 2.9977774613701818,
+    "facadeNight": 1,
+    "rain": 0.25040796113278974,
+    "wetness": [
+      0.35,
+      0.35
+    ]
+  },
+  "rendererErrors": [],
+  "networkStatus": "online",
+  "selfPose": {
+    "x": -345,
+    "y": 0.16999999999999998,
+    "z": -66,
+    "animation": "idle"
+  },
+  "rawMetrics": {
+    "repo": "game",
+    "path": "artifacts/performance-live-fps-live-20261017-subject-camera.json",
+    "bytes": 227527,
+    "sha256": "2f76b678fff70f7071c4d6a071f1da547b5ae277efd5ff3ca4a34c86065acfbb"
+  },
+  "gameBundle": {
+    "repo": "game",
+    "path": "public/build/game.js",
+    "bytes": 2492369,
+    "sha256": "dcccdd96f7db9b37108f3ae0ba9acb6953b3705168f346949fe911740beb4bb1",
+    "archive": "artifacts/office-subject-camera/fps-game.js"
+  },
+  "servedGameBundle": {
+    "url": "http://127.0.0.1:3007/build/game.js",
+    "status": 200,
+    "bytes": 2492369,
+    "sha256": "dcccdd96f7db9b37108f3ae0ba9acb6953b3705168f346949fe911740beb4bb1"
+  },
+  "finalHealthCheck": {
+    "date": "2026-10-17T02:37:40.598Z",
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+    "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+    "900 requestAnimationFrame intervals after 180 warmup frames; each benchmark discards 30 initial intervals. Not isolated GPU execution time. Interval sum derived from count/throughput.",
+    "Fixed requested visual settings do not freeze the live authority environment. The sampled world had night facade lights and rain/wetness; actual environment recorded separately.",
+    "Different bundle and unpaired live world from the earlier 60.7115 FPS sample. These measurements do not establish a performance improvement or regression."
+  ]
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Production shadows and glossy reflections</title>
+<style>body{margin:0;background:#18202b;color:#eee;font:16px system-ui}canvas{width:960px;height:600px;display:block}pre{white-space:pre-wrap}p{margin:12px}</style>
+<p>Production Engine: smooth metal (left), rough metal (right), static and dynamic sun shadows.</p>
+<canvas width="960" height="600"></canvas><pre id="result">Running…</pre>
+<script type="module">
+import {Scene} from '/dist/scene/scene.js';
+import {WebGPURenderer} from '/dist/render/webgpu.js';
+import {SHADOW_FILTER_WGSL,STATIC_SHADOW_SAMPLES,DYNAMIC_SHADOW_SAMPLES} from '/dist/render/shadow-filter.js';
+const result=document.querySelector('#result');
+try{
+ const canvas=document.querySelector('canvas');
+ result.textContent='Initializing production pipelines…';
+ const renderer=await WebGPURenderer.create(canvas,{features:{temporalAA:false,bloom:false}});
+ result.textContent='Rendering production probe and shadow passes…';
+ renderer.setResolution(960,600);
+ const scene=new Scene({version:1,environment:{sunlight:1,snowfall:'none'},camera:{position:[6,4.5,8],target:[.5,.8,0],fov:48},rendering:{sunDirection:[-.6,.7,.4],sunIntensity:3,skyColor:[.25,.34,.48],ambientIrradiance:[.04,.04,.04],shadowExtent:12,reflectionProbe:{position:[.5,1.5,0],radius:20,facesPerFrame:6,exclude:['smooth','rough']}},entities:[
+  {id:'ground',mesh:{kind:'plane',size:[24,24]},material:{kind:'concrete',color:[.45,.46,.43,1],roughness:.9}},
+  {id:'smooth',mesh:{kind:'sphere',radius:1},position:[-1,1,0],renderOnly:true,material:{kind:'steel',color:[.75,.75,.75,1],roughness:.08,metalness:1}},
+  {id:'rough',mesh:{kind:'sphere',radius:1},position:[2,1,0],renderOnly:true,material:{kind:'steel',color:[.75,.75,.75,1],roughness:.85,metalness:1}},
+  {id:'caster',mesh:{kind:'box',size:[1,3,1]},position:[-3,1.5,-2],renderOnly:true,material:{color:[.35,.45,.55,1],roughness:.8}},
+  {id:'red',mesh:{kind:'box',size:[3,3,.15]},position:[-2,2,5],renderOnly:true,material:{color:[1,.03,.01,1],emissive:[1,.01,0]}},
+  {id:'blue',mesh:{kind:'box',size:[.15,3,3]},position:[5,2,1],renderOnly:true,material:{color:[.02,.1,1,1],emissive:[0,.04,1]}}
+ ]});
+ // This is a rendering fixture: no authority, gameplay state or alternate game entry.
+ scene.setVisualTransform('smooth',[-1,1,0]);
+ for(let i=0;i<8;i++){renderer.render(scene);await renderer.sampleLinearPixels([[480,300]],'hdr');}
+ renderer.render(scene);
+ const device=renderer.device;
+ device.pushErrorScope('validation');
+ const module=device.createShaderModule({code:SHADOW_FILTER_WGSL+`
+ @group(0) @binding(0) var<storage,read_write> answers:array<f32>;
+ @compute @workgroup_size(1) fn main(){
+  var centre=vec2<f32>(0);var xx=0.;var yy=0.;
+  for(var i=0u;i<4u;i++){centre+=SHADOW_TAPS[i];xx+=SHADOW_TAPS[i].x*SHADOW_TAPS[i].x;yy+=SHADOW_TAPS[i].y*SHADOW_TAPS[i].y;}
+  answers[0]=centre.x;answers[1]=centre.y;answers[2]=xx-yy;
+  answers[3]=combineShadowVisibility(f32(STATIC_SHADOW_SAMPLES),f32(DYNAMIC_SHADOW_SAMPLES));
+  answers[4]=combineShadowVisibility(f32(STATIC_SHADOW_SAMPLES)*.5,f32(DYNAMIC_SHADOW_SAMPLES));
+  answers[5]=combineShadowVisibility(f32(STATIC_SHADOW_SAMPLES),f32(DYNAMIC_SHADOW_SAMPLES)*.25);
+ }`});
+ const pipeline=await device.createComputePipelineAsync({layout:'auto',compute:{module,entryPoint:'main'}});
+ const output=device.createBuffer({size:24,usage:0x80|0x04}),readback=device.createBuffer({size:24,usage:0x01|0x08});
+ const bind=device.createBindGroup({layout:pipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:output}}]});
+ const encoder=device.createCommandEncoder(),pass=encoder.beginComputePass();pass.setPipeline(pipeline);pass.setBindGroup(0,bind);pass.dispatchWorkgroups(1);pass.end();encoder.copyBufferToBuffer(output,0,readback,0,24);device.queue.submit([encoder.finish()]);
+ await readback.mapAsync(1);const values=[...new Float32Array(readback.getMappedRange())];readback.unmap();output.destroy();readback.destroy();
+ const error=await device.popErrorScope();if(error)throw Error(error.message);
+ const expected=[0,0,0,1,.5,.25],stats=renderer.inspect(false);
+ const checks=values.map((actual,i)=>({actual,expected:expected[i],passed:actual===expected[i]}));
+ result.textContent=JSON.stringify({status:checks.every(c=>c.passed)&&!stats.errors?.length?'passed':'failed',checks,staticSamples:STATIC_SHADOW_SAMPLES,dynamicSamples:DYNAMIC_SHADOW_SAMPLES,errors:stats.errors},null,2);
+}catch(error){result.textContent=JSON.stringify({status:'failed',error:String(error)},null,2);}
+</script>

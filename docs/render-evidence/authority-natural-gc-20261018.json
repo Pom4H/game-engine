@@ -1,0 +1,365 @@
+{
+  "date": "2026-10-18",
+  "label": "canonical-current-20261018-1",
+  "status": "complete_raw_clock_mapping_unverified",
+  "scope": "One isolated passive Inspector diagnostic, not an unprofiled authority benchmark or native FPS observation.",
+  "command": "bun artifacts/network-stability-20261018/collect-authority-gc-inspector.ts canonical-current-20261018-1 > artifacts/network-stability-20261018/authority-gc-canonical-current-20261018-1.log 2>&1",
+  "runtime": {
+    "bunVersion": "1.4.2",
+    "bunRevision": "744846f844374847c902b5e7fd59b4342a51ef99"
+  },
+  "settings": {
+    "seed": 29,
+    "residentLimit": 80,
+    "workers": 0,
+    "populationHz": 30,
+    "physicsSubsteps": 2,
+    "snapshotHz": 20,
+    "vehicleInterestPeriod": 1,
+    "streamingPeriod": 2,
+    "worldInterestPeriod": 1,
+    "warmTicks": 120,
+    "measuredTicks": 600
+  },
+  "naturalCollections": {
+    "count": 162,
+    "byType": {
+      "partial": 150,
+      "full": 12
+    },
+    "totalReportedIntervalMs": 977.4693999788724,
+    "maxReportedIntervalMs": 118.6697999946773,
+    "scope": "Entire Heap.enable observation includes construction, warmup, measured steps and cleanup; no scored-only collection attribution."
+  },
+  "diagnosticTicks": {
+    "count": 600,
+    "meanMs": 14.54619699999999,
+    "p95Ms": 28.73829999999907,
+    "quantileMethod": "sorted[floor(N*p)] consistent with prior authority fixture summaries",
+    "nearestRankP95Ms": 28.16349999999875,
+    "maxMs": 59.70629999999983,
+    "worstTick": {
+      "index": 239,
+      "authorityTick": 240,
+      "startedMs": 6489.0819,
+      "endedMs": 6548.7882,
+      "measured": true
+    },
+    "worstPhases": [
+      {
+        "index": 239,
+        "name": "worldBefore",
+        "parent": "stream",
+        "startedMs": 6489.1712,
+        "endedMs": 6492.0097,
+        "measured": true,
+        "durationMs": 2.83849999999984
+      },
+      {
+        "index": 239,
+        "name": "vehicleInterest",
+        "parent": "stream",
+        "startedMs": 6492.0112,
+        "endedMs": 6492.2194,
+        "measured": true,
+        "durationMs": 0.20820000000003347
+      },
+      {
+        "index": 239,
+        "name": "safety",
+        "parent": "stream",
+        "startedMs": 6492.22,
+        "endedMs": 6492.2404,
+        "measured": true,
+        "durationMs": 0.020399999999426655
+      },
+      {
+        "index": 239,
+        "name": "streaming",
+        "parent": "stream",
+        "startedMs": 6492.2407,
+        "endedMs": 6492.4504,
+        "measured": true,
+        "durationMs": 0.20969999999942956
+      },
+      {
+        "index": 239,
+        "name": "catalog",
+        "parent": "stream",
+        "startedMs": 6492.4509,
+        "endedMs": 6492.4589,
+        "measured": true,
+        "durationMs": 0.007999999999810825
+      },
+      {
+        "index": 239,
+        "name": "stream",
+        "parent": null,
+        "startedMs": 6489.0997,
+        "endedMs": 6492.4604,
+        "measured": true,
+        "durationMs": 3.360700000000179
+      },
+      {
+        "index": 239,
+        "name": "players",
+        "parent": null,
+        "startedMs": 6492.4667,
+        "endedMs": 6492.9497,
+        "measured": true,
+        "durationMs": 0.4830000000001746
+      },
+      {
+        "index": 239,
+        "name": "residentsUpdate",
+        "parent": "population",
+        "startedMs": 6493.0184,
+        "endedMs": 6501.9442,
+        "measured": true,
+        "durationMs": 8.925799999999981
+      },
+      {
+        "index": 239,
+        "name": "worldAfter",
+        "parent": "population",
+        "startedMs": 6501.9463,
+        "endedMs": 6502.0885,
+        "measured": true,
+        "durationMs": 0.14220000000022992
+      },
+      {
+        "index": 239,
+        "name": "residentsStep",
+        "parent": "population",
+        "startedMs": 6502.0891,
+        "endedMs": 6533.6603,
+        "measured": true,
+        "durationMs": 31.571199999999408
+      },
+      {
+        "index": 239,
+        "name": "traffic",
+        "parent": "population",
+        "startedMs": 6533.7634,
+        "endedMs": 6539.2776,
+        "measured": true,
+        "durationMs": 5.514200000000528
+      },
+      {
+        "index": 239,
+        "name": "population",
+        "parent": null,
+        "startedMs": 6492.955,
+        "endedMs": 6539.4246,
+        "measured": true,
+        "durationMs": 46.469600000000355
+      },
+      {
+        "index": 239,
+        "name": "physics",
+        "parent": null,
+        "startedMs": 6539.4366,
+        "endedMs": 6547.23,
+        "measured": true,
+        "durationMs": 7.793399999999565
+      },
+      {
+        "index": 239,
+        "name": "settle",
+        "parent": null,
+        "startedMs": 6547.2395,
+        "endedMs": 6547.3705,
+        "measured": true,
+        "durationMs": 0.13100000000031287
+      },
+      {
+        "index": 239,
+        "name": "publish",
+        "parent": null,
+        "startedMs": 6547.3726,
+        "endedMs": 6548.7835,
+        "measured": true,
+        "durationMs": 1.410899999999856
+      }
+    ],
+    "note": "Nested phase intervals overlap and must not be added together. Inspector/event and interval-array overhead can change allocations, GC, JIT and work before the existing navigation deadline."
+  },
+  "clockMapping": {
+    "verified": false,
+    "conversionCandidate": "Heap startTime/endTime seconds multiplied by1000; not proof of shared performance.now origin.",
+    "pilot": {
+      "path": "artifacts/network-stability-20261018/inspector-gc-pilot.json",
+      "status": "pilot_complete",
+      "bunVersion": "1.4.2",
+      "eventMethods": {
+        "Heap.garbageCollected": 41
+      },
+      "unsupportedTimeline": [
+        {
+          "method": "Timeline.start",
+          "error": {
+            "code": -32601,
+            "message": "'Timeline' domain was not found",
+            "data": [
+              {
+                "code": -32601,
+                "message": "'Timeline' domain was not found"
+              }
+            ]
+          }
+        },
+        {
+          "method": "Timeline.stop",
+          "error": {
+            "code": -32601,
+            "message": "'Timeline' domain was not found",
+            "data": [
+              {
+                "code": -32601,
+                "message": "'Timeline' domain was not found"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "rule": "Preserve raw event/host/child clock domains. No zero-origin assumption, pointwise tick overlap, GC pause attribution or performance claim until an independently verified bridge or conservative offset-bound analysis is supplied. Collection intervals are not independently verified mutator-pause intervals."
+  },
+  "clockAnchors": [
+    {
+      "label": "constructionBefore",
+      "performanceNow": 90.2041,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297448786
+    },
+    {
+      "label": "constructionAfter",
+      "performanceNow": 1631.703,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297450327
+    },
+    {
+      "label": "warmBefore",
+      "performanceNow": 1682.7249,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297450378
+    },
+    {
+      "label": "scoreBefore",
+      "performanceNow": 4767.8326,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297453463
+    },
+    {
+      "label": "scoreAfter",
+      "performanceNow": 13502.3923,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297462198
+    },
+    {
+      "label": "cleanupBefore",
+      "performanceNow": 13502.4773,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297462198
+    },
+    {
+      "label": "cleanupAfter",
+      "performanceNow": 13502.6457,
+      "timeOrigin": 1792297448696.1064,
+      "dateNow": 1792297462198
+    }
+  ],
+  "physical": {
+    "physics": {
+      "steps": 1440,
+      "contacts": 0,
+      "maxPenetration": 0,
+      "ceilingContacts": 0,
+      "substeps": 2373,
+      "bodySubsteps": 20593,
+      "islands": 34
+    },
+    "residents": 80,
+    "navigation": {
+      "expanded": 2031,
+      "completed": 29,
+      "failed": 5,
+      "maxWork": 20,
+      "dynamicRoutes": 33,
+      "pending": 23,
+      "cachedCells": 5427,
+      "queryMemo": {
+        "hits": 16280,
+        "misses": 111960,
+        "maxEntries": 1626
+      }
+    },
+    "egress": {
+      "searched": 0,
+      "failed": 0,
+      "recovered": 0,
+      "motorTicks": 0,
+      "maxExpanded": 0
+    },
+    "statics": 91129,
+    "planes": 4787,
+    "globalPlanes": 2,
+    "index": {
+      "cells": 8553,
+      "oversizedItems": 3,
+      "cachedQueries": 128,
+      "cachedReferences": 9356,
+      "cacheHits": 659628,
+      "cacheMisses": 67365
+    }
+  },
+  "guards": {
+    "parseErrors": 0,
+    "droppedEvents": 0,
+    "droppedOutput": 0,
+    "invalidGcEvents": 0,
+    "droppedPhases": 0,
+    "sourceHashesUnchanged": true,
+    "manualGcCommands": []
+  },
+  "cleanup": {
+    "collectorExit": 0,
+    "fixtureStatus": "complete",
+    "ownedIdleChildExit": 143,
+    "explanation": "After completed fixture and Heap.disable response the collector closed its owned WebSocket and terminated the intentionally idling inspected child; child143 is this cleanup signal, not fixture failure."
+  },
+  "sourceHashes": {
+    "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+    "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+    "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+    "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+    "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+    "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+    "../game-engine/src/physics/compound.ts": "773b9887c7940d631e82558b8ac716cb0121f82100e5efbfb6b2fdcec7ba1304",
+    "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+    "../game-engine/dist/physics/compound.js": "2ea2c922516481588e9567737e277af5c563aa831686f9250dbbd6341519b791",
+    "../game-engine/dist/core/spatial-hash.js": "a6c0be374ce4a19e738cee5e3194d7b733f82639b4804ad518d35b665b850c9d"
+  },
+  "artifactHashes": {
+    "artifacts/network-stability-20261018/authority-gc-canonical-current-20261018-1-inspector.json": "68be87cde2b4cbe4213f53bbbbb40359420083493ab295fc794a03913a0a6dd1",
+    "artifacts/network-stability-20261018/authority-gc-canonical-current-20261018-1-ticks.json": "04b94c0f7908c4144050fc04db6e4666d3e0de03040c2bf0d8b6a29eb2449e54",
+    "artifacts/network-stability-20261018/authority-gc-inspector-child.ts": "fad487dc92ac54298f625a87b64f7e2bd5affee20962169fac6f88be077cd192",
+    "artifacts/network-stability-20261018/collect-authority-gc-inspector.ts": "6d1cb120a6d7b5d521435704ea9bc3fc1c9ec0fa938a5abe3b69be0ca1b74d42"
+  },
+  "limitations": [
+    "Heap interval seconds and process performance.now are retained in separate raw clock domains; no zero-origin assumption or pointwise tick/phase overlap is claimed.",
+    "Reported GC collection intervals are not independently established stop-the-world mutator pauses.",
+    "Natural event counts and duration totals span the full observer window, not just the600 measured ticks.",
+    "No forced GC, full heap snapshot, allocation tracking, production edits, browser capture or TLS verification occurred.",
+    "Instrumentation and one run prohibit a before/after server-budget, FPS, leak or resident-tail causal claim."
+  ],
+  "clockResearch": {
+    "sourceManifest": "artifacts/network-stability-20261018/clock-source/manifest.json",
+    "bunPerformanceSource": "https://raw.githubusercontent.com/oven-sh/bun/744846f844374847c902b5e7fd59b4342a51ef99/src/jsc/bindings/webcore/Performance.cpp",
+    "bunPerformanceFinding": "Pinned installed-revision source Performance::now reads Bun__readOriginTimer/1e6; this does not establish equality with the Inspector execution stopwatch origin.",
+    "upstreamHeapSource": "https://raw.githubusercontent.com/WebKit/WebKit/main/Source/JavaScriptCore/inspector/agents/InspectorHeapAgent.cpp",
+    "upstreamScriptProfilerSource": "https://raw.githubusercontent.com/WebKit/WebKit/main/Source/JavaScriptCore/inspector/agents/InspectorScriptProfilerAgent.cpp",
+    "finding": "Upstream Heap collection and ScriptProfiler trackingStart use the same environment executionStopwatch, while Heap.startTracking invokes snapshot and is excluded. Installed Bun JSC dependency equivalence is not yet pinned, so the current capture remains unmapped.",
+    "nextCandidate": "After verifying installed JSC dependency, an independently authorized isolated marker pilot could bracket ScriptProfiler.startTracking(includeSamples:false) with Runtime performance.now before/after. It still installs a profiling client and must be reported as diagnostic instrumentation. No ScriptProfiler command or canonical rerun was performed."
+  }
+}

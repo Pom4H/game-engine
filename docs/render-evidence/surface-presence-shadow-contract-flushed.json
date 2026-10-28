@@ -1,0 +1,205 @@
+{
+  "status": "completed",
+  "controls": {
+    "cases": 4177,
+    "staticSamples": 4,
+    "dynamicSamples": 2,
+    "binaryCases": 64,
+    "filteredCases": 4096,
+    "dynamicDisabledCases": 17,
+    "receiverPlanes": 225,
+    "receiverPlaneAbsoluteTolerance": 0.000001
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "shaderContractHash": "1c188537898084ca4082439e2954e2c32e2de7468315d512fda8f29ae4eaf829",
+  "productionModuleHashes": [
+    "cddfe5a78fa95ce7ff01be456748f54a5d82fd34f71bc65deaf5a383e66eff58",
+    "b9c22aff580aacff33a6ff4cc922fa8fbb585ef05ad986a156133a0ed9407f83",
+    "9b8362ead6c006f90d7fd4806ea3ee2de1f69787869452d306029e5efd07c843"
+  ],
+  "productionCompilation": [
+    {
+      "material": "main",
+      "messages": []
+    },
+    {
+      "material": "relief",
+      "messages": []
+    },
+    {
+      "material": "instances",
+      "messages": []
+    }
+  ],
+  "inputsHash": "b2e0573d73ee8d3dc29315734fcdcdecc2bdf52bfe5535ac41a8a2521bea1f9b",
+  "outputsHash": "63539bb229d63ab1061fcbc74fdc06c7c6966be5ca868a39157a0e07825ee84b",
+  "maxError": 0,
+  "failures": [],
+  "changedLegacyCases": 2089,
+  "maxLegacyError": 0.5,
+  "examples": [
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:17",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:18",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:20",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        1,
+        0
+      ],
+      "label": "binary:24",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:33",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:34",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:36",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    },
+    {
+      "staticSamples": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "dynamicSamples": [
+        0,
+        1
+      ],
+      "label": "binary:40",
+      "expected": 0.25,
+      "actual": 0.25,
+      "legacy": 0.5
+    }
+  ],
+  "receiverPlanes": {
+    "maxError": 0,
+    "failures": [],
+    "inputsHash": "9bc62431d095f5ce9ad2db160bcd1b9a706076e2e7cac59b702d2d5dbed4fac7",
+    "outputsHash": "822f56e9bdd4c99baf12fe993a1df6424d89244cb52c849a8390a7e989da1c5b"
+  },
+  "gates": {
+    "nativeHardware": true,
+    "productionContractPresent": true,
+    "normalizedCoverage": true,
+    "receiverPlaneDepth": true,
+    "originalErrorExposed": true
+  },
+  "interpretation": "Actual GPU evaluates the production WGSL helper used by main/relief/instance material shaders. Independent references average individual static/dynamic filtered comparison samples. Binary, fractional and dynamic-disabled coverage cases compare with zero tolerance. The old min(sumStatic,sumDynamic)*0.5 exposes incorrect static weighting. Receiver-plane references use authored affine slopes across mirrored/rotated/sheared projections, with a declared 1e-6 f32 absolute tolerance and finite neutral fallback for singular projections. These kernel checks do not prove image repeatability, full-frame performance or competitive quality.",
+  "startedAt": "2026-10-12T02:34:40.812Z",
+  "completedAt": "2026-10-12T02:34:54.108Z",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "468c5eecf68f17b5ee8ac2abf7e81228bb42c92abfcfd5eecad65ae664f1601f",
+    "diagnosticSha256": "4065f96102d8913ce12f4932d76d47a821d5d8b9f49a08dbf2b40dd06dfff562"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

@@ -3,6 +3,7 @@ import {
  type EngineDepth,type SimulationProfile,type SimulationProfileInput,type SimulationTier,
 } from './depth.js';
 import {compileDepthVariants} from './variants.js';
+import type {EngineTrace} from '../observability/trace.js';
 export {
  ENGINE_DEPTH,ENGINE_DEPTH_AXES,SIMULATION_TIERS,simulationDepth,simulationProfile,simulationProfileKey,simulationTierDepth,simulationTierForDepth,validateEngineDepth,
 } from './depth.js';
@@ -10,6 +11,12 @@ export type {EngineDepth,SimulationProfile,SimulationProfileInput,SimulationProf
 
 export type EnginePhase='input'|'plan'|'simulate'|'commit'|'publish';
 export const ENGINE_PHASES:readonly EnginePhase[]=Object.freeze(['input','plan','simulate','commit','publish']);
+export interface KernelSchedulingOptions{
+ /** Strict declarations are the default; ID order adapts synchronous state
+  * owners whose declared resource hazards already execute serially. */
+ readonly resourceOrder?:'explicit'|'id';
+}
+const CYCLE_PLAN_LIMIT=4096,PATTERN_PLAN_LIMIT=256;
 
 export interface ModuleDepthRequirement{
  readonly axis:string;
@@ -51,15 +58,19 @@ export interface ModuleBatch{
  readonly modules:readonly ModuleDescription[];
 }
 export interface KernelRunOptions<Context,Command>{
+ readonly trace?:EngineTrace;
  readonly commit?:(commands:readonly Command[],context:Readonly<Context>,phase:EnginePhase)=>Readonly<Context>;
  readonly deltaSeconds?:number;
  readonly read?:()=>Readonly<Context>;
  readonly onModule?:(module:ModuleDescription,frame:ModuleFrame)=>void;
+ readonly onModuleTime?:(module:ModuleDescription,milliseconds:number)=>void;
 }
 export interface CompiledSchedule{
  readonly profile:SimulationProfile;
+ /** Zero selects bounded due-pattern planning instead of a large LCM table. */
  readonly cycleTicks:number;
  readonly selectedModules:readonly ModuleDescription[];
+ readonly diagnostics:{readonly precomputedPlans:number;readonly cachedPatterns:number;readonly patternCapacity:number};
  plan(tick:number):readonly ModuleBatch[];
 }
 
@@ -90,9 +101,12 @@ export class ModuleScheduler{
  private readonly modules=new Map<string,Registered>();
  private readonly compiled=new Map<string,CompiledSchedule>();
  private compileBuilds=0;private compileHits=0;
- constructor(readonly tickRate=60,readonly capacity=64){
+ private readonly orderPolicy:'explicit'|'id';
+ constructor(readonly tickRate=60,readonly capacity=64,options:KernelSchedulingOptions={}){
   if(!Number.isSafeInteger(tickRate)||tickRate<1||!Number.isSafeInteger(capacity)||capacity<1)throw new RangeError('Invalid module scheduler budget');
+  const policy=options.resourceOrder??'explicit';if(policy!=='explicit'&&policy!=='id')throw new TypeError('Unknown resource ordering policy');this.orderPolicy=policy;
  }
+ get resourceOrder(){return this.orderPolicy;}
  private prepare(module:ModuleDescription,seen:Set<string>):Registered{
   if(typeof module.id!=='string'||!module.id||module.id.length>180||seen.has(module.id))throw new TypeError('Modules require distinct stable IDs');
   if(!ENGINE_PHASES.includes(module.phase))throw new TypeError('Unknown engine phase');
@@ -163,12 +177,16 @@ export class ModuleScheduler{
    while(queue.length){const id=queue.pop()!;if(visited.has(id))continue;visited.add(id);for(const dependency of byChosenId.get(id)?.dependencies??[]){if(dependency===a)return true;queue.push(dependency);}}
    return false;
   };
+  if(this.orderPolicy==='id')for(let i=0;i<order.length;i++)for(let j=i+1;j<order.length;j++){
+   const a=order[i]!,b=order[j]!;
+   if(a.description.phase===b.description.phase&&conflicts(a.description,b.description)&&!precedes(a.description.id,b.description.id)&&!precedes(b.description.id,a.description.id))b.dependencies=Object.freeze([...b.dependencies,a.description.id]);
+  }
   for(let i=0;i<chosen.length;i++)for(let j=i+1;j<chosen.length;j++){
    const a=chosen[i]!.description,b=chosen[j]!.description;
    if(a.phase===b.phase&&conflicts(a,b)&&!precedes(a.id,b.id)&&!precedes(b.id,a.id))throw new TypeError(`Ambiguous resource hazard: ${a.id} / ${b.id}; declare after`);
   }
-  const cycleTicks=order.reduce((cycle,item)=>lcm(cycle,item.periodTicks),1),plans:(readonly ModuleBatch[])[]=[];
-  for(let tick=0;tick<cycleTicks;tick++){
+  let cycleTicks=1;for(const item of order){const next=lcm(cycleTicks,item.periodTicks);if(!Number.isSafeInteger(next)||next>CYCLE_PLAN_LIMIT){cycleTicks=0;break;}cycleTicks=next;}
+  const makePlan=(tick:number):readonly ModuleBatch[]=>{
    const batches:ModuleBatch[]=[];let batch:ModuleDescription[]=[];
    const flush=()=>{if(batch.length)batches.push(Object.freeze({phase:batch[0]!.phase,modules:Object.freeze(batch)}));batch=[];};
    for(const item of order){
@@ -176,11 +194,15 @@ export class ModuleScheduler{
     if(batch.some(other=>other.phase!==m.phase||conflicts(other,m)||item.dependencies.includes(other.id)))flush();
     batch.push(m);
    }
-   flush();plans.push(Object.freeze(batches));
-  }
-  const frozenPlans=Object.freeze(plans),schedule=Object.freeze({
+   flush();return Object.freeze(batches);
+  };
+  const frozenPlans=Object.freeze(Array.from({length:cycleTicks},(_,tick)=>makePlan(tick))),patterns=new Map<string,readonly ModuleBatch[]>(),schedule=Object.freeze({
    profile,cycleTicks,selectedModules:Object.freeze(order.map(item=>item.description)),
-   plan:(tick:number)=>{if(!Number.isSafeInteger(tick)||tick<0)throw new RangeError('tick must be a non-negative safe integer');return frozenPlans[tick%cycleTicks]!;},
+   get diagnostics(){return Object.freeze({precomputedPlans:frozenPlans.length,cachedPatterns:patterns.size,patternCapacity:PATTERN_PLAN_LIMIT});},
+   plan:(tick:number)=>{
+    if(!Number.isSafeInteger(tick)||tick<0)throw new RangeError('tick must be a non-negative safe integer');if(cycleTicks)return frozenPlans[tick%cycleTicks]!;
+    const due=order.map(item=>tick%item.periodTicks===0?'1':'0').join(''),cached=patterns.get(due);if(cached)return cached;const plan=makePlan(tick);if(patterns.size>=PATTERN_PLAN_LIMIT)patterns.delete(patterns.keys().next().value!);patterns.set(due,plan);return plan;
+   },
   }) as CompiledSchedule;
   if(this.compiled.size>=64)this.compiled.delete(this.compiled.keys().next().value!);
   this.compiled.set(key,schedule);this.compileBuilds++;return schedule;
@@ -206,40 +228,51 @@ function snapshot<T>(context:T):Readonly<T>{
 interface ExecutableModule<Context,Command>{readonly module:EngineModule<Context,Command>;readonly depth:EngineDepth}
 interface ExecutableBatch<Context,Command>{readonly phase:EnginePhase;readonly modules:readonly ExecutableModule<Context,Command>[]}
 
-/** Immutable direct-call program for one depth profile. All plugin flattening, variant
- * selection, dependency resolution and LOD decisions are already compiled out. */
+/** Immutable direct-call program for one depth profile. Variant/dependency/LOD
+ * selection is compiled once; long cadences cache bounded direct-call patterns. */
 export class KernelProgram<Context,Command>{
  readonly profile:SimulationProfile;
  readonly cycleTicks:number;
  readonly selectedModules:readonly ModuleDescription[];
  private readonly plans:readonly (readonly ExecutableBatch<Context,Command>[])[];
  private readonly tier:SimulationTier;
+ private readonly implementations:ReadonlyMap<string,EngineModule<Context,Command>>;
+ private readonly patterns=new Map<readonly ModuleBatch[],readonly ExecutableBatch<Context,Command>[]>();
  constructor(
   readonly tickRate:number,
-  schedule:CompiledSchedule,
+  private readonly schedule:CompiledSchedule,
   implementations:ReadonlyMap<string,EngineModule<Context,Command>>,
  ){
-  this.profile=schedule.profile;this.cycleTicks=schedule.cycleTicks;this.selectedModules=schedule.selectedModules;this.tier=simulationTierForDepth(schedule.profile.defaultDepth);
+  this.profile=schedule.profile;this.cycleTicks=schedule.cycleTicks;this.selectedModules=schedule.selectedModules;this.tier=simulationTierForDepth(schedule.profile.defaultDepth);this.implementations=new Map(implementations);
   const plans:(readonly ExecutableBatch<Context,Command>[])[]=[];
-  for(let tick=0;tick<schedule.cycleTicks;tick++)plans.push(Object.freeze(schedule.plan(tick).map(batch=>Object.freeze({
-   phase:batch.phase,
-   modules:Object.freeze(batch.modules.map(description=>{
-    const module=implementations.get(description.id);if(!module)throw new TypeError(`No implementation: ${description.id}`);
-    return Object.freeze({module,depth:description.depth?simulationDepth(schedule.profile,description.depth.axis):schedule.profile.defaultDepth});
-   })),
-  }))));
+  for(let tick=0;tick<schedule.cycleTicks;tick++)plans.push(this.compilePlan(schedule.plan(tick)));
   this.plans=Object.freeze(plans);
  }
+ private compilePlan(plan:readonly ModuleBatch[]):readonly ExecutableBatch<Context,Command>[]{
+  return Object.freeze(plan.map(batch=>Object.freeze({
+   phase:batch.phase,
+   modules:Object.freeze(batch.modules.map(description=>{
+    const module=this.implementations.get(description.id);if(!module)throw new TypeError(`No implementation: ${description.id}`);
+    return Object.freeze({module,depth:description.depth?simulationDepth(this.profile,description.depth.axis):this.profile.defaultDepth});
+   })),
+  })));
+ }
+ get diagnostics(){return Object.freeze({precomputedPlans:this.plans.length,cachedPatterns:this.patterns.size,patternCapacity:PATTERN_PLAN_LIMIT});}
  run(tick:number,context:Readonly<Context>,options:KernelRunOptions<Context,Command>={}):Command[]{
   if(!Number.isSafeInteger(tick)||tick<0)throw new RangeError('tick must be a non-negative safe integer');
   const dt=options.deltaSeconds??1/this.tickRate;if(!Number.isFinite(dt)||dt<=0)throw new RangeError('Kernel delta must be positive and finite');
   const commands:Command[]=[];let current=context;
-  for(const batch of this.plans[tick%this.cycleTicks]!){
+  let plan=this.cycleTicks?this.plans[tick%this.cycleTicks]:undefined;
+  if(!plan){const schedule=this.schedule.plan(tick);plan=this.patterns.get(schedule);if(!plan){plan=this.compilePlan(schedule);if(this.patterns.size>=PATTERN_PLAN_LIMIT)this.patterns.delete(this.patterns.keys().next().value!);this.patterns.set(schedule,plan);}}
+  for(const batch of plan){
    const view=batch.modules.every(item=>item.module.context==='none')?Object.freeze({}) as Readonly<Context>:snapshot(options.read?.()??current),pending:Command[]=[];
    for(const item of batch.modules){
     const module=item.module,frame=Object.freeze({tick,deltaSeconds:dt*this.tickRate/module.rateHz,tier:this.tier,depth:item.depth,profile:this.profile,phase:module.phase});
     options.onModule?.(module,frame);
-    const result=module.run(view,frame);if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
+    const trace=options.trace?.recording?options.trace:undefined,at=options.onModuleTime||trace?performance.now():0;
+    let result:readonly Command[]|void;
+    try{result=module.run(view,frame);}finally{if(options.onModuleTime||trace){const end=performance.now();options.onModuleTime?.(module,end-at);trace?.complete(module.id,'kernel.module',at,end,{tick,phase:frame.phase});}}
+    if(result&&!Array.isArray(result))throw new TypeError(`Module ${module.id} must return synchronous commands`);if(result)pending.push(...result);
    }
    if(pending.length){commands.push(...pending);if(options.commit)current=options.commit(pending,view,batch.phase);}
   }
@@ -252,7 +285,7 @@ export class EngineKernel<Context,Command>{
  private readonly modules=new Map<string,EngineModule<Context,Command>>();
  private readonly plugins=new Set<string>();
  private readonly programs=new Map<string,KernelProgram<Context,Command>>();
- constructor(tickRate=60,capacity=64){this.scheduler=new ModuleScheduler(tickRate,capacity);}
+ constructor(tickRate=60,capacity=64,options:KernelSchedulingOptions={}){this.scheduler=new ModuleScheduler(tickRate,capacity,options);}
  use(module:EngineModule<Context,Command>):this{
   if(typeof module.run!=='function')throw new TypeError('Kernel modules require a synchronous implementation');
   this.scheduler.use(module);this.modules.set(module.id,Object.freeze({...stable(module),run:module.run}));this.programs.clear();return this;

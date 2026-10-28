@@ -1,0 +1,32 @@
+{
+  "source": "Native Office original wagon exit; one actually intersected rendered triangle and its camera. Derived from office-exit-clearance-first, frame 1485. This is an isolated regression fixture, never a playable route.",
+  "id": "canonical:original:instance:custom:vehicle:1001:0:3",
+  "triangle": 33,
+  "positions": [
+    30.264845990313727,
+    -5.219999969005585,
+    430.8044819707188,
+    29.645726167518546,
+    -5.219999969005585,
+    431.47263581198126,
+    29.526335156474154,
+    -5.839999973773956,
+    431.35518987847684
+  ],
+  "desired": {
+    "position": [
+      29.675682382893317,
+      -2.898467515071057,
+      423.78538063031453
+    ],
+    "target": [
+      29.73900000000003,
+      -5.414999999999999,
+      431.37899999999996
+    ],
+    "fov": 39,
+    "aperture": 0
+  },
+  "oldDistance": 0.001,
+  "newDistance": 8.000000000000025
+}

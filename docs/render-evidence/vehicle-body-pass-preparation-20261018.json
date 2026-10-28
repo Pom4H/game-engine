@@ -1,0 +1,30 @@
+{
+  "date":"2026-10-18",
+  "change":"Prepare chassis deformation, body transform closure and body MeshBuilder only for all/body vehicle passes.",
+  "source":"../thegame/src/game/runtime/scene.js",
+  "noPhysicsOrQualityChanges":true,
+  "regressions":{
+    "file":"../thegame/test/vehicle-body-pass-preparation.test.ts",
+    "passed":4,"failed":0,"assertions":121,
+    "frozenFixture":"../thegame/test/fixtures/vehicle-render-before-body-lazy.js",
+    "scope":"Six vehicle families across body/wheels/effects/all and raw/instanced output; exact complete Float64 geometry and active instance buffers; unchanged callback/reentry traces; evolving actual structural revisions; wheel/effects deformation-read trap. Aircraft early return remains unchanged."
+  },
+  "isolatedBenchmark":{
+    "artifact":"../thegame/artifacts/vehicle-body-pass-preparation-bench.json",
+    "runtime":"Bun1.4.2/JSC",
+    "pairedOrder":"Seven alternating before/after pairs using actual passes and reused instance streams",
+    "vehicles":24,
+    "cases":[
+      {"structural":false,"pass":"effects","frames":1200,"beforeMedianMs":1.288,"afterMedianMs":0.9676},
+      {"structural":false,"pass":"wheels","frames":160,"beforeMedianMs":42.3034,"afterMedianMs":40.0914},
+      {"structural":true,"pass":"effects","frames":1200,"beforeMedianMs":5.3554,"afterMedianMs":0.7862},
+      {"structural":true,"pass":"wheels","frames":160,"beforeMedianMs":45.733,"afterMedianMs":40.8541}
+    ],
+    "scope":"A small dead-work removal. Effects are empty for these non-aircraft vehicles; their benchmark primarily measures avoided preparation. Body tessellation, general vertex allocation, GPU upload, physics and visual detail remain unchanged. These totals are not per-frame live time or an FPS/GC improvement claim."
+  },
+  "rejectedAlternatives":{
+    "numericTriangleBuilder":"artifacts/numeric-builder-rejected-20261018.json",
+    "reason":"Private scalar builder plus direct pack regressed complete compile+pack for ordinary bodies. Its small V8 large-body win was noisy and Bun/JSC regressed; global push interception also exposed a private-array trust leak. Candidate was fully removed; existing public mesh ownership/iterator behavior is retained.",
+    "publicVertexFastPath":"Descriptor-safe guards increased sampled allocations and slowed actual complete body generation. An unsafe shortcut changed valid accessor/iterator behavior. Production vertex method remains unchanged."
+  }
+}

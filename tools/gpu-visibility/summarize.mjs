@@ -1,0 +1,11 @@
+import {readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const report=JSON.parse(await readFile(resolve(import.meta.dirname,'../../artifacts/gpu-visibility/report.json'),'utf8'));
+const number=value=>Number.isFinite(value)?value.toFixed(2):'unavailable';
+console.log('# GPU visibility crossover\n');
+console.log(`Correctness: **${report.status}**. 60 FPS p95 budget: **${report.frameBudgetPassed===true?'passed':'not passed'}**.\n`);
+console.log('Objects | Camera | Mode | CPU p95 ms | GPU p95 ms | Frame interval p95 ms | FPS | Mean upload bytes\n--- | --- | --- | ---: | ---: | ---: | ---: | ---:');
+for(const result of report.results??[])console.log([result.count,result.scenario,result.mode,number(result.cpuMs.p95),number(result.gpuMs?.p95Ms),number(result.frameIntervalMs.p95),number(result.fps),number(result.uploadBytes.mean)].join(' | '));
+if(report.error)console.log('\nFailure: '+report.error);
+console.log('\nFixed scene, replay, resolution and lighting across all modes. Native adapter and GPU timestamps are required. The current CPU renderer remains the default.');
+if(process.argv.includes('--check-budget')&&(report.status!=='correctness-passed'||report.frameBudgetPassed!==true))process.exitCode=1;

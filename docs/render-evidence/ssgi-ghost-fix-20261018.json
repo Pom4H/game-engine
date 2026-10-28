@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-18",
+  "scope": "TheGame production entry at http://localhost:3007/ in the user's Chrome tab",
+  "cause": "SSGI divided its weighted radiance by the sum of accepted weights. This canceled receiver cosine and range attenuation; a nonzero emitter floor also allowed back-facing transfer. Sparse HDR taps appeared as shifted copies of headlights, roof sign and road markings on unrelated surfaces.",
+  "isolation": [
+    "Observed ghost taxi in the live user tab.",
+    "Turned TAA off through the graphics menu: ghost remained.",
+    "Rebuilt TheGame browser bundle, not only the Engine dist files.",
+    "Temporarily disabled SSR, then planar application, with rebuild/reload/reconnect: ghost headlights remained.",
+    "Temporarily disabled SSGI contribution: ghost headlights disappeared.",
+    "Restored SSR and planar passes, fixed SSGI quadrature and emitter cosine, rebuilt and reloaded production game."
+  ],
+  "fix": "Use a fixed six-direction integration divisor, preserving both cosines and distance attenuation. Back-facing emitters contribute zero. SSGI remains enabled.",
+  "visualVerification": {
+    "settings": "Engine WebGPU, TAA enabled, bloom off, motion blur off, DOF off. Clear-day preset used for final inspection.",
+    "observed": "No shifted headlights below the taxi bumper in front view; no rectangular roof-sign copies on the roof or duplicated taxi on the ground in elevated side view.",
+    "images": ["artifacts/reflection-qa/taxi-front-fixed.jpg", "artifacts/reflection-qa/taxi-angle-fixed.jpg"],
+    "limits": "Manual visual verification in a live changing world, not pixel-identical before/after replay or a performance benchmark. Initial crosswalk camera was not reproduced."
+  },
+  "checks": {
+    "engineBuild": "bun run build: passed",
+    "engineTypes": "bun run typecheck: passed",
+    "gameBuild": "bun run build in ../thegame: passed; bundle SHA256 7bb758acdb1d0d14c9fceeb9335e85219e3b99637eab8a281df4ddcb12aeefa9",
+    "nodeTests": "node --test test/clearcoat.test.mjs test/renderer-post.test.mjs test/render-visibility-plan.test.mjs test/surface-appearance.test.mjs test/rain-surface.test.mjs: 37 passed",
+    "gpuRegression": "tools/render-stability/diffuse-bounce-check.html: 8 passed on the production WGSL helper, including zero/tangent/back-facing/range and weak-angle transfer. Raw output: artifacts/reflection-qa/gpu-regression.json"
+  }
+}

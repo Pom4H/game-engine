@@ -1,0 +1,104 @@
+name: GPU visibility crossover
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_artifacts:
+        description: Upload evidence to GitHub artifact storage (local evidence is always retained)
+        type: boolean
+        default: false
+
+concurrency:
+  group: gpu-visibility-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  crossover:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install and check
+        id: checks
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run check
+      - name: Crossover correctness and measurements
+        run: node tools/gpu-visibility/benchmark.mjs
+      - name: Native shadow coverage and receiver-plane depth
+        if: always() && steps.checks.outcome == 'success'
+        run: |
+          $env:CANONICAL_OUTPUT = 'artifacts/gpu-visibility/shadow-filter'
+          node tools/gpu-visibility/diagnose-canonical.mjs --shadow-filter
+      - name: Native live material demand
+        if: always() && steps.checks.outcome == 'success'
+        run: |
+          $env:CANONICAL_COUNT = '10000'
+          $env:CANONICAL_PAIRS = '16'
+          $env:CANONICAL_OUTPUT = 'artifacts/gpu-visibility/moss-demand'
+          node tools/gpu-visibility/diagnose-canonical.mjs --moss-demand
+      - name: Native physical presence eligibility
+        if: always() && steps.checks.outcome == 'success'
+        run: |
+          $env:CANONICAL_COUNT = '10000'
+          $env:CANONICAL_PAIRS = '16'
+          $env:CANONICAL_OUTPUT = 'artifacts/gpu-visibility/surface-presence'
+          node tools/gpu-visibility/diagnose-canonical.mjs --surface-presence
+      - name: Canonical temporal repeatability
+        if: always() && steps.checks.outcome == 'success'
+        run: |
+          $env:CANONICAL_TRACE = '1'
+          $env:CANONICAL_COUNT = '10000'
+          $env:CANONICAL_REPETITIONS = '2'
+          $env:CANONICAL_OUTPUT = 'artifacts/gpu-visibility/repeatability'
+          node tools/gpu-visibility/diagnose-canonical.mjs --check-repeatability
+      - name: Keep evidence on the Windows GPU host
+        if: always()
+        shell: powershell
+        run: |
+          if (Test-Path -LiteralPath artifacts/gpu-visibility) {
+            $visibilityTarget = Join-Path $env:USERPROFILE "game-engine-renders/gpu-visibility/${{ github.run_id }}-${{ github.run_attempt }}"
+            New-Item -ItemType Directory -Force -Path $visibilityTarget | Out-Null
+            Copy-Item -Path artifacts/gpu-visibility/* -Destination $visibilityTarget -Recurse -Force
+            "Evidence retained: $visibilityTarget" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+      - name: Publish numerical summary
+        if: always()
+        shell: powershell
+        run: |
+          if (Test-Path -LiteralPath artifacts/gpu-visibility/report.json) {
+            node tools/gpu-visibility/summarize.mjs | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+          if (Test-Path -LiteralPath artifacts/gpu-visibility/repeatability/report.json) {
+            node tools/gpu-visibility/canonical-summary.mjs artifacts/gpu-visibility/repeatability/report.json | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+          if (Test-Path -LiteralPath artifacts/gpu-visibility/shadow-filter/report.json) {
+            $shadowFilterReport = Get-Content -LiteralPath artifacts/gpu-visibility/shadow-filter/report.json -Raw | ConvertFrom-Json
+            "Shadow filter status: $($shadowFilterReport.status); gates: $($shadowFilterReport.gates | ConvertTo-Json -Compress)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+          if (Test-Path -LiteralPath artifacts/gpu-visibility/moss-demand/report.json) {
+            $mossDemandReport = Get-Content -LiteralPath artifacts/gpu-visibility/moss-demand/report.json -Raw | ConvertFrom-Json
+            "Live material status: $($mossDemandReport.status); gates: $($mossDemandReport.gates | ConvertTo-Json -Compress)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+          if (Test-Path -LiteralPath artifacts/gpu-visibility/surface-presence/report.json) {
+            $surfacePresenceReport = Get-Content -LiteralPath artifacts/gpu-visibility/surface-presence/report.json -Raw | ConvertFrom-Json
+            "Physical presence status: $($surfacePresenceReport.status); gates: $($surfacePresenceReport.gates | ConvertTo-Json -Compress)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+      - name: Upload requested evidence
+        if: always() && inputs.upload_artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpu-visibility-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/gpu-visibility/
+          if-no-files-found: error
+          retention-days: 7
+      - name: 60 FPS p95 quality gate
+        if: always() && steps.checks.outcome == 'success'
+        run: node tools/gpu-visibility/summarize.mjs --check-budget

@@ -1,0 +1,718 @@
+{
+  "date": "2026-10-18",
+  "status": "current_policy_expansion_diagnostic_complete_no_production_change",
+  "command": "bun artifacts/network-stability-20261018/run-authority-expansions-current.ts authority-expansions-current-20261018",
+  "runId": "434de345-2d61-480e-b72b-68979fc1a8e9",
+  "settings": {
+    "seed": 29,
+    "residentLimit": 80,
+    "workers": 0,
+    "populationHz": 30,
+    "physicsSubsteps": 2,
+    "snapshotHz": 20,
+    "vehicleInterestPeriod": 1,
+    "streamingPeriod": 2,
+    "worldInterestPeriod": 1,
+    "warmTicks": 120,
+    "scoredTicks": 300
+  },
+  "originalArgumentContract": {
+    "calls": 300,
+    "allHaveTwoArguments": true,
+    "allMaxWork24AndBudget3": true
+  },
+  "provenance": {
+    "files": {
+      "artifacts/network-stability-20261018/authority-expansions-current-20261018.json": "237f7e3cea34afd178cc537f0b86fe80c99d95b2578aa26aad7de450ad7fbefb",
+      "artifacts/network-stability-20261018/authority-expansions-current-20261018-driver.json": "eb1d7bbd359d11fba5c66f978a7ffa839f8287ff13a914891d9f0d4ee13ce9c7",
+      "artifacts/network-stability-20261018/authority-expansions-current-20261018-module-proof.json": "1d4d1c13675b00aec02f066ac727f3a31bf7087b5d34b5e231b1f5ce4c46f6bb",
+      "artifacts/network-stability-20261018/navigation-expansion-probe-manifest-20261018.json": "ee2f9024ccd93863c21933daf95e0bf75ea18906c9ef50bdca6f071052c8fae2",
+      "artifacts/network-stability-20261018/analyze-authority-expansions-current.mjs": "55d75af56fff3020dfd296487179e782af989e72456b2b847ac7d20a94bbb106"
+    },
+    "knownSourceSubsetCount": 32,
+    "sourceHash": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+    "payloadHash": "9137f36457d006794fd849c77ec0005ae025ec34345f128964e29956b1d9e7d7",
+    "actualModuleHits": 1,
+    "moduleEvaluations": 1,
+    "watchdog": false,
+    "childExit": 0,
+    "sourcesUnchanged": true,
+    "observerValid": true,
+    "droppedCalls": 0,
+    "droppedRows": 0,
+    "reentryOrOverlappingCalls": 0
+  },
+  "summary": {
+    "ticks": {
+      "count": 300,
+      "meanMs": 14.547141666666624,
+      "p50Ms": 12.870499999999083,
+      "p95Ms": 26.51760000000013,
+      "p99Ms": 44.19639999999981,
+      "maxMs": 61.086200000000645,
+      "method": "sorted[floor(N*p)]"
+    },
+    "navigationCalls": {
+      "count": 300,
+      "meanMs": 5.716446333333303,
+      "p50Ms": 4.69589999999971,
+      "p95Ms": 10.50590000000011,
+      "p99Ms": 27.028299999999945,
+      "maxMs": 40.712899999999536,
+      "method": "sorted[floor(N*p)]"
+    },
+    "expansions": {
+      "count": 785,
+      "meanMs": 2.176861656050957,
+      "p50Ms": 1.252599999999802,
+      "p95Ms": 6.426900000000387,
+      "p99Ms": 16.919400000000678,
+      "maxMs": 38.02820000000065,
+      "method": "sorted[floor(N*p)]"
+    },
+    "counts": {
+      "calls": 300,
+      "rows": 785,
+      "goals": 14,
+      "staleEntries": 94,
+      "missingSearches": 0,
+      "exhaustedEntries": 0,
+      "deadlineChecks": 829,
+      "stopReasons": {
+        "deadline": 300
+      }
+    },
+    "timeTotalsMs": {
+      "calls": 1714.933899999991,
+      "expansions": 1708.836400000001,
+      "segments": 1572.4421000000011,
+      "samples": 75.32930000008491,
+      "outsideExpansions": 6.09749999998985
+    },
+    "fractions": {
+      "segmentOfCall": 0.916911199901063,
+      "segmentOfExpansion": 0.9201829385188659,
+      "sampleOfCall": 0.04392548307551988,
+      "outsideExpansionOfCall": 0.0035555306242356526
+    },
+    "nestedCounts": {
+      "sampleCalls": 11558,
+      "sampleHits": 10532,
+      "sampleMisses": 1026,
+      "segmentCalls": 4058,
+      "edgeHits": 846,
+      "edgeMisses": 4058
+    },
+    "preludeDistributions": {
+      "preDeadlineMs": {
+        "count": 300,
+        "total": 0.666399999985515,
+        "mean": 0.00222133333328505,
+        "p50": 0.0015000000003055902,
+        "p95": 0.005100000000311411,
+        "p99": 0.009799999999813735,
+        "max": 0.0385999999998603,
+        "method": "sorted[floor(N*p)]"
+      },
+      "listSetupMs": {
+        "count": 300,
+        "total": 0.6743000000114989,
+        "mean": 0.0022476666667049965,
+        "p50": 0.001900000000205182,
+        "p95": 0.004200000000309956,
+        "p99": 0.01599999999962165,
+        "max": 0.019700000000739237,
+        "method": "sorted[floor(N*p)]"
+      },
+      "preFirstExpansionMs": {
+        "count": 300,
+        "total": 1.769600000000537,
+        "mean": 0.005898666666668457,
+        "p50": 0.005100000000311411,
+        "p95": 0.010800000000017462,
+        "p99": 0.021999999999934516,
+        "max": 0.025399999999535794,
+        "method": "sorted[floor(N*p)]"
+      },
+      "trailerMs": {
+        "count": 300,
+        "total": 0.9238999999943189,
+        "mean": 0.0030796666666477296,
+        "p50": 0.0027000000009138603,
+        "p95": 0.006000000000312866,
+        "p99": 0.013299999999617285,
+        "max": 0.016300000000228465,
+        "method": "sorted[floor(N*p)]"
+      },
+      "outsideExpansionsMs": {
+        "count": 300,
+        "total": 6.09749999998985,
+        "mean": 0.020324999999966165,
+        "p50": 0.018299999999726424,
+        "p95": 0.03600000000005821,
+        "p99": 0.06829999999899883,
+        "max": 0.08569999999963329,
+        "method": "sorted[floor(N*p)]"
+      },
+      "expansions": {
+        "count": 300,
+        "total": 785,
+        "mean": 2.6166666666666667,
+        "p50": 2,
+        "p95": 5,
+        "p99": 6,
+        "max": 7,
+        "method": "sorted[floor(N*p)]"
+      }
+    }
+  },
+  "sourceHashes": {
+    "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+    "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+    "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+    "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+    "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+    "src/game/snow-physics.ts": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+    "src/game/actor-state.ts": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511",
+    "src/game/character.ts": "9116e5605f88ae4f41928f2a6e9a6fd7d5488be85069292c16304fbd4385684d",
+    "src/game/engine-motion.ts": "d8b51158c9d9e266fdd003ae5e968f6d5c107ee59636221cdc3352bab61d4724",
+    "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+    "src/game/runtime/dynamics.js": "13d5c88f43394ea2c2c551cde2f734d3296576bf040750bcc9acfda1ee9520b1",
+    "src/game/runtime/roads.js": "3274857d3ff1cdcdd36ad8f80f1395342a9e2ac7b0393ec61cae96816d49b492",
+    "src/shared/input-reorder.ts": "56ad7e52f46cc82cdee5a1d4d3548169c914b8c9ea79fdebd46d77dec7ffa222",
+    "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+    "../game-engine/src/physics/compound.ts": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+    "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+    "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+    "../game-engine/src/runtime/character-motion.ts": "a5fcf68171fd1006db936441c593031e8eb1100f0f47e262883e5dbacd6fd4f3",
+    "artifacts/network-stability-20261018/authority-phase-profile-sources.ts": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5",
+    "artifacts/network-stability-20261018/profile-authority-phases-current.ts": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6",
+    "artifacts/network-stability-20261018/run-authority-phases-current.ts": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9",
+    "artifacts/network-stability-20261018/navigation-expansion-observer.ts": "088d1685c7826e36d527c0e7781520c8b1863d9e62c4754a583d862b85274ca3",
+    "artifacts/network-stability-20261018/navigation-expansion-transform.ts": "928850b41fc49fbb2ee2a8226b3a427a344aeba07b8afc8e70fd84b0b3d75cf0",
+    "artifacts/network-stability-20261018/navigation-expansion-sources.ts": "78acde14bfc0cf3fab0a2abe542dde435f7b3f8fce6fc456a723eabfedf8c38a",
+    "artifacts/network-stability-20261018/prepare-navigation-expansion-manifest.ts": "881329ce9f0db2835f1cecc7d197e2212299cfbb35f2139144aa84d4da245e8a",
+    "artifacts/network-stability-20261018/profile-authority-expansions-current.ts": "008a82cd98c13891a13b3d3746b62648e19b4362a4578410013239b00ff4560d",
+    "artifacts/network-stability-20261018/run-authority-expansions-current.ts": "678695feb16e425d76aa107dc31d71ee77309156d5be1b92ace53cc62d99abde",
+    "artifacts/network-stability-20261018/navigation-expansion-probe.test.ts": "84f3e52c2eb3cf26d018378d61c839e9e72598704af532d92b258bf116154e08",
+    "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts": "56f9a87e522a927f795742d5f1a49c5cf46ae0342caa543befa4655f4d304444",
+    "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts.txt": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+    "artifacts/network-stability-20261018/navigation-expansion-instrumented.ts.txt": "9137f36457d006794fd849c77ec0005ae025ec34345f128964e29956b1d9e7d7",
+    "artifacts/network-stability-20261018/navigation-expansion-probe-PLAN.md": "39d6f9e193e7ae48aece02290d44d4ff1dcf75e67db9e157645584d58d8e7f25"
+  },
+  "artifactHashes": {
+    "artifacts/network-stability-20261018/authority-expansions-current-20261018.json": "237f7e3cea34afd178cc537f0b86fe80c99d95b2578aa26aad7de450ad7fbefb",
+    "artifacts/network-stability-20261018/authority-expansions-current-20261018-driver.json": "eb1d7bbd359d11fba5c66f978a7ffa839f8287ff13a914891d9f0d4ee13ce9c7",
+    "artifacts/network-stability-20261018/authority-expansions-current-20261018-module-proof.json": "1d4d1c13675b00aec02f066ac727f3a31bf7087b5d34b5e231b1f5ce4c46f6bb",
+    "artifacts/network-stability-20261018/authority-expansions-current-20261018-analysis.json": "30b07e46e8d940806c77071397aa88a6b15ff6aaf491166613eeb94f73a58fb0",
+    "artifacts/network-stability-20261018/analyze-authority-expansions-current.mjs": "55d75af56fff3020dfd296487179e782af989e72456b2b847ac7d20a94bbb106",
+    "artifacts/network-stability-20261018/navigation-expansion-probe-manifest-20261018.json": "ee2f9024ccd93863c21933daf95e0bf75ea18906c9ef50bdca6f071052c8fae2"
+  },
+  "conclusions": [
+    "Measured segment wall intervals dominate this exact scored run:1572.4421ms,91.6911% of1714.9339ms Nav call time. Sample75.3293ms,4.39255%; outside expansions6.0975ms,0.35555%. Nested intervals overlap and must not be added as independent work.",
+    "785 expansions across300calls; worst38.0282ms expansion contains18segment calls and36.101ms nested segment time. It starts before the deadline;3ms is checked between whole expansions.",
+    "All300calls stop at deadline. Setup/list/heap/pre-first work and14goal reconstructions are not dominant in this measured scope; no reentry or dropped rows.",
+    "This localizes segment as next query boundary. It does not attribute cost to footing, blocked/SAT, terrain, memo keys, allocations, GC or native network scheduling."
+  ],
+  "limitations": [
+    "One current-policy420tick run, not paired before/after or a live60Hz/native transport/GPU/FPS measurement.",
+    "Real clocks and original24work/3ms preserved. Instrumentation can alter JIT, GC and real-deadline route progress.",
+    "Explicit32source/script fences are not a complete dependency graph. No full world-state hashes.",
+    "Group rows by call identity, not contiguous array slices; recorded starts after a policy check do not prove a missed check.",
+    "No cooperative slicing or cross-tick query memo was introduced. Synchronous purity does not authorize persistent world results."
+  ],
+  "next": "Stop timing subdivision. Validate one ignored exact-semantic MRU tile write-elision counterfactual with full frozen-class state/iterator/reentry oracles, then a bounded paired full-footing fixture; reject negligible gain. No native/client FPS claim.",
+  "segmentLeafDrill": {
+    "command": "bun artifacts/network-stability-20261018/run-authority-segment-leaves-current.ts authority-segment-leaves-current-20261018",
+    "runId": "457a6542-7a08-44b5-88a6-2979361a0df8",
+    "settings": {
+      "seed": 29,
+      "residentLimit": 80,
+      "workers": 0,
+      "populationHz": 30,
+      "physicsSubsteps": 2,
+      "snapshotHz": 20,
+      "vehicleInterestPeriod": 1,
+      "streamingPeriod": 2,
+      "worldInterestPeriod": 1,
+      "warmTicks": 120,
+      "scoredTicks": 300
+    },
+    "originalArgumentContract": {
+      "calls": 300,
+      "allHaveTwoArguments": true,
+      "allMaxWork24AndBudget3": true
+    },
+    "provenance": {
+      "files": {
+        "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018.json": "b07dd1afcae04b99f310554d78bd6ce906e917d448ec811a0b206f403eaeb40a",
+        "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018-driver.json": "8b67c374729e9a92ef570a75e24fb2a40097ac57281384e91127e8ea01037758",
+        "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018-module-proof.json": "523fbcf04179a0b48033dda05ce703e7f89577d8c6c1c6d96c66e92c31a6bcd9",
+        "artifacts/network-stability-20261018/navigation-segment-leaf-manifest-20261018.json": "d4409816441d47902608f83413cb7c607ee6c3dd2caf079e4bea868d1a7c0c32",
+        "artifacts/network-stability-20261018/analyze-authority-segment-leaves-current.mjs": "a9fdf000bda0eeb7984fcf3ba2529b6cc5fa425f29d14148074fcc54eb85fb9a"
+      },
+      "sourceHash": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "payloadHash": "f26ea6beb033f5e2239eacd476217eb6bae233c3f62da0fb36062f622dcf50f8",
+      "sourceSubsetCount": 41,
+      "actualModuleHits": 1,
+      "moduleEvaluations": {
+        "base": 1,
+        "leaf": 1
+      },
+      "childExit": 0,
+      "watchdog": false,
+      "sourcesUnchanged": true,
+      "drops": {
+        "baseCalls": 0,
+        "baseRows": 0,
+        "leafCalls": 0
+      },
+      "unbalancedCalls": 0,
+      "reentryOrOverlappingCalls": 0,
+      "nestedSegments": 0
+    },
+    "summaries": {
+      "ticks": {
+        "count": 300,
+        "meanMs": 14.384896666666627,
+        "p50Ms": 12.744400000000496,
+        "p95Ms": 25.164299999999457,
+        "p99Ms": 38.27679999999964,
+        "maxMs": 53.69419999999991,
+        "method": "sorted[floor(N*p)]"
+      },
+      "navigation": {
+        "count": 300,
+        "meanMs": 5.439116333333374,
+        "p50Ms": 4.564300000000003,
+        "p95Ms": 11.161799999999857,
+        "p99Ms": 20.388300000000527,
+        "maxMs": 29.642100000000028,
+        "method": "sorted[floor(N*p)]"
+      },
+      "expansions": {
+        "count": 790,
+        "meanMs": 2.055954683544281,
+        "p50Ms": 1.2524999999995998,
+        "p95Ms": 6.568299999999908,
+        "p99Ms": 15.164999999999964,
+        "maxMs": 28.702400000000125,
+        "method": "sorted[floor(N*p)]"
+      }
+    },
+    "scalarTotals": {
+      "totalMs": 1630.361800000007,
+      "segmentCalls": 4101,
+      "segmentMs": 1470.1406999999936,
+      "nestedSegments": 0,
+      "supportCalls": 26383,
+      "supportMs": 1299.081199999996,
+      "blockedCalls": 26375,
+      "blockedMs": 129.41710000005332,
+      "memoSupportQueries": 26383,
+      "memoSupportHits": 3692,
+      "memoSupportMisses": 22691,
+      "memoSupportMs": 1293.735800000003,
+      "memoSupportReadMs": 1266.3054999999667,
+      "memoBlockedQueries": 26375,
+      "memoBlockedHits": 3713,
+      "memoBlockedMisses": 22662,
+      "memoBlockedMs": 125.41179999999986,
+      "memoBlockedReadMs": 101.35219999999845,
+      "supportReadCalls": 22691,
+      "supportReadMs": 1266.3054999999667,
+      "blockedReadCalls": 22662,
+      "blockedReadMs": 101.35219999999845,
+      "optionalFootingAttempts": 22691,
+      "optionalFootingMs": 1263.959900000058,
+      "optionalFootingNullish": 0,
+      "optionalFootingThrows": 0,
+      "fallbackFloorCalls": 0,
+      "fallbackFloorMs": 0,
+      "fallbackFloorThrows": 0,
+      "worldBlockedCalls": 22662,
+      "worldBlockedMs": 99.12150000007387,
+      "worldBlockedThrows": 0,
+      "memoSupportBookkeepingResidualMs": 27.430300000036368,
+      "memoBlockedBookkeepingResidualMs": 24.05960000000141
+    },
+    "fractions": {
+      "footingOfSegment": 0.8597543758907318,
+      "footingOfNav": 0.7746110596764515,
+      "supportMethodOfSegment": 0.8836441301162546,
+      "worldBlockedOfSegment": 0.06742313847924508,
+      "worldBlockedOfNav": 0.06074608075127469,
+      "combinedMemoResidualOfNav": 0.031555309627830715
+    },
+    "counts": {
+      "calls": 300,
+      "expansions": 790,
+      "actualFooting": 22691,
+      "allFootingNonnull": true,
+      "navFallbackFloor": 0,
+      "supportMemoHitRate": 0.13993859682371224,
+      "blockedMemoHitRate": 0.1407772511848341,
+      "footingTimeExceedsBlockedTimeCalls": 299,
+      "blockedTimeExceedsFootingTimeCalls": 1
+    },
+    "mixedTailCaveats": [
+      {
+        "tick": 299,
+        "scope": "worldBlocked interval21.2554ms versusfooting2.0956ms; one enclosed wall-time outlier does not prove a SAT/physics algorithm or GC cause."
+      },
+      {
+        "tick": 365,
+        "scope": "Nav17.4449ms, sample interval16.7527ms versussegment.6088ms/footing.3794ms. Footing optimization cannot be promised to remove every observed navigation tail."
+      }
+    ],
+    "sourceHashes": {
+      "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+      "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+      "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+      "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "src/game/snow-physics.ts": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+      "src/game/actor-state.ts": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511",
+      "src/game/character.ts": "9116e5605f88ae4f41928f2a6e9a6fd7d5488be85069292c16304fbd4385684d",
+      "src/game/engine-motion.ts": "d8b51158c9d9e266fdd003ae5e968f6d5c107ee59636221cdc3352bab61d4724",
+      "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+      "src/game/runtime/dynamics.js": "13d5c88f43394ea2c2c551cde2f734d3296576bf040750bcc9acfda1ee9520b1",
+      "src/game/runtime/roads.js": "3274857d3ff1cdcdd36ad8f80f1395342a9e2ac7b0393ec61cae96816d49b492",
+      "src/shared/input-reorder.ts": "56ad7e52f46cc82cdee5a1d4d3548169c914b8c9ea79fdebd46d77dec7ffa222",
+      "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+      "../game-engine/src/physics/compound.ts": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+      "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+      "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+      "../game-engine/src/runtime/character-motion.ts": "a5fcf68171fd1006db936441c593031e8eb1100f0f47e262883e5dbacd6fd4f3",
+      "artifacts/network-stability-20261018/authority-phase-profile-sources.ts": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5",
+      "artifacts/network-stability-20261018/profile-authority-phases-current.ts": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6",
+      "artifacts/network-stability-20261018/run-authority-phases-current.ts": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9",
+      "artifacts/network-stability-20261018/navigation-expansion-observer.ts": "088d1685c7826e36d527c0e7781520c8b1863d9e62c4754a583d862b85274ca3",
+      "artifacts/network-stability-20261018/navigation-expansion-transform.ts": "928850b41fc49fbb2ee2a8226b3a427a344aeba07b8afc8e70fd84b0b3d75cf0",
+      "artifacts/network-stability-20261018/navigation-expansion-sources.ts": "78acde14bfc0cf3fab0a2abe542dde435f7b3f8fce6fc456a723eabfedf8c38a",
+      "artifacts/network-stability-20261018/prepare-navigation-expansion-manifest.ts": "881329ce9f0db2835f1cecc7d197e2212299cfbb35f2139144aa84d4da245e8a",
+      "artifacts/network-stability-20261018/profile-authority-expansions-current.ts": "008a82cd98c13891a13b3d3746b62648e19b4362a4578410013239b00ff4560d",
+      "artifacts/network-stability-20261018/run-authority-expansions-current.ts": "678695feb16e425d76aa107dc31d71ee77309156d5be1b92ace53cc62d99abde",
+      "artifacts/network-stability-20261018/navigation-expansion-probe.test.ts": "84f3e52c2eb3cf26d018378d61c839e9e72598704af532d92b258bf116154e08",
+      "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts": "56f9a87e522a927f795742d5f1a49c5cf46ae0342caa543befa4655f4d304444",
+      "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts.txt": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "artifacts/network-stability-20261018/navigation-expansion-instrumented.ts.txt": "9137f36457d006794fd849c77ec0005ae025ec34345f128964e29956b1d9e7d7",
+      "artifacts/network-stability-20261018/navigation-expansion-probe-PLAN.md": "39d6f9e193e7ae48aece02290d44d4ff1dcf75e67db9e157645584d58d8e7f25",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-observer.ts": "286f95cc8f2f6cd1fa1e6995ffe1e15b564e315a2d47efd438796b3a41e84300",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-transform.ts": "93c7c544e8e6d0432224b7bf6300351d7ba9dde8d57ec7f45d9799b9bc2ed4bb",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-sources.ts": "9ae86d2b025140297422474f5bc239c7daa072c8a2b9d61afca247a3309243ef",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-probe.test.ts": "d878fa4e892f963b9abd9d680a497c351a0e879c3101e1d3f62face825f6df2e",
+      "artifacts/network-stability-20261018/profile-authority-segment-leaves-current.ts": "58a02e794dde5049321fbbd4dc7ccd203200968978e937852c3afce0c645dabe",
+      "artifacts/network-stability-20261018/run-authority-segment-leaves-current.ts": "fc674d5032e97f7c0f98a8fc2cf2288cae5fba71e2c85e531f0f8515fcef9abd",
+      "artifacts/network-stability-20261018/prepare-navigation-segment-leaf-manifest.ts": "3e49de6a5ad4ca5aec66a8954c58f9f6706ee2f356f648ba02bd7b9ce1ca6016",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-instrumented.ts.txt": "f26ea6beb033f5e2239eacd476217eb6bae233c3f62da0fb36062f622dcf50f8",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-PLAN.md": "03dd7bbf4b5b8b2b44449dfa9b343b2c4a4769aba831756d58060f7c66da6189"
+    },
+    "artifactHashes": {
+      "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018.json": "b07dd1afcae04b99f310554d78bd6ce906e917d448ec811a0b206f403eaeb40a",
+      "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018-driver.json": "8b67c374729e9a92ef570a75e24fb2a40097ac57281384e91127e8ea01037758",
+      "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018-module-proof.json": "523fbcf04179a0b48033dda05ce703e7f89577d8c6c1c6d96c66e92c31a6bcd9",
+      "artifacts/network-stability-20261018/authority-segment-leaves-current-20261018-analysis.json": "842064cb92dc629f421122604aa5ec088a3d4968fb52f24495b1deefa2afc35e",
+      "artifacts/network-stability-20261018/analyze-authority-segment-leaves-current.mjs": "a9fdf000bda0eeb7984fcf3ba2529b6cc5fa425f29d14148074fcc54eb85fb9a",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-manifest-20261018.json": "d4409816441d47902608f83413cb7c607ee6c3dd2caf079e4bea868d1a7c0c32"
+    },
+    "interpretation": "22691 actual optional-footing reads are all nonnull. Footing1263.9599ms is85.9754% of1470.1407ms segment time in this separate run; blocked99.1215ms is6.0746% of Nav time. Memo bookkeeping residual51.4899ms includes observer/OS/JIT/GC wall effects. Other blocked/sample tails remain.",
+    "staticChecks": {
+      "tests": 13,
+      "assertions": 2401,
+      "strictTypeScript": "exit0"
+    },
+    "limitations": [
+      "World/query/read/method timings are nested wall intervals with instrumentation. They must not be added as independent CPU time or allocation bytes.",
+      "Residual subtraction includes observer clocks and any GC/OS/JIT delay; no causality is established by a long interval.",
+      "Original real3ms budget and rates are unchanged; extra clocks can alter work completed and world history. No A/B gain or trajectory comparison against previous probes.",
+      "Final Nav diagnostic counters include construction/warmup; only300 scalar calls and790 expansions are scored here.",
+      "This analysis does not rerun a child, browser, native capture or production code."
+    ]
+  },
+  "footingStageDrill": {
+    "command": "bun artifacts/network-stability-20261018/run-authority-footing-stages-current.ts authority-footing-stages-current-20261018",
+    "runId": "a0100093-a913-4ea6-bd79-b6cdfa408a83",
+    "settings": {
+      "seed": 29,
+      "residentLimit": 80,
+      "workers": 0,
+      "populationHz": 30,
+      "physicsSubsteps": 2,
+      "snapshotHz": 20,
+      "vehicleInterestPeriod": 1,
+      "streamingPeriod": 2,
+      "worldInterestPeriod": 1,
+      "warmTicks": 120,
+      "scoredTicks": 300
+    },
+    "originalArgumentContract": {
+      "calls": 300,
+      "allHaveTwoArguments": true,
+      "allMaxWork24AndBudget3": true
+    },
+    "provenance": {
+      "files": {
+        "artifacts/network-stability-20261018/authority-footing-stages-current-20261018.json": "6a400ff71b1e880882cc10729949c01231213c9bb59a6f2d74f90fe8dafd0aa2",
+        "artifacts/network-stability-20261018/authority-footing-stages-current-20261018-driver.json": "3a98f890a2e33663811818144f5f1747822dd95436c24b5a23db9d01b5db55af",
+        "artifacts/network-stability-20261018/authority-footing-stages-current-20261018-module-proof.json": "792218e787e38986ad7715dddc79b84777fe852f48e7ad4130279ff7252a4409",
+        "artifacts/network-stability-20261018/footing-stage-manifest-20261018.json": "ed128159fb79181566e803f3e083e5713386ab72a6840c202efdc1cfcd806831",
+        "artifacts/network-stability-20261018/analyze-authority-footing-stages-current.mjs": "469697df7f744e9a12b9135dcc160e3e936c554d8cbedb6016d7e34e76277b82"
+      },
+      "sourceSubsetCount": 60,
+      "nav": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\resident-navigation.ts",
+        "sourceHash": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+        "payloadHash": "2533ac81669a25a6533b12f6c1c14ecc128f1eef3dc0beefa7c82bb7e2eca7a2"
+      },
+      "world": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\world.ts",
+        "sourceHash": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+        "payloadHash": "454432fecec6745f5fd121496281c153a5da20fe4c009e0792823ffba96e8abb"
+      },
+      "childExit": 0,
+      "watchdog": false,
+      "sourcesUnchanged": true,
+      "stageEvaluations": {
+        "nav": 1,
+        "world": 1
+      },
+      "observerValid": {
+        "base": true,
+        "leaf": true,
+        "stage": true
+      },
+      "drops": {
+        "baseCalls": 0,
+        "expansions": 0,
+        "leafCalls": 0,
+        "stageCalls": 0
+      },
+      "unbalanced": {
+        "leaf": 0,
+        "stage": 0
+      },
+      "overlappingCalls": 0,
+      "nestedFootings": 0
+    },
+    "summaries": {
+      "ticks": {
+        "count": 300,
+        "meanMs": 14.04200833333336,
+        "p50Ms": 12.370299999999588,
+        "p95Ms": 27.786299999999756,
+        "p99Ms": 35.26890000000003,
+        "maxMs": 58.133600000000115,
+        "method": "sorted[floor(N*p)]"
+      },
+      "navigation": {
+        "count": 300,
+        "meanMs": 5.274552333333301,
+        "p50Ms": 4.4791000000004715,
+        "p95Ms": 9.484400000000278,
+        "p99Ms": 19.26339999999982,
+        "maxMs": 22.807400000001508,
+        "method": "sorted[floor(N*p)]"
+      },
+      "expansions": {
+        "count": 772,
+        "meanMs": 2.0385730569948177,
+        "p50Ms": 1.2884000000003653,
+        "p95Ms": 6.277799999999843,
+        "p99Ms": 9.632100000000719,
+        "maxMs": 21.225000000000364,
+        "method": "sorted[floor(N*p)]"
+      }
+    },
+    "totals": {
+      "totalMs": 1580.8529999999982,
+      "footingCalls": 21965,
+      "footingMs": 1250.9561000000149,
+      "footingThrows": 0,
+      "footingNullish": 0,
+      "nestedFootings": 0,
+      "snapshotReferences": 174482,
+      "nearTruthy": 334,
+      "pavementReads": 21631,
+      "pavementTruthy": 11693,
+      "offsetSnowTruthy": 90580,
+      "offsetAccepted": 29,
+      "centerSnowCalls": 21965,
+      "centerSnowMs": 262.99050000005354,
+      "centerSnowThrows": 0,
+      "centerFloorCalls": 6143,
+      "centerFloorMs": 41.590999999970336,
+      "centerFloorThrows": 0,
+      "snapshotCalls": 21965,
+      "snapshotMs": 15.412799999976414,
+      "snapshotThrows": 0,
+      "nearCalls": 21965,
+      "nearMs": 10.358199999968747,
+      "nearThrows": 0,
+      "pavementCalls": 21965,
+      "pavementMs": 27.66769999994449,
+      "pavementThrows": 0,
+      "offsetSnowCalls": 96216,
+      "offsetSnowMs": 814.7525000000778,
+      "offsetSnowThrows": 0,
+      "offsetRayCalls": 5636,
+      "offsetRayMs": 57.42670000005273,
+      "offsetRayThrows": 0
+    },
+    "phaseOwnership": [
+      {
+        "phase": "offsetSnow",
+        "calls": 96216,
+        "milliseconds": 814.7525000000778,
+        "fractionOfFooting": 0.6513038307260088,
+        "fractionOfNav": 0.5148951977410043
+      },
+      {
+        "phase": "centerSnow",
+        "calls": 21965,
+        "milliseconds": 262.99050000005354,
+        "fractionOfFooting": 0.21023159805531977,
+        "fractionOfNav": 0.1662008346111491
+      },
+      {
+        "phase": "offsetRay",
+        "calls": 5636,
+        "milliseconds": 57.42670000005273,
+        "fractionOfFooting": 0.045906247229660614,
+        "fractionOfNav": 0.03629167391586729
+      },
+      {
+        "phase": "centerFloor",
+        "calls": 6143,
+        "milliseconds": 41.590999999970336,
+        "fractionOfFooting": 0.033247369751800114,
+        "fractionOfNav": 0.02628406315933832
+      },
+      {
+        "phase": "pavement",
+        "calls": 21965,
+        "milliseconds": 27.66769999994449,
+        "fractionOfFooting": 0.022117242963157667,
+        "fractionOfNav": 0.017485022583556165
+      },
+      {
+        "phase": "snapshot",
+        "calls": 21965,
+        "milliseconds": 15.412799999976414,
+        "fractionOfFooting": 0.01232081605419745,
+        "fractionOfNav": 0.009740352688368124
+      },
+      {
+        "phase": "near",
+        "calls": 21965,
+        "milliseconds": 10.358199999968747,
+        "fractionOfFooting": 0.008280226620237611,
+        "fractionOfNav": 0.006546021567561033
+      }
+    ],
+    "selectedFacts": {
+      "snowFootingCalls": 118181,
+      "snowFootingMs": 1077.7430000001314,
+      "snowFractionOfFooting": 0.8615354287813286,
+      "snowFractionOfNav": 0.6810960323521534,
+      "snapshotAndNearMs": 25.77099999994516,
+      "snapshotAndNearFractionOfFooting": 0.020601042674435063,
+      "footprintQueries": 12027,
+      "centerSnowNonnull": 15822,
+      "offsetSnowTruthyRate": 0.9414234638729525,
+      "remainingFootingWallResidualMs": 20.756699999970806,
+      "offsetRawRaysAccepted": 29,
+      "rawRayCaveat": "Only29 accepted higher supports does not justify deleting5636 rays; the queries still decide exact collision/step support and must remain."
+    },
+    "conclusion": {
+      "measuredOwner": "GameSnowPhysics.footing: center+offset1077.743ms,86.1535% of WorldCollision.footing. Offset snow alone814.7525ms; active snapshot+near only25.771ms/~2.06%footing. Stop timing subdivision.",
+      "oneCounterfactual": "Retain the original GameSnowPhysics.tile coordinate coercion/key/get/create/read path and64-tile eviction loop; track one private most-recent tile identity/key and elide only redundant native Map delete+set when that exact entry is already MRU. Preserve every raw ray, exposure/sample/bearing calculation and all world callbacks. Keep original promotion while any internal tiles.values traversal is active (checkpoint/snapshot), because deleting/reinserting an already-last entry can be observable to an in-progress iterator. Invalidate the marker when eviction removes it, including store callback reentry. Start with this narrower write-elision, not an early return that skips key/get/overflow work.",
+      "proofRequired": "Frozen complete GameSnowPhysics class oracle must compare numeric results/normal references, full ordered64-entry Map/SnowMatter state, dirty saves/evictions/store traces, restore/receive/contact/snapshot/checkpoint and callback reentry/throws/nonfinite/signed0. Explicit private-map ownership and unchanged builtin Map assumptions; no persistent physical query cache. Then root-owned bounded paired full-footing fixture decides if gain is worthwhile. No world child/browser or new timing subdivision.",
+      "notGainEvidence": "This report does not measure the LRU Map operations themselves or prove that this counterfactual saves a useful fraction. Their source is a concrete semantics-preserving cost candidate within the measured owner. Reject it if full-footing paired timing is not useful."
+    },
+    "limitations": [
+      "Wall durations include observer costs and any GC/OS/JIT delay; no hardware execution/GC cause is established.",
+      "Phases are sibling intervals in this no-reentry run; their parent footing and Nav intervals remain nested and must not be added.",
+      "Extra clocks change later work fitting the original real3ms deadline; no A/B trajectory or gain comparison against preceding reports.",
+      "Snapshot reference counts are actual copied references, not measured allocated heap bytes.",
+      "No original source/manifest/probe was changed by this analysis; no child/browser was rerun."
+    ],
+    "sourceHashes": {
+      "src/game/authority.ts": "6665caddfd79c9b98142e6d126ba7fbede562e11176c4f142c277c578cdccfee",
+      "src/game/residents.ts": "c17466fa31bf44ddcc3edeeeb3fdab49a99a5855d8068bec673ba4dd1fb2a745",
+      "src/game/resident-navigation.ts": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "src/game/resident-egress.ts": "d0d868a41ca78bb3ea32e4738b6ff51dea71143e3007d9e6191503d3ae1528dd",
+      "src/game/world.ts": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "src/game/snow-physics.ts": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+      "src/game/actor-state.ts": "6e29fdb5d5e1a8f20ce52d4dd999bcc2eef245b577673d3b751648f50fd4e511",
+      "src/game/character.ts": "9116e5605f88ae4f41928f2a6e9a6fd7d5488be85069292c16304fbd4385684d",
+      "src/game/engine-motion.ts": "d8b51158c9d9e266fdd003ae5e968f6d5c107ee59636221cdc3352bab61d4724",
+      "src/game/runtime/physics.js": "d7db9c0eb33803d8674726d0521e79364675d91f0011216688cd5dcefcfe4201",
+      "src/game/runtime/dynamics.js": "13d5c88f43394ea2c2c551cde2f734d3296576bf040750bcc9acfda1ee9520b1",
+      "src/game/runtime/roads.js": "3274857d3ff1cdcdd36ad8f80f1395342a9e2ac7b0393ec61cae96816d49b492",
+      "src/shared/input-reorder.ts": "56ad7e52f46cc82cdee5a1d4d3548169c914b8c9ea79fdebd46d77dec7ffa222",
+      "src/shared/tick-profiler.ts": "da3e845d2d0d4701b544ef8601e88b8433769a5d4feb645125c69938981a2123",
+      "../game-engine/src/physics/compound.ts": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+      "../game-engine/src/physics/box-overlap.ts": "a17faf88480c0475868a893c5476a635d717a5e8a2a0ae86969916237be407f3",
+      "../game-engine/src/core/spatial-hash.ts": "b9602293a0fd8fc9446888b12c3915041f373deb6d198acf3347087e8bd5a5d8",
+      "../game-engine/src/runtime/character-motion.ts": "a5fcf68171fd1006db936441c593031e8eb1100f0f47e262883e5dbacd6fd4f3",
+      "artifacts/network-stability-20261018/authority-phase-profile-sources.ts": "76aebe50a3b87f0b2bd162ae524583b95940c2dc893d72de44f491d7bb3ad3a5",
+      "artifacts/network-stability-20261018/profile-authority-phases-current.ts": "085be8d6e0a8bd95cc5e1bb0f590303540168658f4838cbbc4c67b2892b711b6",
+      "artifacts/network-stability-20261018/run-authority-phases-current.ts": "7f9bff494fd2b65a879da7be99d80d6837b7e139c640ccb99fb2e24d8ac1b1a9",
+      "artifacts/network-stability-20261018/navigation-expansion-observer.ts": "088d1685c7826e36d527c0e7781520c8b1863d9e62c4754a583d862b85274ca3",
+      "artifacts/network-stability-20261018/navigation-expansion-transform.ts": "928850b41fc49fbb2ee2a8226b3a427a344aeba07b8afc8e70fd84b0b3d75cf0",
+      "artifacts/network-stability-20261018/navigation-expansion-sources.ts": "78acde14bfc0cf3fab0a2abe542dde435f7b3f8fce6fc456a723eabfedf8c38a",
+      "artifacts/network-stability-20261018/prepare-navigation-expansion-manifest.ts": "881329ce9f0db2835f1cecc7d197e2212299cfbb35f2139144aa84d4da245e8a",
+      "artifacts/network-stability-20261018/profile-authority-expansions-current.ts": "008a82cd98c13891a13b3d3746b62648e19b4362a4578410013239b00ff4560d",
+      "artifacts/network-stability-20261018/run-authority-expansions-current.ts": "678695feb16e425d76aa107dc31d71ee77309156d5be1b92ace53cc62d99abde",
+      "artifacts/network-stability-20261018/navigation-expansion-probe.test.ts": "84f3e52c2eb3cf26d018378d61c839e9e72598704af532d92b258bf116154e08",
+      "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts": "56f9a87e522a927f795742d5f1a49c5cf46ae0342caa543befa4655f4d304444",
+      "artifacts/network-stability-20261018/resident-navigation-before-expansion-probe.ts.txt": "594119df148aa02e712e548705f52004937d193e2ecd63dbb81d08f5d566b262",
+      "artifacts/network-stability-20261018/navigation-expansion-instrumented.ts.txt": "9137f36457d006794fd849c77ec0005ae025ec34345f128964e29956b1d9e7d7",
+      "artifacts/network-stability-20261018/navigation-expansion-probe-PLAN.md": "39d6f9e193e7ae48aece02290d44d4ff1dcf75e67db9e157645584d58d8e7f25",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-observer.ts": "286f95cc8f2f6cd1fa1e6995ffe1e15b564e315a2d47efd438796b3a41e84300",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-transform.ts": "93c7c544e8e6d0432224b7bf6300351d7ba9dde8d57ec7f45d9799b9bc2ed4bb",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-sources.ts": "9ae86d2b025140297422474f5bc239c7daa072c8a2b9d61afca247a3309243ef",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-probe.test.ts": "d878fa4e892f963b9abd9d680a497c351a0e879c3101e1d3f62face825f6df2e",
+      "artifacts/network-stability-20261018/profile-authority-segment-leaves-current.ts": "58a02e794dde5049321fbbd4dc7ccd203200968978e937852c3afce0c645dabe",
+      "artifacts/network-stability-20261018/run-authority-segment-leaves-current.ts": "fc674d5032e97f7c0f98a8fc2cf2288cae5fba71e2c85e531f0f8515fcef9abd",
+      "artifacts/network-stability-20261018/prepare-navigation-segment-leaf-manifest.ts": "3e49de6a5ad4ca5aec66a8954c58f9f6706ee2f356f648ba02bd7b9ce1ca6016",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-instrumented.ts.txt": "f26ea6beb033f5e2239eacd476217eb6bae233c3f62da0fb36062f622dcf50f8",
+      "artifacts/network-stability-20261018/navigation-segment-leaf-PLAN.md": "03dd7bbf4b5b8b2b44449dfa9b343b2c4a4769aba831756d58060f7c66da6189",
+      "artifacts/network-stability-20261018/footing-stage-observer.ts": "a200d48005222b04b83f514aee6bfb200a6e683550390f15a20e3edc9cb9c43c",
+      "artifacts/network-stability-20261018/footing-stage-transform.ts": "bf0fdbc3106a4360e75bc54b2724b8598badabf46948664b82b66635470a2bcf",
+      "artifacts/network-stability-20261018/footing-stage-sources.ts": "a08b309ecd22b6a26cc85da754c61a6d341087c99c5423ab785f928a8ce4e58f",
+      "artifacts/network-stability-20261018/footing-stage-probe.test.ts": "d70966bf84f1eac57ed3e2b9793d6a1ab8c5d32fda90cd26b3074527962add6d",
+      "artifacts/network-stability-20261018/profile-authority-footing-stages-current.ts": "484b4157d8afd7742640911a3f03946d6a7800c4dccff12e99452100f86e842a",
+      "artifacts/network-stability-20261018/run-authority-footing-stages-current.ts": "5f4700b7bf104b763e67d685fc74c624f605f31febcf3db977408b6cda4fe1fb",
+      "artifacts/network-stability-20261018/prepare-footing-stage-manifest.ts": "7f0f115a6863d3e782aa484b2ea9eea877e0ebd05afd3fb8a6ffb9cb49e2f61a",
+      "artifacts/network-stability-20261018/footing-stage-PLAN.md": "aa2ce13f906b4381e0c01e754f832e0902d0c1ada614709385b9499fdd6e2f0d",
+      "artifacts/network-stability-20261018/world-before-footing-stage.ts.txt": "c5a8201c09490ffee3fe06a25fe382eec41a1200c59e238826a0d6a458594551",
+      "artifacts/network-stability-20261018/world-collision-before-footing-stage.ts": "1fd6d08da93696a1dfe8d88125b931e8c9be6edae7ee117a5745ae35c3169736",
+      "artifacts/network-stability-20261018/footing-stage-nav-instrumented.ts.txt": "2533ac81669a25a6533b12f6c1c14ecc128f1eef3dc0beefa7c82bb7e2eca7a2",
+      "artifacts/network-stability-20261018/footing-stage-world-instrumented.ts.txt": "454432fecec6745f5fd121496281c153a5da20fe4c009e0792823ffba96e8abb",
+      "src/game/buildings/plan.ts": "bdef3c0a9883bfaad147f2c83ea4a34fe7749e98e29fc8d6525118e2fe04a5f1",
+      "src/game/buildings/world.ts": "1421595a140fbe832bd512600fa1a3e4df2d30bee1b7a8814f69a52b9e6e1d8f",
+      "src/game/character-recovery.ts": "70a9adc54514cf98e0267ac0594b34e5dbbb35438de411777926e5d299ba26c8",
+      "src/game/box-overlap.ts": "c981d07e3ab974a6ea066591dac81db7e2e4a2646292d7fac3732958f2fed1cd",
+      "src/game/biomes.ts": "6d5ed7cbe114a4b268a6e74475c9d85315bb19ab06ec6a94deff111296cdef03",
+      "src/game/runtime/solid.js": "36795d6b6623cccdb95ccdcc59954e63cdb8011c56d4b427168ddb618fd9f982",
+      "../game-engine/src/environment/snow-matter.ts": "bc64441093d6b255061b62d51807506e04eeeefd21c878710e9a0bb956e79254"
+    },
+    "artifactHashes": {
+      "artifacts/network-stability-20261018/authority-footing-stages-current-20261018.json": "6a400ff71b1e880882cc10729949c01231213c9bb59a6f2d74f90fe8dafd0aa2",
+      "artifacts/network-stability-20261018/authority-footing-stages-current-20261018-driver.json": "3a98f890a2e33663811818144f5f1747822dd95436c24b5a23db9d01b5db55af",
+      "artifacts/network-stability-20261018/authority-footing-stages-current-20261018-module-proof.json": "792218e787e38986ad7715dddc79b84777fe852f48e7ad4130279ff7252a4409",
+      "artifacts/network-stability-20261018/authority-footing-stages-current-20261018-analysis.json": "6759a1e8e3442a53e47e57f3b27cfbcce01a82e6183409e375922efcfa8c6055",
+      "artifacts/network-stability-20261018/analyze-authority-footing-stages-current.mjs": "469697df7f744e9a12b9135dcc160e3e936c554d8cbedb6016d7e34e76277b82",
+      "artifacts/network-stability-20261018/footing-stage-manifest-20261018.json": "ed128159fb79181566e803f3e083e5713386ab72a6840c202efdc1cfcd806831"
+    },
+    "staticChecks": {
+      "tests": 19,
+      "assertions": 3108,
+      "strictTypeScript": "exit0",
+      "independentReview": "clean"
+    },
+    "nativeScope": "This hot-route fixture uses workers=0. NativeR5b uses workers=2 and much less main-world Nav activity; this is not attribution of its390ms pump. Client snow has no store and does not use tile()."
+  }
+}

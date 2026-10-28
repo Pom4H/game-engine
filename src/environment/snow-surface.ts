@@ -63,6 +63,13 @@ export class SnowSurface {
  get tileCount(){return this.tiles.size;}
  get detailedTiles(){return[...this.tiles.values()].filter(t=>t.detailed).length;}
  get snowDepth(){return this.depth;}
+ /** Restore an authoritative impression history without replaying simulation ticks. */
+ restoreStamps(stamps:readonly SnowFootprint[]):void{
+  if(stamps.length>this.capacity)throw new RangeError('Snow impression snapshot exceeds capacity');
+  this.records.length=0;
+  for(const tile of this.tiles.values()){tile.detailed=false;this.dirty.add(tile.key);}
+  for(const stamp of stamps)this.stamp(stamp);
+ }
  private local(x:number,z:number):readonly[number,number]{const dx=x-this.options.center[0],dz=z-this.options.center[1],c=Math.cos(this.options.yaw??0),s=Math.sin(this.options.yaw??0);return[c*dx-s*dz,s*dx+c*dz];}
  private world(x:number,z:number):readonly[number,number]{const c=Math.cos(this.options.yaw??0),s=Math.sin(this.options.yaw??0);return[this.options.center[0]+c*x+s*z,this.options.center[1]-s*x+c*z];}
  contains(x:number,z:number){const p=this.local(x,z);return Math.abs(p[0])<=this.options.size[0]/2&&Math.abs(p[1])<=this.options.size[1]/2;}
@@ -77,14 +84,15 @@ export class SnowSurface {
   for(const key of this.tiles.keys())this.dirty.add(key);
  }
  private affected(stamp:SnowFootprint):Tile[]{
-  const p=this.local(stamp.position[0],stamp.position[2]),sx=this.options.size[0]/this.nx,sz=this.options.size[1]/this.nz,result:Tile[]=[];
-  const x0=clamp(Math.floor((p[0]+this.options.size[0]/2-.27)/sx),0,this.nx-1),x1=clamp(Math.floor((p[0]+this.options.size[0]/2+.27)/sx),0,this.nx-1),z0=clamp(Math.floor((p[1]+this.options.size[1]/2-.27)/sz),0,this.nz-1),z1=clamp(Math.floor((p[1]+this.options.size[1]/2+.27)/sz),0,this.nz-1);
+  const p=this.local(stamp.position[0],stamp.position[2]),sx=this.options.size[0]/this.nx,sz=this.options.size[1]/this.nz,result:Tile[]=[],extent=stamp.ellipse?Math.max(...stamp.ellipse)*1.5:.27;
+  const x0=clamp(Math.floor((p[0]+this.options.size[0]/2-extent)/sx),0,this.nx-1),x1=clamp(Math.floor((p[0]+this.options.size[0]/2+extent)/sx),0,this.nx-1),z0=clamp(Math.floor((p[1]+this.options.size[1]/2-extent)/sz),0,this.nz-1),z1=clamp(Math.floor((p[1]+this.options.size[1]/2+extent)/sz),0,this.nz-1);
   for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)result.push(this.tiles.get(`${x}:${z}`)!);return result;
  }
  stamp(stamp:SnowFootprint):boolean{
   if(!Number.isFinite(stamp.depth)||stamp.depth<0||stamp.position.length!==3||stamp.position.some(v=>!Number.isFinite(v))||!Number.isFinite(stamp.yaw))throw new TypeError('Invalid snow stamp');
+  if(stamp.ellipse&&(stamp.ellipse.length!==2||stamp.ellipse.some(v=>!Number.isFinite(v)||v<=0||v>2)))throw new TypeError('Invalid contact ellipse');
   if(!this.contains(stamp.position[0],stamp.position[2]))return false;
-  this.records.push(Object.freeze({...stamp,position:Object.freeze([...stamp.position]) as Vec3}));this.revision++;
+  this.records.push(Object.freeze({...stamp,position:Object.freeze([...stamp.position]) as Vec3,...(stamp.ellipse?{ellipse:Object.freeze([...stamp.ellipse]) as readonly[number,number]}:{})}));this.revision++;
   const evicted=this.records.length>this.capacity?this.records.shift():undefined;if(evicted)for(const tile of this.affected(evicted))this.dirty.add(tile.key);
   for(const tile of this.affected(stamp)){tile.detailed=true;tile.touched=this.revision;this.dirty.add(tile.key);}
   const detailed=[...this.tiles.values()].filter(t=>t.detailed).sort((a,b)=>a.touched-b.touched);
@@ -92,8 +100,10 @@ export class SnowSurface {
  }
  height(x:number,z:number,stamps:readonly SnowFootprint[]=this.records):number{
   let h=this.heightValue+snowRelief(x,z,this.depth,this.options.seed??1);
+  let deepest=0,highestRim=0,soleRelief=0;
   for(const stamp of stamps){
-   const dx=x-stamp.position[0],dz=z-stamp.position[2];if(Math.abs(dx)>.28||Math.abs(dz)>.28)continue;
+   const dx=x-stamp.position[0],dz=z-stamp.position[2],extent=stamp.ellipse?Math.max(...stamp.ellipse)*1.5:.28;if(Math.abs(dx)>extent||Math.abs(dz)>extent)continue;
+   if(stamp.ellipse){const c=Math.cos(stamp.yaw),s=Math.sin(stamp.yaw),u=c*dx-s*dz,v=s*dx+c*dz,r=Math.hypot(u/stamp.ellipse[0],v/stamp.ellipse[1]),depth=Math.min(stamp.depth,this.depth*.7);if(r<1.5){highestRim=Math.max(highestRim,depth*.2*Math.exp(-(((r-1.1)/.15)**2)));deepest=Math.max(deepest,depth*(1-smooth(.65,1.02,r)));}continue;}
    const c=Math.cos(stamp.yaw),s=Math.sin(stamp.yaw),u=c*dx-s*dz-.032,v=s*dx+c*dz;
    const toe=clamp((u+.04)/.1,0,1),heel=clamp((-u-.03)/.07,0,1),width=.047+.017*toe+.008*heel;
    const shape=(u/.154)**4+(v/width)**4,r=Math.sqrt(Math.sqrt(shape));if(r>=1.48)continue;
@@ -103,9 +113,11 @@ export class SnowSurface {
    const rim=depth*.25*Math.exp(-(((r-1.08)/.135)**2))*(.55+noise(x*49,z*47,this.options.seed??1));
    const tread=(1-smooth(.56,.88,r))*(.5+.5*Math.cos(u*174))**5*.0021;
    const arch=Math.exp(-(((u+.018)/.028)**2))*.0024*(1-smooth(.6,.95,r));
-   h+=rim-depression+Math.min(depth*.22,tread+arch);
+   highestRim=Math.max(highestRim,rim);deepest=Math.max(deepest,depression);soleRelief=Math.max(soleRelief,Math.min(depth*.22,tread+arch));
   }
-  return Math.max(this.heightValue-this.depth*.78,h);
+  // Stamps describe absolute compression of the same settled layer. Repeating
+  // a contact must not add its rim again or excavate through the snow base.
+  return Math.max(this.heightValue-this.depth*.78,h-deepest+highestRim+soleRelief);
  }
  /** Take immutable authoring descriptions for only changed tiles. */
  drainMeshes():EntitySpec[]{const result:EntitySpec[]=[];for(const key of this.dirty){const tile=this.tiles.get(key);if(tile)result.push(this.mesh(tile));}this.dirty.clear();return result;}
@@ -113,7 +125,7 @@ export class SnowSurface {
  private mesh(tile:Tile):EntitySpec{
   const sx=this.options.size[0]/this.nx,sz=this.options.size[1]/this.nz,cx=-this.options.size[0]/2+(tile.x+.5)*sx,cz=-this.options.size[1]/2+(tile.z+.5)*sz;
   const center=this.world(cx,cz),positions:number[]=[],normals:number[]=[],indices:number[]=[],cell=tile.detailed?this.detailCell:this.cell,nx=Math.ceil(sx/cell),nz=Math.ceil(sz/cell),eps=.008;
-  const stamps=this.records.filter(s=>{const p=this.local(s.position[0],s.position[2]);return Math.abs(p[0]-cx)<sx/2+.28&&Math.abs(p[1]-cz)<sz/2+.28;});
+  const stamps=this.records.filter(s=>{const p=this.local(s.position[0],s.position[2]),extent=s.ellipse?Math.max(...s.ellipse)*1.5:.28;return Math.abs(p[0]-cx)<sx/2+extent&&Math.abs(p[1]-cz)<sz/2+extent;});
   for(let z=0;z<=nz;z++)for(let x=0;x<=nx;x++){
    const p=this.world(cx+(x/nx-.5)*sx,cz+(z/nz-.5)*sz),h=this.height(p[0],p[1],stamps),dx=(this.height(p[0]+eps,p[1],stamps)-this.height(p[0]-eps,p[1],stamps))/(eps*2),dz=(this.height(p[0],p[1]+eps,stamps)-this.height(p[0],p[1]-eps,stamps))/(eps*2),length=Math.hypot(dx,1,dz);
    positions.push(p[0]-center[0],h,p[1]-center[1]);normals.push(-dx/length,1/length,-dz/length);

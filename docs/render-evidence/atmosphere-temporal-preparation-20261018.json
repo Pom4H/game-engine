@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-18T11:33:10.881Z",
+  "status": "bounded-cpu-domain-proof-native-candidate-prepared",
+  "goalComplete": false,
+  "productionAdopted": false,
+  "nativeExecuted": false,
+  "cpu": {
+    "reference": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\report.json",
+      "sha256": "469c6dd7d296e1ab389e448a5d1d7e6fe181135cf57d3be91dcc80e2c6a8bca2"
+    },
+    "script": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\reproduce.mjs",
+      "sha256": "ef9d304a1678f45c4df505b3fc4e7a28cf70c7730aa99ec9baaeada38fc3d96f"
+    },
+    "cases": 8,
+    "scope": "Actual compiled Scene + WebGPU render prefix; stop before collection/GPU/radiance bake. Direct semantic source/dist fences unchanged. Tiny exposure/fog changes reset valid history; unchanged state and continuous sun/sky retain it. Not a full render or native image."
+  },
+  "domain": {
+    "exposure": "Present shader multiplies exposure after linear HDR TAA/motion blur; exposure-only changes do not change stored HDR radiance.",
+    "fog": "Fog is already mixed into the linear HDR input. Default discontinuous fog resets must remain; no blanket appearanceRevision suppression.",
+    "background": "Separate existing baseline gap: same-Scene background-only structural change does not itself reset TAA. Retain reference/candidate parity; not fixed by this candidate."
+  },
+  "candidate": {
+    "plan": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\PLAN.md",
+      "sha256": "586225c002a0f8cff18ef4f8d0acc6d96cbdf004cd66d1aa78a082700f03ff7c"
+    },
+    "patch": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\exposure-only.patch",
+      "sha256": "e44b1a140f0ee4690a605acd80267564d6fb6df73a427c0aea2e06dea209d0c1"
+    },
+    "behavior": "Only classify exposure as continuous frame setting; material/fog/texture/camera and other existing rejection paths retained. No production source or shader change yet."
+  },
+  "nativePreparation": {
+    "directory": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\native-exposure",
+    "plan": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\native-exposure\\PLAN.md",
+      "sha256": "5ec58a3531b8af603fc1a53371e17dd1d06a6f6490ab0e08c83e3c33e6d86e89"
+    },
+    "manifestExists": false,
+    "scope": "Two ignored bundles from actual source, reference versus one Scene-key addition, fixed128x96 targets/timeline, actual Engine adapter proof, full HDR/TAA bytes and immediate present response, negative controls and exact owned-process cleanup. Files remain under review until explicit freeze/release; no execution or FPS score.",
+    "preparationChecks": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\atmosphere-temporal-audit-20261018\\native-exposure\\preparation.json",
+      "sha256": "4b9ed7d79340f3ab4fbc1353374412d02d71c2df5d1db4e522f54db5f062fc69"
+    }
+  },
+  "pending": [
+    "Finish independent lifecycle review and helper preparation.",
+    "Wait for external hydrology/weather completion and stable Engine source/dist before freezing candidate inputs.",
+    "Run one bounded native correctness oracle with actual hardware and retained raw outcomes.",
+    "Adopt only a proven narrow candidate and run meaningful permanent tests plus common verification.",
+    "Handle continuous fog and background history separately; neither is fixed here."
+  ]
+}

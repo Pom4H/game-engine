@@ -1,0 +1,740 @@
+{
+  "scope": "Full render descriptor hashes after optional authored turf/grass-blade optics and reserved WGSL litter identifier repair (2026-10-21). Native AMD RDNA-3 production renderer compiled; async readiness and synchronous fallback retain explicit layouts and pipeline plans. Receiver-plane spotlight PCF texel comparisons validated by native empty-plane and real-occluder regression. Only exact affected shader fingerprints changed; replacing that WGSL block recovers all prior hashes. Exact-zero point-light/fog early returns: native paired PNGs and sampled HDR are bitwise identical. Replacing just those two functions recovers all previous descriptor hashes. Exact-zero actual Frame sun PCF and zero-opacity sky cloud gates retain native full HDR/depth/effects/TAA and PNG against the complete frozen renderer, including celestial moon and first-visible transitions (artifacts/render-zero-work-native-20261021/report.json). Pipeline graph/layout unchanged; only affected shader source fingerprints refreshed. Planar zero-selected-weight sampling gate: 11 native paired dry/wet/ice/slurry/threshold/slope/bounds/rain scenes preserve full HDR/depth/effects/TAA and PNG; artifacts/render-planar-weight-native-20261021/report.json. Exact staged Float32 spotlight culling preserves moving/turning/slot-transition native images; it changes no pipeline descriptors.",
+  "baseSourceSha256": "6d808c6bd75f2437d91c921f4c2f57252fe327335c3584e3a7c43f18f287d231",
+  "plans": {
+    "canonical": {
+      "options": {
+        "visibility": "gpu",
+        "logarithmicDepthFar": 2000,
+        "profiling": false,
+        "features": {
+          "temporalAA": true,
+          "bloom": true,
+          "motionBlur": true
+        }
+      },
+      "pipelines": [
+        {
+          "label": "blit",
+          "sha256": "d91eca8114970cb4cf4a4f0ac08997118b1485e21f94d64944699d9ba20a3750"
+        },
+        {
+          "label": "bloom downsample",
+          "sha256": "dd694f49c64c29352f2d62e8138474baf9daeb20f418f483c3c3c729c7fd87e9"
+        },
+        {
+          "label": "bloom horizontal",
+          "sha256": "6cf42f324978d6a6bdda89c61dd82cefa741aa904cdedcf0b2a22099218a2f3f"
+        },
+        {
+          "label": "bloom vertical",
+          "sha256": "6f2e08e268d99a67c942307c47981957f8374353d60c2f9d11fa7f9c8a92351a"
+        },
+        {
+          "label": "coating overlay back",
+          "sha256": "5adade6d11056170fb7e6bec89adcc82e7a1617b0928528c3b0a152ee07f18d5"
+        },
+        {
+          "label": "coating overlay none",
+          "sha256": "cf2cebe0925d97f413cd83364f2a770c630a7d28d1efb588f651c556a79dada5"
+        },
+        {
+          "label": "effects",
+          "sha256": "cfaeda43f0746b5b889927858e82882282367e2dc15db2ce7217fa72537220de"
+        },
+        {
+          "label": "glass",
+          "sha256": "0f42a08873511595036aeaee7b156ddac2db981f42516674ac4404f31e62b6de"
+        },
+        {
+          "label": "material -1 transparent none",
+          "sha256": "0b4f075d35b423850fdb1f6947986360b3a2f99fbbb5b2dfe3801c47cd648267"
+        },
+        {
+          "label": "material 0 opaque back",
+          "sha256": "295169be400381214875cf3684b11e7266720d5bd2f0261ab9029f27e033f5b8"
+        },
+        {
+          "label": "material 0 opaque back",
+          "sha256": "7b3e075a40059d34d85e077081e060d993b32dbdce8966cdd0293dbd9ba3908d"
+        },
+        {
+          "label": "material 0 opaque none",
+          "sha256": "03949809536e5422380510681e243c037a71e9a110217cc12c9e9cbc0f37a216"
+        },
+        {
+          "label": "material 0 opaque none",
+          "sha256": "814d08e3db752676ee264947a60e24a2fe11b8d7f7e4fe41b5ede3f5a299a5c5"
+        },
+        {
+          "label": "material 1 opaque back",
+          "sha256": "55636db2feb67b0fcc98401124e3c6e4f7b6b75fba9bbb9e98f894320559bf68"
+        },
+        {
+          "label": "material 1 opaque back",
+          "sha256": "e020c545e825b0b0b361dc7cbcb67975428d4201aa98fc874a7583c749ab2437"
+        },
+        {
+          "label": "material 1 opaque none",
+          "sha256": "1bb41e2e53571a3aea2a1e1fcda46cff68316c75512daab5fa5650de415810ca"
+        },
+        {
+          "label": "material 1 opaque none",
+          "sha256": "3df289afc8e656f119854b6704d7e0300d0d6c2cf5d78c7bc6d9a0f80139f3dd"
+        },
+        {
+          "label": "material 10 opaque back",
+          "sha256": "9785a69529b8f8ad008d335996eeb083bff2d4ee1d6e989da31d00d93897027e"
+        },
+        {
+          "label": "material 10 opaque back",
+          "sha256": "adeb9b40ce238390cf1326780ff5524b3fcd87ec8274420207f1b11419b43026"
+        },
+        {
+          "label": "material 10 opaque none",
+          "sha256": "c348a56cd39e92bc6869715136402ad2e57e75edd9f536824f804a03fe085d83"
+        },
+        {
+          "label": "material 10 opaque none",
+          "sha256": "d95bc2c5a875c50b02ddb017ab7908ebe660a13aa614a03c15e4103e1e2b8b02"
+        },
+        {
+          "label": "material 2 opaque back",
+          "sha256": "5bdaf2754a49e470a9aaf661389156252c5f9f3cd35d71d405a0b4276aa3a6d4"
+        },
+        {
+          "label": "material 2 opaque back",
+          "sha256": "c92e2f81b610e68ba07736d085a51bb4e4026eac081592b7be111d42ccfba142"
+        },
+        {
+          "label": "material 2 opaque none",
+          "sha256": "72b518fbcc34fa19e54b6191e46003186e88c57d1b4ceb2f8386508fb7ae35ae"
+        },
+        {
+          "label": "material 2 opaque none",
+          "sha256": "760779fce8fd8effe013c8a5562c93d2493f7e909ef8ed7a2a1851184824cbae"
+        },
+        {
+          "label": "material 3 opaque back",
+          "sha256": "1ef12d68e63952bf4928dd9ec84bb706a9c0d606789dddf22b3550bf91e6316a"
+        },
+        {
+          "label": "material 3 opaque back",
+          "sha256": "af2344babd008cac2e890927209a0abedc81d26e1bf63f8e3320a9caba46e64b"
+        },
+        {
+          "label": "material 3 opaque none",
+          "sha256": "ce9a1ee3a8ae25282f5703c111bad50cf04a8cac76debfec7b4b0118cf69453e"
+        },
+        {
+          "label": "material 3 opaque none",
+          "sha256": "e79d75253c139bdcebfb2cb04c96acf79278ccc689392ed540d700a77e3487cc"
+        },
+        {
+          "label": "material 4 opaque back",
+          "sha256": "43d63c7051a8cbf531eb9772bcf4f1b5bbf1ce1f6a1d0b4e658f9409ae5aa125"
+        },
+        {
+          "label": "material 4 opaque back",
+          "sha256": "de758bbbc9d6d501fd0cd45af7179fb2d722551142ed067f3081af1c9c987604"
+        },
+        {
+          "label": "material 4 opaque none",
+          "sha256": "60ec34dfb4ca1ebd5061389391a22760d8eaab3e9d48c42f1a7285d586f31786"
+        },
+        {
+          "label": "material 4 opaque none",
+          "sha256": "c6d6249589a0c25212ed0123b2b2a07048f6fa3f9178df388ccc062af025364c"
+        },
+        {
+          "label": "material 5 opaque back",
+          "sha256": "bbc491f3c46399754c5390630e4a3da357327528950d0b88e2a323264fc28daf"
+        },
+        {
+          "label": "material 5 opaque back",
+          "sha256": "f3c949f72971c87264fea35674178f7ecffa288727d9342bbf4efbd702095264"
+        },
+        {
+          "label": "material 5 opaque none",
+          "sha256": "83b3638d5a98ae8292ef82943ae8f4be2f0ef14e7eacd4a75c06047c7e04de89"
+        },
+        {
+          "label": "material 5 opaque none",
+          "sha256": "a9cdc4a5b174735295314d285a4c0f05cbc95b7fee3c9b88de9481d7f1ecb6da"
+        },
+        {
+          "label": "material 6 opaque back",
+          "sha256": "a53ab8f0a81ef5f31e3661e5784dc001d34c978279eb95dbd1870c4749aa860f"
+        },
+        {
+          "label": "material 6 opaque back",
+          "sha256": "eac51787a7d345e7ab35630eace7b49ad709b6c2412e2bb7875e83ccf2c150ac"
+        },
+        {
+          "label": "material 6 opaque none",
+          "sha256": "26a38759f4c8ac8dfd072f0e0a8e40657f0ce290dcf6dce31661353ef7f1b6ff"
+        },
+        {
+          "label": "material 6 opaque none",
+          "sha256": "fdf2fc122bce6126a6a0656671ee5eeaf51c00df4a7910274c6bf8c71a71873f"
+        },
+        {
+          "label": "material 7 opaque back",
+          "sha256": "51b088e39ba096ec1462045c5aad92f0900a06fc14f6523099b01a54197ab119"
+        },
+        {
+          "label": "material 7 opaque back",
+          "sha256": "5f5b5a5b9cc79df670530d64a2953343e7a37130489fe823c84f518ec7038693"
+        },
+        {
+          "label": "material 7 opaque none",
+          "sha256": "05b28baa31af1ed11804077f50a78e3b26baeac46eb61f3e6f6d17fee4317190"
+        },
+        {
+          "label": "material 7 opaque none",
+          "sha256": "e5c688cbb7c474026f598c4d53da16db7b33a7ec14f4f9f5decac2a0cc4cdbe1"
+        },
+        {
+          "label": "material 8 opaque back",
+          "sha256": "297924eb1ee5664d5f6d22b0d50e0dfa80b9c7e5af427e7ed2e6aaa8ade37fcc"
+        },
+        {
+          "label": "material 8 opaque back",
+          "sha256": "97e68747ed8d8120f7e1a3d06ba8f6f75bc8dce5af821ac83d461584bb2c5e79"
+        },
+        {
+          "label": "material 8 opaque none",
+          "sha256": "24dad5896046e98f1b105025ce53009089bb021c5fab7576962145206302fada"
+        },
+        {
+          "label": "material 8 opaque none",
+          "sha256": "775db995175dd7d44c0b872cb352cd98ef66fadf9b49e3a6b1009e3ecffed37b"
+        },
+        {
+          "label": "material 9 opaque back",
+          "sha256": "37ab80dc1cde5211dd7cc12c0d1ca2892e1f64c503ac4cfdcdeb2a96c6ddbd41"
+        },
+        {
+          "label": "material 9 opaque back",
+          "sha256": "d371818849e6369d784f9a5d36dbb2aa7251af1d34b4fefd96857da28b1db301"
+        },
+        {
+          "label": "material 9 opaque none",
+          "sha256": "2d4591bf0f08156509b233ba12dee342b0df8772dd808bc888455b17164f194e"
+        },
+        {
+          "label": "material 9 opaque none",
+          "sha256": "531ae59b926eeaac612e6d46e2b859e6d82fc9cec180f551be89d86bdcdb350e"
+        },
+        {
+          "label": "material instances 0 back",
+          "sha256": "d7a4b91e267665e53617dec657616d7163d301a8c2c72490dded7ee1fa2fb718"
+        },
+        {
+          "label": "material instances 0 none",
+          "sha256": "779fe17117e9c7ec3add75db57d8e554ff8c0ab15107b1d85b7c31c68a18b103"
+        },
+        {
+          "label": "material instances 1 back",
+          "sha256": "670e3b599f920c54186fd66440324f159320fe3bcae6f114391c5bf5c5dd7323"
+        },
+        {
+          "label": "material instances 1 none",
+          "sha256": "f16c4c0e593a1a7afd2a92bbdd1e5ec28b321aa7b6307a702f994d3ad561019f"
+        },
+        {
+          "label": "material instances 10 back",
+          "sha256": "8407813d51679cecd547b79b44769837cc4f10db825badc2101c584fb799b4dd"
+        },
+        {
+          "label": "material instances 10 none",
+          "sha256": "a04fadab544029aacbf1bcf83cfb506298029d2bd505fe401f5e63aabd300dbb"
+        },
+        {
+          "label": "material instances 2 back",
+          "sha256": "490150ce13848e31e9c523ce06ec9fc28a8dcd55fe592738a07558cdfb2c4c61"
+        },
+        {
+          "label": "material instances 2 none",
+          "sha256": "6dca71c89aa5d8b65157c9294d297e49c81c3929a0224ac991b9f4f4bae59e45"
+        },
+        {
+          "label": "material instances 3 back",
+          "sha256": "0e3fe52751510fac5333b08b204b3284705051e5d12376edf3007cff9936b404"
+        },
+        {
+          "label": "material instances 3 none",
+          "sha256": "c7d55e6d7b4096ffe2725566d812d48108e522a8ba06c5ce51da29cc8ace1c69"
+        },
+        {
+          "label": "material instances 4 back",
+          "sha256": "57c0423fa4eee3b99fd3480ff1f7f7d407fa4840670eb984f1cd87fa652b6c64"
+        },
+        {
+          "label": "material instances 4 none",
+          "sha256": "4025e4f28dcc814334b3b268d373937431d5f49b0060f4699fddf21bd74db709"
+        },
+        {
+          "label": "material instances 5 back",
+          "sha256": "95668823e5d609e2e4256804a2002438890416dc9cb623865aa2c6860cf498eb"
+        },
+        {
+          "label": "material instances 5 none",
+          "sha256": "64339f3a4fb5435b51b2eeb4f524a9e1c26184b355aaf58e77f9522f581d4616"
+        },
+        {
+          "label": "material instances 6 back",
+          "sha256": "ff3f3a33491d9069d2b185b32f95b212d3b88d8e68f89d86969957d2984cb13e"
+        },
+        {
+          "label": "material instances 6 none",
+          "sha256": "825f864761e3cc2df647641877ab4598075ab6be9ee946daac03581bf94cf966"
+        },
+        {
+          "label": "material instances 7 back",
+          "sha256": "2903fc79e206be5d0bb5b9f9723f8a1d311f9196e19636584bddf65feb466aba"
+        },
+        {
+          "label": "material instances 7 none",
+          "sha256": "fb1a5f614524aa3588a94fdd585791734a022e11367f9208d49c9975f7709e60"
+        },
+        {
+          "label": "material instances 8 back",
+          "sha256": "162086cdd21a0da2147515da29455451eae3efb570c39187c94ad88db467e0ac"
+        },
+        {
+          "label": "material instances 8 none",
+          "sha256": "9afabb190bb26f5ee4e912a846d191bc134633cbd3eca3b1187653559f961f77"
+        },
+        {
+          "label": "material instances 9 back",
+          "sha256": "fd8771417e1e1e77944f485e58b3e9f4cfb1ed5d444766c137b22865568bdf1f"
+        },
+        {
+          "label": "material instances 9 none",
+          "sha256": "5ff762be0fe81d92d90ddeb0264af74e5a2249a5dcf9eddaab07aa301e6512c6"
+        },
+        {
+          "label": "motion blur",
+          "sha256": "de36921a222843a9a2999cb1a61842fca518f29e6fd4ae1f9a7b4f4ef97fe0a9"
+        },
+        {
+          "label": "present",
+          "sha256": "f2fdeaf53dcc8f39fa1801d72e5beaa1d2c249cf2c23a152297bac066a48a137"
+        },
+        {
+          "label": "probe back",
+          "sha256": "78bed29d5627ed98e3c2b64f28436a299ef4bf8b8cbfe3c6573e28e3351c7720"
+        },
+        {
+          "label": "probe filter",
+          "sha256": "bf40b0618d95e5075155e473aae54817db1552a13a27b6eb76a4e203555994ef"
+        },
+        {
+          "label": "probe none",
+          "sha256": "6013f96e7fa2e81b9910f79cd5cd5117a9a131bf01ab858b2a9d44a4faaa8997"
+        },
+        {
+          "label": "reflection back",
+          "sha256": "192fa621ddbea1fb083d595001a9119967bf81f1194ff21123e4652c7436f8c4"
+        },
+        {
+          "label": "reflection instances back",
+          "sha256": "0631175b0050fe55e555253ea0d5ff3daba896eaa702befd835624dad1d25965"
+        },
+        {
+          "label": "reflection instances none",
+          "sha256": "04048889587c17eeaeb487347aea02d52a2d5a5f7838a935577d9842ee495f65"
+        },
+        {
+          "label": "reflection none",
+          "sha256": "42527ede46a5af97e9e077af536a043967e59843879b8e2d422bcb407d354f0f"
+        },
+        {
+          "label": "shadow back instances",
+          "sha256": "f101900e42c5d027dde99452ea19106762c8dcb7c47ed0c006a49822d3b433ab"
+        },
+        {
+          "label": "shadow back single",
+          "sha256": "8035577c893d2dcc4d029f44d1211ada6d3145368fff590e03205505ecb6946e"
+        },
+        {
+          "label": "shadow none instances",
+          "sha256": "b68f850fdf2f4d19122601c0689612d5c9e177f20b676d87d5004abe39acd146"
+        },
+        {
+          "label": "shadow none single",
+          "sha256": "6abb0b762b1a43fac9291b9494066b2d755ba86aad1c6a3be5f517f1a6433168"
+        },
+        {
+          "label": "shadow shared back",
+          "sha256": "61167134e1266d8fcd4207936ffcc6aa412e633651e3caab11a5b510d6c86237"
+        },
+        {
+          "label": "shadow shared none",
+          "sha256": "8b06154751d995e84e4e8dfaaa01459b1c083c4ab50c28a7c92e05c27d5ffb12"
+        },
+        {
+          "label": "sky",
+          "sha256": "dc1d290ce76744e45d725b3e91f23c0eecefc6ccf76a23796e9e6c17a9c22608"
+        },
+        {
+          "label": "snow",
+          "sha256": "7c54529440fe61a3f106d72fb78a66218c401de767a4aa5e2e8a720228667813"
+        },
+        {
+          "label": "surface probe back",
+          "sha256": "4ff158824c3aaaf98bbfccdc1529197c21c7681207c190b01b01636c8a87db69"
+        },
+        {
+          "label": "surface probe none",
+          "sha256": "7cf8cc7267e37f3b11da809faf31fd57f3ef62249cf9d21cfc6e32e9c518a67c"
+        },
+        {
+          "label": "surface reflection back",
+          "sha256": "b5e941072379d77ee33746413379ffcc9f165fbdc3bb93e64526f7ea437c41a4"
+        },
+        {
+          "label": "surface reflection none",
+          "sha256": "22f9050c63934b07a814a4cdc1a17f3c4d1297a621b365a125be5a7b2b9e6ec1"
+        },
+        {
+          "label": "surface relief back",
+          "sha256": "6fd30311bc20841eb698e55b9248a74b205acd04ee52ec9b6bf2ac1e56d081a3"
+        },
+        {
+          "label": "surface relief none",
+          "sha256": "0b1ab008679da80bc3228319a7ac5af2ce2dc2e3d9fc43c596166d06e54d0110"
+        },
+        {
+          "label": "surface shadow back",
+          "sha256": "8b472bb758553b7a04b07bf4b41ad59a96c3b461aaded23c6b2731f141c9c2b7"
+        },
+        {
+          "label": "surface shadow none",
+          "sha256": "2b4423bb8dbd5b89c6fa0c41b146ad6417a820f128776bd6cd0da6c78857b3d6"
+        },
+        {
+          "label": "taa",
+          "sha256": "f28343a2e3c7e69ae33c6e3d0862b82a230a2ed6799e2f6fa4ffdd3c78499c5e"
+        }
+      ]
+    },
+    "minimal": {
+      "options": {
+        "visibility": "cpu",
+        "profiling": false,
+        "features": {
+          "temporalAA": false,
+          "bloom": false,
+          "motionBlur": false,
+          "planarReflections": false,
+          "screenSpace": false
+        }
+      },
+      "pipelines": [
+        {
+          "label": "blit",
+          "sha256": "0cf8a3e9fa3a62224d6ba838fc8ad7c88074ea4a0f2dbb08fa3e064af207879e"
+        },
+        {
+          "label": "bloom downsample",
+          "sha256": "dd694f49c64c29352f2d62e8138474baf9daeb20f418f483c3c3c729c7fd87e9"
+        },
+        {
+          "label": "bloom horizontal",
+          "sha256": "6cf42f324978d6a6bdda89c61dd82cefa741aa904cdedcf0b2a22099218a2f3f"
+        },
+        {
+          "label": "bloom vertical",
+          "sha256": "6f2e08e268d99a67c942307c47981957f8374353d60c2f9d11fa7f9c8a92351a"
+        },
+        {
+          "label": "coating overlay back",
+          "sha256": "339b049ac29029e593bb0bef05f30b6102d79f844ccb9888d9ea51035d62253c"
+        },
+        {
+          "label": "coating overlay none",
+          "sha256": "192fff74b6a54ef033c30791da3b0e2fc464df50cfaa77fd7fcc0ba1389e8ec9"
+        },
+        {
+          "label": "effects",
+          "sha256": "f37717f979acdfb23cdac8d6d11999ab397b490e3f3e80fea58014f9df5c36b1"
+        },
+        {
+          "label": "glass",
+          "sha256": "3c3d1b977242259f703100beae88723fc42abdd4e92ebdd846acb7b91ac1705e"
+        },
+        {
+          "label": "material -1 transparent none",
+          "sha256": "5ad543664695215c61eae4e7090566e7fc2540f3e6dc77ff522af7445a78a306"
+        },
+        {
+          "label": "material 0 opaque back",
+          "sha256": "61f95b99c4b032f75e344d5bef093996073a457a5784fdd4bbda2d5bf5527723"
+        },
+        {
+          "label": "material 0 opaque back",
+          "sha256": "8b2167a8aae0972226162502f131378fd7761258ef53621c936eb76d8e4eb999"
+        },
+        {
+          "label": "material 0 opaque none",
+          "sha256": "179410435f8c856a80eb24e109e44545cc7fd874164a231ca8e64c9818a4a31f"
+        },
+        {
+          "label": "material 0 opaque none",
+          "sha256": "7040cf78346120c6b54be328c7fbd15917019e82ac93190904ca7e2a93a443e8"
+        },
+        {
+          "label": "material 1 opaque back",
+          "sha256": "6a8bde348b3ff8462c7ae4426bfedccdb72292dea87ebffcfae24016b513b916"
+        },
+        {
+          "label": "material 1 opaque back",
+          "sha256": "acd0ca6c1d3af9680c9b705661140837291ae95cb31f1785631062cb497117e6"
+        },
+        {
+          "label": "material 1 opaque none",
+          "sha256": "5ce0e999423b013d648cd7a666472a7e871035dbc1f46514df8588bc7b393b5f"
+        },
+        {
+          "label": "material 1 opaque none",
+          "sha256": "d7f13fbeaa63afa096b322b0fa590f910b4ef23cf80391cae3cf377bd190a194"
+        },
+        {
+          "label": "material 10 opaque back",
+          "sha256": "06f90830a69e9ec1b60a71b8ba5b8c267e7433cfcc69d28d6e94cb93defbf414"
+        },
+        {
+          "label": "material 10 opaque back",
+          "sha256": "9fbb43bfa00dead9f0fc39d615c74bec29885c6a318e79baebdd484d661262aa"
+        },
+        {
+          "label": "material 10 opaque none",
+          "sha256": "1094d6525667db320555319c7ef6f08054a79df32a7d0674c43e07af6814f047"
+        },
+        {
+          "label": "material 10 opaque none",
+          "sha256": "637cbb324fb525407368b350450963572f61b7435841ab6aaf2f18a3527f26e5"
+        },
+        {
+          "label": "material 2 opaque back",
+          "sha256": "889389603a5ef8ef05a29b41f3207e6dc1e8ad04c2e30be4440a3034bdf83b1b"
+        },
+        {
+          "label": "material 2 opaque back",
+          "sha256": "af487991950514f9e05883cb794165e560d2a2ad511fb0cab7d9835130687991"
+        },
+        {
+          "label": "material 2 opaque none",
+          "sha256": "45ea5d972ad2903044e640ae31d16edcbe37f31ee61c6cd94531ee1afdcc0017"
+        },
+        {
+          "label": "material 2 opaque none",
+          "sha256": "a5e2418fbece8244e7bd369c5d03cf30eb26345579fb3b79d3a503a15b636ad1"
+        },
+        {
+          "label": "material 3 opaque back",
+          "sha256": "2b604ef1c051016f53e214e88432c9b9914321737a93acfc29fd0c1f768a5ec9"
+        },
+        {
+          "label": "material 3 opaque back",
+          "sha256": "e007ae2f4719d97c1445842e9f505e46b8272e5fd0f2af7cf3e2d2e93e633a65"
+        },
+        {
+          "label": "material 3 opaque none",
+          "sha256": "3c83b9165a8b5165d64922b27a141669f42475ef2b9c32e7d2ea3b2dbc4ddb6d"
+        },
+        {
+          "label": "material 3 opaque none",
+          "sha256": "a653218cc4c21df8dfe06079637819369a7282ce1009fe610763014a6c2992c7"
+        },
+        {
+          "label": "material 4 opaque back",
+          "sha256": "23d45767da58d0cebf3a56082d1556982e7ea8c2f4e78c383887c145fe7850c8"
+        },
+        {
+          "label": "material 4 opaque back",
+          "sha256": "34990c8858fa2d1742da1ad3b9a5d5570398e3b6b167478208815945d3024766"
+        },
+        {
+          "label": "material 4 opaque none",
+          "sha256": "1d0080fd46374c1d29b1b07727005bdc13a96cc037b4ab2706077cff5b6cbaed"
+        },
+        {
+          "label": "material 4 opaque none",
+          "sha256": "e22fb974cef54790211c7c70e95457067f486ce4383c8cae861eb5224dcdb064"
+        },
+        {
+          "label": "material 5 opaque back",
+          "sha256": "2ee54ef3810dae08514b280b4e64ad5b8ec071f682c01a823a5db2b3738c34fe"
+        },
+        {
+          "label": "material 5 opaque back",
+          "sha256": "4167389bbe74b8cc23775e8397e271bf964decf15623620cebcd33d1bf52e8e2"
+        },
+        {
+          "label": "material 5 opaque none",
+          "sha256": "6290c8e1f23090933419a8cf7345eff6404fda3bbdb461e62a26db482fcbbd87"
+        },
+        {
+          "label": "material 5 opaque none",
+          "sha256": "da76de1879cd68606fc2b72305b41340e9ab23285003d98172d99a41c9e0d64e"
+        },
+        {
+          "label": "material 6 opaque back",
+          "sha256": "8b067b0d88a13a1124311c40addf71912eafbbc5e1faf507d02cb5adbed26aa5"
+        },
+        {
+          "label": "material 6 opaque back",
+          "sha256": "f4c22b3e1b41f80ebae2daff3c1bca4dba3d4133c6887cefca558a4e33b8f0a5"
+        },
+        {
+          "label": "material 6 opaque none",
+          "sha256": "038b0b291934864858b9912d58bc6b2084536f7e5f0f0471a1b49b2c7c490a64"
+        },
+        {
+          "label": "material 6 opaque none",
+          "sha256": "6a4387140e03a9b08240c4b090d132f7ca44ac70fafcd529b5b695815391cb38"
+        },
+        {
+          "label": "material 7 opaque back",
+          "sha256": "2e36eea424d91e7036560395fc75616c15a3bc6724fc5e038a9e093ac6910bfe"
+        },
+        {
+          "label": "material 7 opaque back",
+          "sha256": "b1472bd2f4d6704eaf7273b1fc6143e687bdd565c6e833034914e910280fe877"
+        },
+        {
+          "label": "material 7 opaque none",
+          "sha256": "07c352ac6647e360c8e4c1bbecc3e67ee09683fa04e099be33b0909e4214f4da"
+        },
+        {
+          "label": "material 7 opaque none",
+          "sha256": "9dcaf73a3fb9833374df7b14f1e8e56471d1fa82022354a2b60d3481dbd43b65"
+        },
+        {
+          "label": "material 8 opaque back",
+          "sha256": "42eefa39a63ee05dfff890a37e734be0b0f232961785ab8240538a3a4082f38c"
+        },
+        {
+          "label": "material 8 opaque back",
+          "sha256": "4c1cfac7cde1f6acae6bfb450ac60671a5d89e1cf29c1c906603e1fef1fe63e2"
+        },
+        {
+          "label": "material 8 opaque none",
+          "sha256": "8b3ef603804ebf94c9dd3574467a9de18017338091c33cfdf787c307f2dcb8b6"
+        },
+        {
+          "label": "material 8 opaque none",
+          "sha256": "d33704771dca0bc1e111527c451a771a8a53cd6e4e02b7c97d544ba5d94a34e8"
+        },
+        {
+          "label": "material 9 opaque back",
+          "sha256": "76c87958cc0a6e3c4ed244ddc2124b0a577f5d8dfb635913f7cffdbe3386e0dc"
+        },
+        {
+          "label": "material 9 opaque back",
+          "sha256": "b24f9a28b7c90abcf17824d9f137c0b698bf4baa8c15035accd3adc5b405d5ce"
+        },
+        {
+          "label": "material 9 opaque none",
+          "sha256": "cc07feb5bd345b08e893498e46d7de69f0cbeef83b2f717e36525abc59f999b0"
+        },
+        {
+          "label": "material 9 opaque none",
+          "sha256": "cc16ff1395070eef03c5d59391f77602d0c8e94f2bbb9cca3fbb6d031ef2e1b1"
+        },
+        {
+          "label": "present",
+          "sha256": "f2fdeaf53dcc8f39fa1801d72e5beaa1d2c249cf2c23a152297bac066a48a137"
+        },
+        {
+          "label": "probe back",
+          "sha256": "78bed29d5627ed98e3c2b64f28436a299ef4bf8b8cbfe3c6573e28e3351c7720"
+        },
+        {
+          "label": "probe filter",
+          "sha256": "bf40b0618d95e5075155e473aae54817db1552a13a27b6eb76a4e203555994ef"
+        },
+        {
+          "label": "probe none",
+          "sha256": "6013f96e7fa2e81b9910f79cd5cd5117a9a131bf01ab858b2a9d44a4faaa8997"
+        },
+        {
+          "label": "reflection back",
+          "sha256": "c117cfc913d5c03cb7516671118ee9a4f439c0bef7c1c7f4b3d333450179bb91"
+        },
+        {
+          "label": "reflection none",
+          "sha256": "d69c7312b440108637d02e256950f12c43603d8508408872495fa23df43b9f79"
+        },
+        {
+          "label": "shadow back instances",
+          "sha256": "ca2ce26be52558cbf967eaf3b046473c82cd006ffffec7cea65154ff29635f27"
+        },
+        {
+          "label": "shadow back single",
+          "sha256": "3df26ad6a76c10178e6c23304641388838840cf740fcab404d476deb4d9e311f"
+        },
+        {
+          "label": "shadow none instances",
+          "sha256": "4a3b837af3c12f0f94b74e9323363466eef3a04b645ba48b7eebcde031f897cd"
+        },
+        {
+          "label": "shadow none single",
+          "sha256": "209f2a1e516d1c58a00f693ba65e36daeda0fe2a4cbe8e50ce7ebb24cd20d7df"
+        },
+        {
+          "label": "sky",
+          "sha256": "761e266718ec1d625a69ce9cc88985b3654044649fa5e980e6f91db0d5c4276a"
+        },
+        {
+          "label": "snow",
+          "sha256": "769aafe1d628d9a4a37be4fcc758071fca2cc41f2dc85fad15e51f6b654cc1de"
+        },
+        {
+          "label": "surface probe back",
+          "sha256": "4ff158824c3aaaf98bbfccdc1529197c21c7681207c190b01b01636c8a87db69"
+        },
+        {
+          "label": "surface probe none",
+          "sha256": "7cf8cc7267e37f3b11da809faf31fd57f3ef62249cf9d21cfc6e32e9c518a67c"
+        },
+        {
+          "label": "surface reflection back",
+          "sha256": "b5e941072379d77ee33746413379ffcc9f165fbdc3bb93e64526f7ea437c41a4"
+        },
+        {
+          "label": "surface reflection none",
+          "sha256": "22f9050c63934b07a814a4cdc1a17f3c4d1297a621b365a125be5a7b2b9e6ec1"
+        },
+        {
+          "label": "surface relief back",
+          "sha256": "30e5c7df9cd45d8c2bfc570d11f969af02b4d41163828682d6d814cf3972bec5"
+        },
+        {
+          "label": "surface relief none",
+          "sha256": "82797f425f7875016e1b150a60d788acd371efc593ed9b0fb824056cf6b8e168"
+        },
+        {
+          "label": "surface shadow back",
+          "sha256": "8b472bb758553b7a04b07bf4b41ad59a96c3b461aaded23c6b2731f141c9c2b7"
+        },
+        {
+          "label": "surface shadow none",
+          "sha256": "2b4423bb8dbd5b89c6fa0c41b146ad6417a820f128776bd6cd0da6c78857b3d6"
+        },
+        {
+          "label": "taa",
+          "sha256": "f28343a2e3c7e69ae33c6e3d0862b82a230a2ed6799e2f6fa4ffdd3c78499c5e"
+        }
+      ]
+    }
+  },
+  "previousReferenceSha256": "cc01c40b3f4b1288ea714cb840a2e97920fcfad63ebe21385238fb86138e5ce2",
+  "previousTurfReferenceSha256": "972743eb1abff267dec2a2aba29b29674c1ebfd0478f7b0691ca6c15d57b2510",
+  "spotShadowSourceSha256": "1e0cd13d68a55112cf550c2f1c886d6957ea59b6d03aec4b192abaed2ced4872",
+  "previousSpotReferenceSha256": "093cc47756c668f8a7c993a633d0bc5e4e071208b6518515d9c517c193e6880b",
+  "exactZeroFogSourceSha256": "7a53bd2d8fff3d00bd07a5c69f61799cc3fafa6a41beb369941686a7eca901bb"
+}

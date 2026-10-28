@@ -1,0 +1,546 @@
+{
+  "date": "2026-10-16T14:49:37.846Z",
+  "scope": "Original neighboring building facades/signs, hub trees, rural buildings/props and airport boxes in the Office Engine Scene; the full integration goal remains active",
+  "sourceHashes": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\scenery-models.ts",
+      "sha256": "7cd36ebaf223564a09a2854b861e9ee32da8476b3d6f33424c28b70f8c56c883"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\runtime\\math.d.ts",
+      "sha256": "c28dc3d1128c79b2bd174877649068ed9bd3455ab29dc7e1816d3ac8b1572d63"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\runtime\\scene.js",
+      "sha256": "7eecb73d25895a61a80b2533759a62faf827f9d54fad3171cf79e17401074cce"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\terrain-scene.ts",
+      "sha256": "10f568926d1cd2878ed212dcdac0354aa4df53b37ab643b23b8e795419874d75"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\office-scenery-assets.ts",
+      "sha256": "2ea18a72a5afe8092a19079fe945057d34ae69a47b21ceba6601a393da588bd3"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\office-controller.ts",
+      "sha256": "de4c0885996dc2f962cda154f00d95e79a270e71c9fe02849afdfa1413daa8f6"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\buildings\\world.ts",
+      "sha256": "efdf3cc8294141d731ba0a3b3dd4130d23953f6355ef4d23c4f1427957f08835"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\buildings\\frontage.ts",
+      "sha256": "9f70eea1f39ed96b6e5d5b19bdca137884f94c3ccbc48d4573b56250ba95a4dc"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\flight\\airport-scene.ts",
+      "sha256": "4d8a9f81db843391a2622304c22905984c1afe0bebdf7a72392a171a65ea1a54"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\fixtures\\scenery-before.ts",
+      "sha256": "3f18597db4367473832d9ce4cd0b7a386e8637ce96d480a80c43597a209fb475"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\office-scenery-assets.test.ts",
+      "sha256": "881fd0d0327e13e702517239e39c3c64865a8af9e5eaf352f848ec699fd145b7"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\tools\\qa-office-walking.ts",
+      "sha256": "a89c7ccd1db673061402c6be3f3fa2778c0b54a46bd23ee7703518034f18eb1f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-scenery.ts",
+      "sha256": "ff5712719a57c5b14dc91383444e8b3589e940ba4ab182a9acb8a1f43223d037"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-types.ts",
+      "sha256": "3a6e24802850320d99c61be1259af8bf4220b5885baaf5924146f5aa0168fe08"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-connection.ts",
+      "sha256": "7d1e11d3f6f6e890716a6fc2562dcbf89ea53380824397d5d769f49ddfe8dd73"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\client\\canonical-world-view.ts",
+      "sha256": "7ce9e58cadbb77018ab90eb4104d5b4023a93967ace05df1e8bb8b5be65ed894"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\test\\canonical-connection.test.ts",
+      "sha256": "900db56454e7df47d63cec2ceb06f1894072de0b986ee9d1774d817877649d2f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\apps\\thegame\\test\\canonical-world-view.test.ts",
+      "sha256": "3f8305411887afd03cfc73ee68aa69db465c8f772b913cabb3bfb25b73afd37f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\voice-agent\\ui\\src\\office\\scene.ts",
+      "sha256": "552eb7939e70b3734089e1b9f5b867583eaf0c21fd1135f10893d00ad9a3b1d8"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\game.js",
+      "sha256": "435e3dd7e5cafc5353b42a8fbc9db097a7f0ebf17fe05c9282cb7403653dbbc9",
+      "bytes": 1586815,
+      "mode": "NODE_ENV=production"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\public\\build\\office-controller.js",
+      "sha256": "a4eb033e6c190e6ff4433238656724e6c35ac692161d2639d54416ce3c0a4116",
+      "bytes": 770092,
+      "mode": "NODE_ENV=production"
+    }
+  ],
+  "oracles": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-scenery\\observer-oracle.json",
+      "date": "2026-10-16T14:44:39.701Z",
+      "kind": "observer",
+      "scope": "Original drawBuilding plus frozen original rural/city tree loops, all 13 source triangle attributes; CPU only",
+      "seed": 29,
+      "revision": 13,
+      "geometryKey": "office:-298:370:1:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+      "center": [
+        -298,
+        370
+      ],
+      "sourceCounts": {
+        "buildings": 14,
+        "props": 0,
+        "trees": 0,
+        "airportBoxes": 0
+      },
+      "rows": [
+        {
+          "floor": 2,
+          "triangles": 9884,
+          "chunks": 10,
+          "quantization": 1e-7,
+          "sourceHash": "e611dcddac2ab7fe9512f324ba171db54c970e3ebf35e0323aaa06626f658a45",
+          "projectedHash": "e611dcddac2ab7fe9512f324ba171db54c970e3ebf35e0323aaa06626f658a45",
+          "equal": true
+        },
+        {
+          "floor": 3,
+          "triangles": 9884,
+          "chunks": 10,
+          "quantization": 1e-7,
+          "sourceHash": "352204c2d2dfd1887f2d78435f228a2cfc38d5b15a83d492e8332fed00a9fd7e",
+          "projectedHash": "352204c2d2dfd1887f2d78435f228a2cfc38d5b15a83d492e8332fed00a9fd7e",
+          "equal": true
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\office-scenery\\controller-oracle.json",
+      "date": "2026-10-16T14:45:56.087Z",
+      "kind": "controller",
+      "scope": "Original drawBuilding plus frozen original rural/city tree loops, all 13 source triangle attributes; CPU only",
+      "seed": 29,
+      "revision": 13,
+      "geometryKey": "controller:-320:-64:1:-4:-1,-4:-2,-4:0,-5:-1,-4:-3,-4:1,-5:-2,-5:0",
+      "center": [
+        -320,
+        -64
+      ],
+      "sourceCounts": {
+        "buildings": 32,
+        "props": 0,
+        "trees": 0,
+        "airportBoxes": 1
+      },
+      "rows": [
+        {
+          "floor": 2,
+          "triangles": 29244,
+          "chunks": 12,
+          "quantization": 1e-7,
+          "sourceHash": "2a0e2dfb3a6f7d4b30ce1cd756272528349a284040dad29d881ba344d798f7ca",
+          "projectedHash": "2a0e2dfb3a6f7d4b30ce1cd756272528349a284040dad29d881ba344d798f7ca",
+          "equal": true
+        },
+        {
+          "floor": 3,
+          "triangles": 29244,
+          "chunks": 12,
+          "quantization": 1e-7,
+          "sourceHash": "48851309322daee04c270f4a4b57555ee03477c4d2790ac1cc6fdcbeefe27a5f",
+          "projectedHash": "48851309322daee04c270f4a4b57555ee03477c4d2790ac1cc6fdcbeefe27a5f",
+          "equal": true
+        }
+      ]
+    }
+  ],
+  "native": {
+    "log": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-20261016.log",
+    "report": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\report.json",
+    "browserMode": "native-gpu",
+    "entryContinuity": {
+      "expectedActorId": "player:50d5aeae-e79d-4966-bf7c-f2f23fb87844",
+      "actor": "player:50d5aeae-e79d-4966-bf7c-f2f23fb87844",
+      "matched": true
+    },
+    "walkDistance": 2.0768874591028146,
+    "officePartsInGame": 231,
+    "observedScopes": [
+      {
+        "name": "observer",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 14,
+          "props": 0,
+          "trees": 0,
+          "airportBoxes": 0,
+          "meshes": 81,
+          "geometryBuilds": 10
+        },
+        "urbanRecords": 29
+      },
+      {
+        "name": "entered",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 32,
+          "props": 0,
+          "trees": 0,
+          "airportBoxes": 1,
+          "meshes": 96,
+          "geometryBuilds": 22
+        },
+        "urbanRecords": 0
+      },
+      {
+        "name": "returned-observer",
+        "scenery": {
+          "source": "thegame",
+          "buildings": 14,
+          "props": 0,
+          "trees": 0,
+          "airportBoxes": 0,
+          "meshes": 81,
+          "geometryBuilds": 32
+        },
+        "urbanRecords": 29
+      }
+    ],
+    "physicsAndGpu": true,
+    "transport": {
+      "ok": true,
+      "vehicle": {
+        "id": "vehicle:1001",
+        "type": "wagon",
+        "initial": [
+          -329.009,
+          0.455,
+          -62.465
+        ]
+      },
+      "exitFrames": 160,
+      "minimumCameraDistance": 7.999999999999982,
+      "maximumCameraDistance": 7.999999999999982,
+      "clearanceRelease": {
+        "before": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "after": {
+          "vehicle": null,
+          "occupied": false
+        },
+        "position": [
+          -326.683376911424,
+          -64.40397588366518
+        ]
+      }
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    }
+  },
+  "checks": {
+    "game": "34 passing tests / 3367 assertions: office-scenery-assets, office-urban-assets, office-dynamic-assets, the-engine-renderer",
+    "adapter": "44 passing tests / 4373 assertions: canonical-world-view, canonical-connection",
+    "typecheck": [
+      "Game full TypeScript",
+      "Engine thegame app TypeScript",
+      "native Office UI TypeScript"
+    ],
+    "build": [
+      "Game production browser/library",
+      "Office UI production build; >1500 kB warning remains"
+    ],
+    "notes": "Initial typecheck found missing declarations for the actual JS rng/hash exports and a readonly color tuple at the boundary; signatures were added after inspecting the implementations and the tuple is copied. Declaration signatures alone are not runtime safety evidence."
+  },
+  "images": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\entered.png",
+      "sha256": "684034c607d3852355822ca6484e27cb11ae31f97eebc3e542541d4dd6879e26"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\observer.png",
+      "sha256": "ddd02221655a433b69e5366862faddf6ee1d0e28d605410030dd1904b2897085"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\orbit-1.png",
+      "sha256": "f559a3cd20e544fc946631d80a08ff7f67ed79c0e8f14a179dc9bbe0203c5724"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\orbit-2.png",
+      "sha256": "0b934ff55c561e90a88931372c3c19ae5ac2750d6d17b7f9962c9fc2d480f989"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\orbit-3.png",
+      "sha256": "e9d34a8b5120595487dafa19150905234252e2a5881fda8fd0fb5656ca193c23"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\orbit-4.png",
+      "sha256": "c4c6b5fcb1e10414540cb812d55bbcb1cad622342534a2aa48d0e233d5c332c6"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\returned-observer.png",
+      "sha256": "2d38ddb7e1e62fbb0b0dec6ba66774d6579656b5a441ae70010e4a31d4f9114f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-clearance-restored.png",
+      "sha256": "b22e779ea8f17c239275d7a573474e09d85bf1509a9bd6cde939a3622998f438"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-driver.png",
+      "sha256": "c7da47ff0d31cb77db66079685eca65ac9f9c81aa04ce983d5b3ee4daf550218"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-driving.png",
+      "sha256": "a8c4b76caa584d362dfa471ad232a1c376c321ce4f9d03b5826b0def95b81ece"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-engine-off.png",
+      "sha256": "4850a0f1764634cb92e53553fcaab5ec680126023ed6cc08a6717de61ae29ece"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-1.png",
+      "sha256": "c7b6f2e3463dace57799c5ff213079de0f7ebc176325db9afc767ee0ecfdbdd5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-2.png",
+      "sha256": "05c4c1493cc6e4f53f3cad1dece120ab56fa9703b89afbbd098582e31bf65e34"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-3.png",
+      "sha256": "d6af1168cc404bb5dbf01976c07867b02ec460b1b2b0bd98e6d85a47994f8f30"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-4.png",
+      "sha256": "961786ad5fecad0568ac3774b5c16c537c02ff87cec98cea51fa933e4789a096"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-5.png",
+      "sha256": "26d549dcc5a2a815d1f961a9646d3a304b2bcc19a8075dae2b27c2f51d1b5b95"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-6.png",
+      "sha256": "9281ef0ec1a07309de7208bc32982d6007b3288b5c56d46a26d284fb19bc394e"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-7.png",
+      "sha256": "4a84d7e8e600cb9433199a67d0a107e9c0257cb5634f6f2991e8f2fb68a5a6cd"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-8.png",
+      "sha256": "fb9b8ad3f941cc039b9ac4a887e7ac0c6f0a2b20b0b89a02a78ed51f1e532786"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited.png",
+      "sha256": "83e0e96c3fe1b917804cdd08b799df75bd33ba3df3f46c1c5f62e36bc017a9ba"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-passenger.png",
+      "sha256": "244fa9dcf84cbc9133fd2adbdeec877d993a464f9e6c0ccdd54d4d961dd8c0c5"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\walk-KeyW.png",
+      "sha256": "5268318952ceab425fb478fb0e2b19a2c10719917eb1e4f32c1ad73371ece40f"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\canonical-lobby.png",
+      "sha256": "50b1ed48ee466533603ccaba659781b466099a9ef4e13a9c46eb3c042ed7023a"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\entrance.png",
+      "sha256": "8c859035027c46ac004df7db06adbabeec860a681503c6f8de811aec4c8018e6"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\office-entry.png",
+      "sha256": "253d5a9d3e9ca7a71dcbad8849c5b5b6fc8f6f0b70725c234c48d27c58496990"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\upper-office.png",
+      "sha256": "dc095c5a05bebfa59143c80a93b07acd4151b6bc28adcc979487764010c1e553"
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\workplaces.png",
+      "sha256": "84722f7e132ad75411a5a799cd1a55328142cecd9a84a14b4e1e10f50e16c011"
+    }
+  ],
+  "visualReview": [
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\observer.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\entered.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\walk-KeyW.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-driver.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\transport-exited-8.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-walking\\office-original-scenery-final-20261016\\returned-observer.png",
+    "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\office-original-scenery-final-game\\workplaces.png"
+  ],
+  "review": "Eight actual PNGs reviewed: source facades/windows are visible around the office and parking area; original Office furniture/cutaway remain. Entry is brighter at the current canonical dawn, which is not a controlled lighting comparison. Ground is still very dark. The immediate exit screenshot has a transient double silhouette consistent with temporal ghosting; settled exit is clear. No flat green exit frame in reviewed samples. Remaining collected PNGs are not claimed individually reviewed.",
+  "runtime": {
+    "pid": 1960,
+    "serverRestarted": false,
+    "officeBackendOrMicrophoneRestarted": false,
+    "physicalMicrophoneEnabled": false,
+    "editorRevision": 53,
+    "geometryRevision": 1,
+    "health": {
+      "ok": true,
+      "seed": 29,
+      "revision": 13,
+      "players": 0,
+      "capacity": {
+        "cpuBudget": 2,
+        "maxPlayers": 16,
+        "workers": 1,
+        "physicsSubsteps": 2,
+        "snapshotHz": 20,
+        "populationHz": 30,
+        "vehicleInterestPeriod": 2,
+        "streamingPeriod": 3,
+        "worldInterestPeriod": 3,
+        "residentLimit": 48
+      },
+      "tick": 843644,
+      "simulationTime": 1545.416666672539,
+      "engine": {
+        "committed": 794,
+        "cancelled": 29,
+        "failed": 0,
+        "deferred": 0,
+        "simulatedResidents": 1450,
+        "cohorts": 1450,
+        "unmetFoodDemand": 2,
+        "catalogOverflow": 0,
+        "migratedHomes": 0,
+        "locations": 11,
+        "pending": 0,
+        "trackedResidents": 1039,
+        "reservedTreasury": 0,
+        "tiers": {
+          "detailed": 7,
+          "active": 23,
+          "aggregate": 18,
+          "dormant": 0
+        },
+        "production": {
+          "factories": 0,
+          "orders": 0,
+          "units": 0,
+          "nextDueMinute": null
+        },
+        "workers": {
+          "submitted": 823,
+          "completed": 807,
+          "cancelled": 16,
+          "failed": 0,
+          "rejected": 0,
+          "maxInFlight": 1,
+          "maxQueue": 1,
+          "workers": 1,
+          "inFlight": 0,
+          "queued": 0,
+          "pending": 0,
+          "closed": false
+        },
+        "vehicles": {
+          "sleeps": 1194,
+          "wakes": 1153,
+          "pinned": 12,
+          "total": 57,
+          "active": 15,
+          "hibernating": 42,
+          "tracked": 57
+        }
+      },
+      "residents": {
+        "active": 48,
+        "limit": 48,
+        "minute": 255395.06665028635,
+        "navigation": {
+          "expanded": 196135,
+          "completed": 460,
+          "failed": 1861,
+          "maxWork": 24,
+          "dynamicRoutes": 201,
+          "pending": 0,
+          "cachedCells": 24006
+        }
+      },
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 185450,
+        "vehicleStepHz": 120,
+        "bodies": 57,
+        "sleeping": 33,
+        "awake": 10,
+        "maxSpeed": 2.9766651628876835,
+        "substeps": 203254,
+        "bodySubsteps": 1424479,
+        "islands": 9,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 3
+      },
+      "timing": {
+        "steps": 843644,
+        "lastStepMs": 0.02890000119805336,
+        "maxStepMs": 442.88529999926686,
+        "meanStepMs": 0.040499166725203394,
+        "p95StepMs": 0.0660999994724989,
+        "droppedMs": 20422.522366666624
+      },
+      "network": {
+        "receivedPackets": 31422,
+        "receivedBytes": 5419714,
+        "submittedPackets": 268876,
+        "submittedBytes": 209579055,
+        "sendErrors": 34,
+        "closedSessions": 34,
+        "transports": {
+          "webtransport": 0
+        },
+        "queuedBytes": 0,
+        "replaced": 0,
+        "expired": 0,
+        "scope": "application framing; send attempts, not delivered QUIC/UDP bytes"
+      },
+      "webTransport": 3009
+    }
+  },
+  "performance": {
+    "newAverageMeasured": false,
+    "lastKnownArtifact": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\performance-live-fps-current-urban-20261016.json",
+    "lastKnownAverageFPS": 46.91678526187386,
+    "scope": "Prior Game live window before this source-extraction phase. No new Office/Game average or optimization claim."
+  },
+  "limits": [
+    "The native Office installation itself retains its existing cutaway/core/lift adapter; those authored boxes/materials/frontage still require source-fidelity work.",
+    "Legacy city lamps, vector road details, outer terrain albedo, analytic roads/water, sky/light/first-frame behavior and broader gameplay/audio/NPC UI flows remain to verify or implement.",
+    "Rural trees/rocks/cacti and fallback buildings are matched against frozen original loops in CPU tests; sampled native observer/controller scopes have zero such prop/tree records.",
+    "The native controller scope includes one airport surface, with its source triangle attributes matched. Other airport traversal/aircraft gameplay is not established.",
+    "Native UI uses the running Vite/8765 entry; production UI was built and typechecked separately.",
+    "TAA/motion artifacts at boarding transitions still need a focused comparison; this phase does not claim complete temporal-image parity."
+  ]
+}

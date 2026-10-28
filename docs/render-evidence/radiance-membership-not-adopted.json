@@ -1,0 +1,747 @@
+{
+  "version": 1,
+  "status": "not-adopted-after-replication",
+  "retainedInProduction": false,
+  "restoredProductionState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633"
+  },
+  "reason": "The 128-pair moving-route mean did not reproduce in the independent 512-pair capture. Both larger-capture means are positive, with confidence intervals spanning zero. The strict final-image and full-frame gates also remain failed.",
+  "reports": [
+    {
+      "report": "artifacts/engine-compare/radiance-membership-paired/report.json",
+      "archive": "artifacts/engine-compare/radiance-membership-paired/measured-state",
+      "archiveVerified": true,
+      "sourceState": {
+        "srcSha256": "117362617d0cacc35908c49a8dc4a01851d0e945f9b1e4c24c4fae44002e1d51",
+        "distSha256": "432e3a5b4c768830ada604472c27b5b64d9d40c17c9608763df7d79234bd0142",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "9e7064a3e985f0e406184e301c106b35f30c802fdb49e2795759c7fc72698159"
+      },
+      "controls": {
+        "count": 10000,
+        "width": 1920,
+        "height": 1080,
+        "pairs": 128,
+        "warmupFramesPerVariant": 128,
+        "settleFramesPerVariant": 2,
+        "scenarios": [
+          "static",
+          "camera-motion"
+        ],
+        "qualityRepetitions": 2
+      },
+      "gates": {
+        "nativeTimestamps": true,
+        "variantsExecuted": true,
+        "physicalReplay": true,
+        "environmentCausesExact": true,
+        "gpuWorkExact": true,
+        "finalCanonicalStages": false,
+        "cpuCombinedImproved": true
+      },
+      "observations": {
+        "baseline": {
+          "fusedFrames": 960,
+          "observations": 9600960,
+          "reusedPoses": 9590959,
+          "checkedPoses": 10001,
+          "fallbackFrames": 0
+        },
+        "candidate": {
+          "fusedFrames": 960,
+          "observations": 9600960,
+          "reusedPoses": 9590959,
+          "checkedPoses": 10001,
+          "fallbackFrames": 0
+        }
+      },
+      "causeChecks": 256,
+      "routes": [
+        {
+          "scenario": "static",
+          "combinedDeltaMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 0.5000000596046448,
+            "mean": -0.03359374776482582
+          },
+          "totalDeltaMs": {
+            "samples": 128,
+            "p50": 0.20000004768371582,
+            "p95": 1.5,
+            "mean": -0.010156244970858097
+          },
+          "byFirst": {
+            "baseline": {
+              "samples": 64,
+              "p50": 0,
+              "p95": 0.6000000238418579,
+              "mean": -0.049999999813735485
+            },
+            "candidate": {
+              "samples": 64,
+              "p50": 0,
+              "p95": 0.5,
+              "mean": -0.017187495715916157
+            }
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "combinedDeltaMs": {
+            "samples": 128,
+            "p50": -5.960464477539063e-8,
+            "p95": 0.5,
+            "mean": -0.08281249832361937
+          },
+          "totalDeltaMs": {
+            "samples": 128,
+            "p50": 0,
+            "p95": 1.800000011920929,
+            "mean": -0.10234374506399035
+          },
+          "byFirst": {
+            "baseline": {
+              "samples": 64,
+              "p50": -5.960464477539063e-8,
+              "p95": 0.5,
+              "mean": -0.06250000093132257
+            },
+            "candidate": {
+              "samples": 64,
+              "p50": 0,
+              "p95": 0.3999999761581421,
+              "mean": -0.10312499571591616
+            }
+          }
+        }
+      ],
+      "finalQuality": [
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "taa",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "taa",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "taa",
+          "changedChannels": 55,
+          "maxEncodedError": 6,
+          "coordinates": [
+            {
+              "x": 1030,
+              "y": 364,
+              "channel": 0,
+              "before": 11912,
+              "after": 11911
+            },
+            {
+              "x": 1030,
+              "y": 364,
+              "channel": 2,
+              "before": 12222,
+              "after": 12223
+            },
+            {
+              "x": 1031,
+              "y": 364,
+              "channel": 0,
+              "before": 11929,
+              "after": 11928
+            },
+            {
+              "x": 1028,
+              "y": 365,
+              "channel": 2,
+              "before": 12275,
+              "after": 12276
+            },
+            {
+              "x": 1029,
+              "y": 365,
+              "channel": 2,
+              "before": 12241,
+              "after": 12242
+            },
+            {
+              "x": 935,
+              "y": 400,
+              "channel": 0,
+              "before": 12339,
+              "after": 12338
+            },
+            {
+              "x": 935,
+              "y": 400,
+              "channel": 1,
+              "before": 12338,
+              "after": 12337
+            },
+            {
+              "x": 936,
+              "y": 400,
+              "channel": 1,
+              "before": 12299,
+              "after": 12298
+            },
+            {
+              "x": 932,
+              "y": 401,
+              "channel": 0,
+              "before": 12057,
+              "after": 12056
+            },
+            {
+              "x": 933,
+              "y": 401,
+              "channel": 0,
+              "before": 12070,
+              "after": 12069
+            },
+            {
+              "x": 935,
+              "y": 401,
+              "channel": 0,
+              "before": 12157,
+              "after": 12156
+            },
+            {
+              "x": 935,
+              "y": 401,
+              "channel": 1,
+              "before": 12080,
+              "after": 12079
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/radiance-membership-paired-512/report.json",
+      "archive": "artifacts/engine-compare/radiance-membership-paired-512/measured-state",
+      "archiveVerified": true,
+      "sourceState": {
+        "srcSha256": "117362617d0cacc35908c49a8dc4a01851d0e945f9b1e4c24c4fae44002e1d51",
+        "distSha256": "432e3a5b4c768830ada604472c27b5b64d9d40c17c9608763df7d79234bd0142",
+        "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb",
+        "diagnosticSha256": "3514a96d9b2f42826e505ad4a16a6e2f9a933a4cc3c48b1835c24f35111d0adb"
+      },
+      "controls": {
+        "count": 10000,
+        "width": 1920,
+        "height": 1080,
+        "pairs": 512,
+        "warmupFramesPerVariant": 128,
+        "settleFramesPerVariant": 2,
+        "scenarios": [
+          "static",
+          "camera-motion"
+        ],
+        "qualityRepetitions": 2
+      },
+      "gates": {
+        "nativeTimestamps": true,
+        "variantsExecuted": true,
+        "physicalReplay": true,
+        "environmentCausesExact": true,
+        "gpuWorkExact": true,
+        "finalCanonicalStages": false,
+        "cpuCombinedImproved": false
+      },
+      "observations": {
+        "baseline": {
+          "fusedFrames": 3264,
+          "observations": 32643264,
+          "reusedPoses": 32633263,
+          "checkedPoses": 10001,
+          "fallbackFrames": 0
+        },
+        "candidate": {
+          "fusedFrames": 3264,
+          "observations": 32643264,
+          "reusedPoses": 32633263,
+          "checkedPoses": 10001,
+          "fallbackFrames": 0
+        }
+      },
+      "causeChecks": 1024,
+      "routes": [
+        {
+          "scenario": "static",
+          "combinedDeltaMs": {
+            "samples": 512,
+            "p50": 0,
+            "p95": 0.5999999642372131,
+            "mean": 0.013085937942378223
+          },
+          "totalDeltaMs": {
+            "samples": 512,
+            "p50": -5.960464477539063e-8,
+            "p95": 1.5999999642372131,
+            "mean": 0.04355468740686774
+          },
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.5999999642372131,
+              "mean": 0.02304687420837581
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.5999999642372131,
+              "mean": 0.0031250016763806343
+            }
+          }
+        },
+        {
+          "scenario": "camera-motion",
+          "combinedDeltaMs": {
+            "samples": 512,
+            "p50": 0,
+            "p95": 0.6000000238418579,
+            "mean": 0.027343747788108885
+          },
+          "totalDeltaMs": {
+            "samples": 512,
+            "p50": 0,
+            "p95": 1.5,
+            "mean": 0.042968748952262104
+          },
+          "byFirst": {
+            "baseline": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.6000000238418579,
+              "mean": 0.015624996740370989
+            },
+            "candidate": {
+              "samples": 256,
+              "p50": 0,
+              "p95": 0.699999988079071,
+              "mean": 0.03906249883584678
+            }
+          }
+        }
+      ],
+      "finalQuality": [
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 0,
+          "stage": "taa",
+          "changedChannels": 35,
+          "maxEncodedError": 3,
+          "coordinates": [
+            {
+              "x": 1697,
+              "y": 515,
+              "channel": 0,
+              "before": 11277,
+              "after": 11276
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 0,
+              "before": 10884,
+              "after": 10883
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 1,
+              "before": 11885,
+              "after": 11886
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 0,
+              "before": 10994,
+              "after": 10993
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 2,
+              "before": 12355,
+              "after": 12356
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 0,
+              "before": 11073,
+              "after": 11072
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 2,
+              "before": 12387,
+              "after": 12388
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 0,
+              "before": 10637,
+              "after": 10636
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 1,
+              "before": 11847,
+              "after": 11848
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 0,
+              "before": 10723,
+              "after": 10721
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 1,
+              "before": 11851,
+              "after": 11852
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 2,
+              "before": 12220,
+              "after": 12221
+            }
+          ]
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "baseline",
+          "repetition": 1,
+          "stage": "taa",
+          "changedChannels": 35,
+          "maxEncodedError": 3,
+          "coordinates": [
+            {
+              "x": 1697,
+              "y": 515,
+              "channel": 0,
+              "before": 11277,
+              "after": 11276
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 0,
+              "before": 10884,
+              "after": 10883
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 1,
+              "before": 11885,
+              "after": 11886
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 0,
+              "before": 10994,
+              "after": 10993
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 2,
+              "before": 12355,
+              "after": 12356
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 0,
+              "before": 11073,
+              "after": 11072
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 2,
+              "before": 12387,
+              "after": 12388
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 0,
+              "before": 10637,
+              "after": 10636
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 1,
+              "before": 11847,
+              "after": 11848
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 0,
+              "before": 10723,
+              "after": 10721
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 1,
+              "before": 11851,
+              "after": 11852
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 2,
+              "before": 12220,
+              "after": 12221
+            }
+          ]
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "opaque",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "hdr",
+          "changedChannels": 0,
+          "maxEncodedError": 0,
+          "coordinates": []
+        },
+        {
+          "mode": "candidate",
+          "repetition": 1,
+          "stage": "taa",
+          "changedChannels": 35,
+          "maxEncodedError": 3,
+          "coordinates": [
+            {
+              "x": 1697,
+              "y": 515,
+              "channel": 0,
+              "before": 11277,
+              "after": 11276
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 0,
+              "before": 10884,
+              "after": 10883
+            },
+            {
+              "x": 1696,
+              "y": 517,
+              "channel": 1,
+              "before": 11885,
+              "after": 11886
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 0,
+              "before": 10994,
+              "after": 10993
+            },
+            {
+              "x": 1697,
+              "y": 517,
+              "channel": 2,
+              "before": 12355,
+              "after": 12356
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 0,
+              "before": 11073,
+              "after": 11072
+            },
+            {
+              "x": 1698,
+              "y": 517,
+              "channel": 2,
+              "before": 12387,
+              "after": 12388
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 0,
+              "before": 10637,
+              "after": 10636
+            },
+            {
+              "x": 1696,
+              "y": 518,
+              "channel": 1,
+              "before": 11847,
+              "after": 11848
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 0,
+              "before": 10723,
+              "after": 10721
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 1,
+              "before": 11851,
+              "after": 11852
+            },
+            {
+              "x": 1697,
+              "y": 518,
+              "channel": 2,
+              "before": 12220,
+              "after": 12221
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "confidence": "docs/render-evidence/radiance-paired-confidence.json",
+  "fullComparison": "docs/render-evidence/radiance-membership-comparison.json",
+  "fullComparisonGates": {
+    "historyRecordsResident": true,
+    "canonicalPixels": false,
+    "wetPixels": true,
+    "frameBudget": false,
+    "equalPixelQualityEstablished": false,
+    "competitiveAdvantageEstablished": false,
+    "performanceIsolationEstablished": false,
+    "staticMembershipObserved": true,
+    "pairedEnvironmentCausesExact": true,
+    "pairedGPUWorkExact": true,
+    "pairedOpaqueHDRExact": true,
+    "pairedAllFinalStagesExact": false
+  },
+  "validation": {
+    "tests": 317,
+    "passed": 317,
+    "log": "artifacts/radiance-membership-restored-check.log"
+  },
+  "limitations": [
+    "Paired timings measure local projection/environment CPU work, with identical observed environment causes, replay and draw/upload work. They do not prove isolation of external clock/load variation.",
+    "The 512-pair baseline repeat also changes 35 TAA channels; a candidate-caused image regression has not been established. No tolerance or gate was relaxed.",
+    "The 72 full native cases compare different renderer pipelines. Their FPS changes do not establish equal-quality superiority or a causal speedup from this rejected candidate.",
+    "These are completed local captures, not a successful GitHub Actions run or evidence of artifact-quota recovery."
+  ]
+}

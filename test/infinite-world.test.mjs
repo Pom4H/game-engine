@@ -99,3 +99,22 @@ test('InfiniteWorld bounds concurrent generation, residency and eviction',async(
   assert.equal(uninstalled.length,16);
   world.dispose();
 });
+
+test('InfiniteWorld prioritises admission and flushes synchronous generators across batches',async()=>{
+  const demands=[['far',1,100],['near',3,10],['middle',2,20],['close',3,5]].map(([key,priority,distanceM])=>({key,priority,distanceM,id:{x:0,z:0,lod:0}}));
+  const generated=[],world=new InfiniteWorld({generate:d=>{generated.push(d.key);return d.key;}},{maxResident:3,maxConcurrent:1});
+  try{
+    world.update(demands);await world.flush();
+    assert.deepEqual(generated,['close','near','middle']);
+    assert.equal(world.inspect().resident,3);assert.equal(world.inspect().pending,0);
+  }finally{world.dispose();}
+});
+
+test('InfiniteWorld reports synchronous generation failure once and retries on the next update',async()=>{
+  const demand={key:'broken',priority:1,distanceM:0,id:{x:0,z:0,lod:0}},errors=[];let attempts=0;
+  const world=new InfiniteWorld({generate:()=>{if(++attempts===1)throw new Error('missing tile');return 'recovered';},onError:(_d,e)=>errors.push(e.message)},{maxResident:1,maxConcurrent:1});
+  try{
+    world.update([demand]);await world.flush();assert.equal(attempts,1);assert.deepEqual(errors,['missing tile']);
+    world.update([demand]);await world.flush();assert.equal(world.value('broken'),'recovered');assert.equal(attempts,2);
+  }finally{world.dispose();}
+});

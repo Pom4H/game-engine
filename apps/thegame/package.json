@@ -1,0 +1,12 @@
+{
+  "name": "thegame-office-integration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --cwd ../.. game",
+    "build": "bun run --cwd ../../../thegame build",
+    "test": "bun test ./test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "description": "Canonical TheGame Office adapters and a separate historical integration QA fixture; the actual game lives in ../thegame."
+}

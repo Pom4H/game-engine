@@ -1,0 +1,2655 @@
+{
+  "date": "2026-10-17T11:08:53.226Z",
+  "status": "partial; complete original-game/Engine/Office objective remains active",
+  "capability": "original-residents-29",
+  "scope": "Account-owned office businesses, original NPC liveness, finite paid drinking water, current Office entry and preserved canonical save.",
+  "changes": [
+    "Harness can reroute a walking approach or wait before bus boarding; physical passengers remain protected.",
+    "Harness rest retains its real place until fatigue is below 20; ordinary short breaks remain unchanged.",
+    "Traffic advances around actual observed or employed bodies with no connected player; static Office points are not fake pedestrians.",
+    "Camera observation retains the same resident after picker disposal and home-place cache eviction.",
+    "Company water has paid finite stock, physical consumption, transactional save and replay protection; Game and Office share the same company UI.",
+    "Missing voice-device health is shown clearly and retains the existing microphone guard.",
+    "Default Engine Game launch/build commands target the original canonical game and save."
+  ],
+  "tests": {
+    "regression": {
+      "pass": 47,
+      "fail": 0,
+      "assertions": 4533,
+      "files": 8,
+      "seconds": 113.45
+    },
+    "harnessWater": {
+      "pass": 1,
+      "fail": 0,
+      "assertions": 15
+    },
+    "officeAdapters": {
+      "pass": 149,
+      "fail": 0,
+      "assertions": 6588,
+      "files": 15,
+      "seconds": 9.39
+    },
+    "typechecks": "Game, Engine app and Office UI exit 0",
+    "builds": "Original Game and Office UI exit 0; exact assets archived",
+    "fullGame": {
+      "lastPass": 1495,
+      "lastSkip": 7,
+      "lastFail": 4,
+      "subsequentNetworkFixtureCorrection": true,
+      "currentFullSuiteGreen": false
+    }
+  },
+  "nativeGame": {
+    "completed": false,
+    "error": "AssertionError [ERR_ASSERTION]: The original employee must reach a real desk and be paid",
+    "workerId": "resident:25183:1",
+    "policySamples": 590,
+    "cleanup": {
+      "date": "2026-10-17T11:06:16.391Z",
+      "ok": true,
+      "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+      "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52",
+      "workerId": "resident:25183:1",
+      "keyRevoked": true,
+      "receipts": [
+        {
+          "ok": true,
+          "requestId": "fe5b2c82-2f8c-4593-964b-3d7c585b82a4",
+          "message": "Заказ закрыт. Город получил обратно 12 ₽ обеспечения. Начисленная зарплата сохраняется.",
+          "tick": 53444,
+          "worldMinute": 278337.599978278,
+          "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52",
+          "orderId": "order:54"
+        },
+        {
+          "ok": true,
+          "requestId": "3246b3d1-3e92-4ea8-bf8f-d1d4674d61ac",
+          "message": "Договор завершён, заработанное выплачено.",
+          "tick": 53445,
+          "worldMinute": 278337.6333116113,
+          "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52",
+          "employmentId": "employment:53"
+        },
+        {
+          "ok": true,
+          "requestId": "1cf697f9-7e0f-409f-b265-9fc81c9c4ca9",
+          "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+          "tick": 53446,
+          "worldMinute": 278337.6333116113,
+          "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52",
+          "unitId": "office:thegame:29:13:36117:2"
+        },
+        {
+          "ok": true,
+          "requestId": "19c67600-341e-49ef-8493-4544eedbd374",
+          "message": "На счёт аккаунта возвращено 152 ₽.",
+          "tick": 53447,
+          "worldMinute": 278337.6333116113,
+          "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52"
+        }
+      ],
+      "players": 0
+    }
+  },
+  "office": {
+    "url": "http://127.0.0.1:5173/",
+    "completed": true,
+    "target": "resident:building:-4:1:1:27462",
+    "records": 13,
+    "takeoverDistance": 0.12074636184164135,
+    "acknowledgedMovement": 0.4093416343163371,
+    "inputToMovementMs": 216,
+    "stopped": {
+      "ack": 1150,
+      "releaseSeq": 1145,
+      "speed": 0.045768436412462726
+    },
+    "idle": {
+      "milliseconds": 15000,
+      "before": 1285,
+      "after": 2157,
+      "samples": [
+        {
+          "time": 126.55390704264562,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1345,
+          "pending": 8
+        },
+        {
+          "time": 127.59370962563685,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1405,
+          "pending": 9
+        },
+        {
+          "time": 128.60852596283883,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1465,
+          "pending": 9
+        },
+        {
+          "time": 129.39249519411408,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1510,
+          "pending": 24
+        },
+        {
+          "time": 130.51043180887672,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1586,
+          "pending": 9
+        },
+        {
+          "time": 131.5792168347731,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1646,
+          "pending": 10
+        },
+        {
+          "time": 132.6001402094602,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1706,
+          "pending": 10
+        },
+        {
+          "time": 133.60297208955976,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1766,
+          "pending": 12
+        },
+        {
+          "time": 134.60873448411405,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1826,
+          "pending": 12
+        },
+        {
+          "time": 135.6258591248827,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1886,
+          "pending": 13
+        },
+        {
+          "time": 136.62935886286212,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1949,
+          "pending": 10
+        },
+        {
+          "time": 137.4208007150273,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 1992,
+          "pending": 27
+        },
+        {
+          "time": 138.23333333337195,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 2052,
+          "pending": 27
+        },
+        {
+          "time": 139.05253364537123,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 2104,
+          "pending": 37
+        },
+        {
+          "time": 139.85885078476974,
+          "network": "online",
+          "actor": "player:9ebb669f-36de-4613-b220-0c0817ac6e2d",
+          "ack": 2157,
+          "pending": 35
+        }
+      ]
+    },
+    "visibleErrors": [
+      "Голосовое устройство недоступно"
+    ],
+    "diagnostics": 98,
+    "physics": {
+      "steps": 0,
+      "bodies": 0
+    },
+    "rendererErrors": [],
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "builtProductionFrontendVerified": false
+  },
+  "priorGameAttempts": [
+    {
+      "label": "office-worker-autonomy-native-20261017-r1",
+      "completed": false,
+      "error": "AssertionError [ERR_ASSERTION]: Персонаж занят транспортом, травмой или проверкой полиции",
+      "cleanup": {
+        "date": "2026-10-17T09:46:59.709Z",
+        "ok": true,
+        "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+        "companyId": "company:05cf156d-a2b8-4a54-93d7-a563aa14e275:43",
+        "workerId": "resident:17675:0",
+        "keyRevoked": true,
+        "receipts": [
+          {
+            "ok": true,
+            "requestId": "d055b77e-178b-4fce-b3ad-e323c69974cd",
+            "message": "Договор завершён, заработанное выплачено.",
+            "tick": 180110,
+            "worldMinute": 274235.5333125664,
+            "companyId": "company:05cf156d-a2b8-4a54-93d7-a563aa14e275:43",
+            "employmentId": "employment:44"
+          },
+          {
+            "ok": true,
+            "requestId": "a878c9c4-661d-42e1-abc1-34ee798ca5a2",
+            "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+            "tick": 180116,
+            "worldMinute": 274235.73331256636,
+            "companyId": "company:05cf156d-a2b8-4a54-93d7-a563aa14e275:43",
+            "unitId": "office:thegame:29:13:36117:2"
+          },
+          {
+            "ok": true,
+            "requestId": "4b1c037f-e8f6-413c-89c7-8f05b6b47978",
+            "message": "На счёт аккаунта возвращено 152 ₽.",
+            "tick": 180128,
+            "worldMinute": 274236.13331256626,
+            "companyId": "company:05cf156d-a2b8-4a54-93d7-a563aa14e275:43"
+          }
+        ],
+        "players": 0
+      }
+    },
+    {
+      "label": "office-worker-autonomy-native-20261017-r2",
+      "completed": false,
+      "error": "AssertionError [ERR_ASSERTION]: The original employee must reach a real desk and be paid",
+      "cleanup": {
+        "date": "2026-10-17T09:59:38.673Z",
+        "ok": true,
+        "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+        "companyId": "company:f2978a04-8060-4ef9-bf44-450ab22e96d1:45",
+        "workerId": "resident:17675:0",
+        "keyRevoked": true,
+        "receipts": [
+          {
+            "ok": true,
+            "requestId": "df60af3d-fb72-4ae5-bf2f-80b4cb214469",
+            "message": "Заказ закрыт. Город получил обратно 12 ₽ обеспечения. Начисленная зарплата сохраняется.",
+            "tick": 29782,
+            "worldMinute": 275165.39997901657,
+            "companyId": "company:f2978a04-8060-4ef9-bf44-450ab22e96d1:45",
+            "orderId": "order:47"
+          },
+          {
+            "ok": true,
+            "requestId": "a12eb604-0dc2-4fbe-b69c-1048cae961f2",
+            "message": "Договор завершён, заработанное выплачено.",
+            "tick": 29783,
+            "worldMinute": 275165.4333123499,
+            "companyId": "company:f2978a04-8060-4ef9-bf44-450ab22e96d1:45",
+            "employmentId": "employment:46"
+          },
+          {
+            "ok": true,
+            "requestId": "860ed151-e8ca-48fd-9b86-802341a20d43",
+            "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+            "tick": 29784,
+            "worldMinute": 275165.4333123499,
+            "companyId": "company:f2978a04-8060-4ef9-bf44-450ab22e96d1:45",
+            "unitId": "office:thegame:29:13:36117:2"
+          },
+          {
+            "ok": true,
+            "requestId": "1d937a77-e77e-49c0-94ff-c2d6d2aad79f",
+            "message": "На счёт аккаунта возвращено 162 ₽.",
+            "tick": 29785,
+            "worldMinute": 275165.4333123499,
+            "companyId": "company:f2978a04-8060-4ef9-bf44-450ab22e96d1:45"
+          }
+        ],
+        "players": 0
+      }
+    },
+    {
+      "label": "office-worker-autonomy-native-20261017-r3",
+      "completed": false,
+      "error": "AssertionError [ERR_ASSERTION]: Available original applicant within funded payroll",
+      "cleanup": {
+        "date": "2026-10-17T10:08:19.626Z",
+        "ok": true,
+        "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+        "companyId": "company:06d81159-62ce-4802-9002-9b606c0f094a:48",
+        "workerId": "",
+        "keyRevoked": false,
+        "receipts": [
+          {
+            "ok": true,
+            "requestId": "4ce1170f-879a-42a1-9522-a47e3e8863cf",
+            "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+            "tick": 3941,
+            "worldMinute": 275400.89997896174,
+            "companyId": "company:06d81159-62ce-4802-9002-9b606c0f094a:48",
+            "unitId": "office:thegame:29:13:36117:2"
+          },
+          {
+            "ok": true,
+            "requestId": "88054a6d-f0b9-4117-942a-81335eb6781a",
+            "message": "На счёт аккаунта возвращено 152 ₽.",
+            "tick": 3953,
+            "worldMinute": 275401.29997896164,
+            "companyId": "company:06d81159-62ce-4802-9002-9b606c0f094a:48"
+          }
+        ],
+        "players": 0
+      }
+    },
+    {
+      "label": "office-worker-autonomy-native-20261017-r4",
+      "completed": false,
+      "error": "AssertionError [ERR_ASSERTION]: The original employee must reach a real desk and be paid",
+      "cleanup": {
+        "date": "2026-10-17T10:21:38.669Z",
+        "ok": true,
+        "scope": "Only the fresh QA account; ordinary authority commands, no saved-state editing",
+        "companyId": "company:d1ee3ff9-564f-4647-9e28-3ffea18bc549:49",
+        "workerId": "resident:25183:1",
+        "keyRevoked": true,
+        "receipts": [
+          {
+            "ok": true,
+            "requestId": "2ae6e563-2b60-4239-9543-d0f3ad21fcb3",
+            "message": "Заказ закрыт. Город получил обратно 12 ₽ обеспечения. Начисленная зарплата сохраняется.",
+            "tick": 51444,
+            "worldMinute": 276663.8999786677,
+            "companyId": "company:d1ee3ff9-564f-4647-9e28-3ffea18bc549:49",
+            "orderId": "order:51"
+          },
+          {
+            "ok": true,
+            "requestId": "e852957c-2013-471b-a97f-a0c8fd35ada0",
+            "message": "Договор завершён, заработанное выплачено.",
+            "tick": 51445,
+            "worldMinute": 276663.933312001,
+            "companyId": "company:d1ee3ff9-564f-4647-9e28-3ffea18bc549:49",
+            "employmentId": "employment:50"
+          },
+          {
+            "ok": true,
+            "requestId": "2aac9e70-cf4e-4f26-b686-82ac15f8178f",
+            "message": "Помещение освобождено. Остаток обеспечения возвращён компании.",
+            "tick": 51447,
+            "worldMinute": 276663.933312001,
+            "companyId": "company:d1ee3ff9-564f-4647-9e28-3ffea18bc549:49",
+            "unitId": "office:thegame:29:13:36117:2"
+          },
+          {
+            "ok": true,
+            "requestId": "38c8e2a3-90a7-424b-a017-9d5729b7ee87",
+            "message": "На счёт аккаунта возвращено 162 ₽.",
+            "tick": 51448,
+            "worldMinute": 276663.933312001,
+            "companyId": "company:d1ee3ff9-564f-4647-9e28-3ffea18bc549:49"
+          }
+        ],
+        "players": 0
+      }
+    }
+  ],
+  "serverUpgrade": {
+    "date": "2026-10-17T10:51:17.278Z",
+    "oldPid": 24756,
+    "newPid": 7688,
+    "beforeRows": 4880,
+    "afterRows": 4880,
+    "missingRows": 0,
+    "protectedRows": 275,
+    "changedProtectedRows": 0,
+    "accounts": 62,
+    "identitiesPreserved": 2193,
+    "ownerFieldsPreserved": 98,
+    "cashBefore": 1000000,
+    "cashAfter": 1000000,
+    "stateRepair": false,
+    "integrity": "ok",
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 54,
+    "geometryRevision": 1
+  },
+  "gameAudit": {
+    "date": "2026-10-17T11:06:16.760Z",
+    "pid": 7688,
+    "beforeRows": 4947,
+    "afterRows": 5010,
+    "missingRows": 0,
+    "protectedRows": 275,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 21,
+        "after": 22,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 16,
+        "after": 17,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 14,
+        "after": 15,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 63,
+    "integrity": "ok",
+    "editorRevision": 54,
+    "geometryRevision": 1,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "cleanup": {
+      "ok": true,
+      "companyId": "company:10063510-0b6f-4b63-881c-d29c2998dcb4:52",
+      "workerId": "resident:25183:1",
+      "keyRevoked": true
+    }
+  },
+  "officeAudit": {
+    "date": "2026-10-17T10:54:41.415Z",
+    "pid": 7688,
+    "beforeRows": 4933,
+    "afterRows": 4947,
+    "missingRows": 0,
+    "protectedRows": 274,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 21,
+        "after": 21,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 16,
+        "after": 16,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 14,
+        "after": 14,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 62,
+    "integrity": "ok",
+    "editorRevision": 54,
+    "geometryRevision": 1,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "finalSave": {
+    "date": "2026-10-17T11:08:41.740Z",
+    "rows": 5010,
+    "cash": 1000000,
+    "integrity": "ok",
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "repair": false
+  },
+  "served": [
+    {
+      "name": "game.js",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/served/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb",
+      "matchesNativeStart": true
+    },
+    {
+      "name": "office-controller.js",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/served/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9",
+      "matchesNativeStart": true
+    },
+    {
+      "name": "audio-worklet.js",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/served/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "matchesNativeStart": true
+    }
+  ],
+  "builtOffice": [
+    {
+      "path": "index.html",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/index.html",
+      "bytes": 422,
+      "sha256": "3796586311a9c1fe4ce7fadc7e9b9f194dcea9ad6e8a852bbe1737e06960c782",
+      "served": false
+    },
+    {
+      "path": "assets/index-DF3aXzTr.js",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/index-DF3aXzTr.js",
+      "bytes": 1806779,
+      "sha256": "713b94d957ddec68d696f5f601c26fddef4bdec8de977dc4044c9a8b66b81cda",
+      "served": false
+    },
+    {
+      "path": "assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec",
+      "served": false
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/package.json",
+      "bytes": 4185,
+      "sha256": "552af7b52d8e70502953679f2ae0045123ffffad846599aa6a89eaa1868ab400"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/package.json",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/package.json",
+      "bytes": 427,
+      "sha256": "fec46a3c9a07a20ed9d209be0a1ccf50883c3aa26b4d8268920be56c686574f5"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/build.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/build.ts",
+      "bytes": 3299,
+      "sha256": "afddce29ccf9efd11dae1d73116f63552150485624970f0803657cdcec63334b"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/README.md",
+      "bytes": 5469,
+      "sha256": "53755968c29b90f563d9db7dad0e5ff7f068d883322af19f6a31e60ce4b172fe"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "c2118139f1914999f77dd7bcccd36d9a9d6c7ba0a4f2fc6b40046933729163d2"
+    },
+    {
+      "repo": "engine",
+      "path": "tools/start-game-office.ps1",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/tools/start-game-office.ps1",
+      "bytes": 3324,
+      "sha256": "d52b57f72f58c6f6303a2c5d091c182536ab5f511febfc59b4f1c6555365b3cb"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 219397,
+      "sha256": "22cfb2acbd563484f71b49a1f12d25e54c3fed92537c2cd65e97b5e8577715ce"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/README.md",
+      "bytes": 41085,
+      "sha256": "f4ceefab4a23ffea48f2f5461e197fb717acf9a8d2be3d878332ab32923967fa"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/company-model.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-model.ts",
+      "bytes": 5743,
+      "sha256": "81b5d315059121f2f354732241d30278dcbfb6753b0b83255c2309d7f908097c"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/company.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company.ts",
+      "bytes": 22539,
+      "sha256": "09aed1c3e8f21a16e11e47dad92fe3e81a1bc7015db1a148a12b728a34b6227d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/company-view.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-view.ts",
+      "bytes": 24323,
+      "sha256": "a4677d0a9c5603c3168dbf13e7cef7072cfc0e5c74381f92351bd37d5000223d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/company-offices.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-offices.ts",
+      "bytes": 2549,
+      "sha256": "75076807a7c3f758e1ca0ce27c5089c520e68d2d6a87265ca71d9cf904f6c01a"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/actor-state.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/actor-state.ts",
+      "bytes": 7038,
+      "sha256": "828d6cd788d637fc6a7b6cbf58be46f1dc3d97340e560f31facfbce43dcac75d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/authority.ts",
+      "bytes": 67265,
+      "sha256": "e3514f10e060dd51b59382826f2c887678f5565913db5621cc25688b924630d1"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/residents.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/residents.ts",
+      "bytes": 51291,
+      "sha256": "7f2adc075498657629c34f82717792dc1ac9d175766e931fc932ff68e4171092"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/player-actors.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/player-actors.ts",
+      "bytes": 19628,
+      "sha256": "d80260f17488a3e03e6b52adc0cdddf52efa9d15c75204896cde1dd4df654611"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/workforce.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/workforce.ts",
+      "bytes": 21878,
+      "sha256": "1811ab5770b49f4170e80d85f0366a999d1184d2781d46d938beab3e3d1aa561"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-workforce.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-workforce.ts",
+      "bytes": 1307,
+      "sha256": "20ef53fdf8310ab2785c62a728ab497ebbf4b2b0edb45274e822cd2de764dba2"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/workforce-harness.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/workforce-harness.ts",
+      "bytes": 14010,
+      "sha256": "6cefb116b894b68cbd0aead7851d20c105d84a4623bcf64afb167fb891c0c266"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-directory.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-directory.ts",
+      "bytes": 2559,
+      "sha256": "361e3b54e9eadcfc7354c3810a4bf6e3f8f1846d20679616d681ada2b4c43707"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/resident-panel.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-panel.ts",
+      "bytes": 17428,
+      "sha256": "594941d614956cd91906b9e6ae6253b04703f9d7160a27f4ea0ef97b97d6dcfd"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-water.test.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/company-water.test.ts",
+      "bytes": 9570,
+      "sha256": "36da675460d02672656a29b6c6f23a1e3456b480f93a3b0cf7cfa59e99e4e7ba"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-traffic-interest.test.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/workforce-traffic-interest.test.ts",
+      "bytes": 2365,
+      "sha256": "c33fddc7ebe0d65140c8158b235354fded6aa365804a8467b0fd5dd52847a441"
+    },
+    {
+      "repo": "game",
+      "path": "test/observed-resident-retention.test.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/observed-resident-retention.test.ts",
+      "bytes": 1930,
+      "sha256": "8954c311b55a0ba47ace1743947438182c83c12a3c82925900a234bfd4950bc5"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-game-workforce.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/tools/qa-game-workforce.ts",
+      "bytes": 22462,
+      "sha256": "836e805d4b0df52c99cb1ac9db70af942b321af7e393030eae390056db72172d"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d"
+    },
+    {
+      "repo": "game",
+      "path": "docs/HARNESS.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/HARNESS.md",
+      "bytes": 11038,
+      "sha256": "203e024e724e468702fbb5d6d034740cf1fd836e16b1f33bddf314ffa3028af7"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/VERIFICATION.md",
+      "bytes": 850701,
+      "sha256": "4eec41f9745eec9bfebbab52a0ef7bb93f1e0b5e7390150107fcf3d93c0efa28"
+    },
+    {
+      "repo": "game",
+      "path": "docs/URBAN_DESIGN.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/URBAN_DESIGN.md",
+      "bytes": 41396,
+      "sha256": "6cb998a8471e4a0efb1db1389de0fc245e0be6c144e029219e96310adf6dd54e"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/audio-guard.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1976,
+      "sha256": "179e5d1956299411a5e2d793db4221b3e5242916f14d21281d0749003cd2e0fa"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/Office.tsx",
+      "bytes": 60275,
+      "sha256": "1893f31f64583cbff7d3169a7dbf70664eb6b1da57d38b38cf9770bfd9bb9e25"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "repo": "office",
+      "path": "scripts/office-audio-guard.test.ts",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/scripts/office-audio-guard.test.ts",
+      "bytes": 3345,
+      "sha256": "380c00449dc883dfe64a700a4268d95d52b1f5e1586f7d835d0694ddf6c4df32"
+    },
+    {
+      "repo": "office",
+      "path": "ui/package.json",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/VERIFICATION.md",
+      "bytes": 154089,
+      "sha256": "177f69f5ad4c5b08bba96c6fca2f3d4056cf39986593cb9b077f1cb24c5ccf24"
+    }
+  ],
+  "reviewed": [
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/failure.png",
+      "note": "The exact-ID search needed its visible Next page; no missing resident or product search failure."
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/game-employee-possessed.png",
+      "note": "Actual account company/lease UI in the original employee body, 7350 personal cash. The world view is occluded in this immediate takeover frame; it does not prove an unobstructed Game camera."
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/observer.png",
+      "note": "Actual Vite Office and original world; acknowledged movement shows the active control bar and friendly missing voice-device message. The immediate possession image still shows the preceding observation UI until its next React update."
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-possessed.png",
+      "note": "Actual Vite Office and original world; acknowledged movement shows the active control bar and friendly missing voice-device message. The immediate possession image still shows the preceding observation UI until its next React update."
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-moved.png",
+      "note": "Actual Vite Office and original world; acknowledged movement shows the active control bar and friendly missing voice-device message. The immediate possession image still shows the preceding observation UI until its next React update."
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-returned.png",
+      "note": "Actual Vite Office and original world; acknowledged movement shows the active control bar and friendly missing voice-device message. The immediate possession image still shows the preceding observation UI until its next React update."
+    }
+  ],
+  "limits": [
+    "Full original Game regression remains non-green: the last broad run had deformation-audio, crushed-hull test expectation and temporal crash deformation failures, plus a subsequently corrected network fixture. No complete new pass is claimed.",
+    "The Office frontend actually tested is the existing Vite service at 5173. Voice/editor services at 8765/7860 remain unavailable. Production build assets are archived separately.",
+    "The current tired worker reaches its real desk and eats, but a later rest intention chooses an off-site bench and spends fitness on the return commute. Paid work remains unproven unless nativeGame.completed is true. On-site recovery requires further work.",
+    "Legacy Office task avatars still have their own visual routes/construction pose API; their relation to canonical Game NPCs requires the remaining fidelity audit.",
+    "Long vehicle/aircraft routes and final original-feature/render parity remain incomplete or unverified.",
+    "The last published 58.3 FPS sample belongs to the earlier be0012f1 bundle and is not a measurement of this rebuilt client.",
+    "Failed probes and their normal QA cleanup remain archived. No needs, money, poses or world records were repaired for the current water/observation run. Fresh QA loans, closed companies and employment history remain."
+  ],
+  "files": [
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture/hand_landmarker.task",
+      "bytes": 7819105,
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture/LICENSE",
+      "bytes": 12331,
+      "sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture/SOURCE.txt",
+      "bytes": 577,
+      "sha256": "ab2e23cdb35cd000d6d69213e10f8ce85a0eea9b22cdd199c6b97de6b58947b5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/gesture/vision_wasm_module_internal.wasm",
+      "bytes": 12997272,
+      "sha256": "ee03b14a878e6c3c053a1bfa62e166dc45244be54dc0bbe61c578f710b771f6a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/index-DF3aXzTr.js",
+      "bytes": 1806779,
+      "sha256": "713b94d957ddec68d696f5f601c26fddef4bdec8de977dc4044c9a8b66b81cda"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/materials/linen.png",
+      "bytes": 24461,
+      "sha256": "7e308fdaecaf3a2a4c0e6bc83ce6cd7863d1ba6523db630df40746659cdb573f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/materials/oak.png",
+      "bytes": 66380,
+      "sha256": "1d3077e3c473b06b0eec13464fdc1bd149123be4eedcc87ccf907058df8fe278"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/LICENSE-CC-BY-NC-4.0.txt",
+      "bytes": 19347,
+      "sha256": "41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/openpeon.json",
+      "bytes": 5843,
+      "sha256": "0abbe1af9c2808707a3a026ec5937f27436b6492525c00d578819070639929b4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonDeath.wav",
+      "bytes": 81530,
+      "sha256": "c46dd952a4dca36cc3e71b5594d6b102ad8366380ca411190e38290090d258c8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonJobDone.wav",
+      "bytes": 75866,
+      "sha256": "e950bae3f85c89bdc87a2826f7fa251c4afb7b2258fe49441a2b9aa5361c30a1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonReady1.wav",
+      "bytes": 76100,
+      "sha256": "62722dd2c0d3050cc8fae615ec28e1b43456779c9e45462bd936afcc439c667a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonWhat1.wav",
+      "bytes": 50304,
+      "sha256": "c5d28882c40411154649980d367331b9aff81bd3fb685819c1e9fc0a2e0d6d39"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonWhat2.wav",
+      "bytes": 53254,
+      "sha256": "9d5ab770416487154e5ae915aaecec137ada0aef71d2d9e6f8b342787edc89dd"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonWhat3.wav",
+      "bytes": 69590,
+      "sha256": "84873648d16be9390246fca859683e6d2bb091b80afebcac84cd8c23faa86097"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonYes1.wav",
+      "bytes": 70826,
+      "sha256": "64b85316710c976aaa498839c93ada4496e73fd8a75daa1886f934b393ae2858"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/PeonYes2.wav",
+      "bytes": 68580,
+      "sha256": "807e072eed2d68543b0e67e1c4f4897da5d78aa3b6fd3fba06a111aae2a353de"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/assets/peon/SOURCE.txt",
+      "bytes": 712,
+      "sha256": "51179d8d8a707a1b546eb5babf00abeaeedfdfbc593eb739e9acffff63ea62c5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/built-office/index.html",
+      "bytes": 422,
+      "sha256": "3796586311a9c1fe4ce7fadc7e9b9f194dcea9ad6e8a852bbe1737e06960c782"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/canonical-close.json",
+      "bytes": 163,
+      "sha256": "d72409b8068fceb4d545d093e86778ed58d7c46ab094924865164f59770f06b1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/canonical-close.sqlite",
+      "bytes": 10629120,
+      "sha256": "6a59fe8fde268e26111b387f2690cc1829e034d4980c611b395ad4fde35688dd"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/analyze-prior-care.ts",
+      "bytes": 1607,
+      "sha256": "a5e1cec471077bacd34d5f3b91842c9034e835cdb3dcba33be956c0456ad9b13"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/audit-requirements.ts",
+      "bytes": 5111,
+      "sha256": "72d5ee08f300757e5a288746762a8d9d809765293ed30e5a02a96e8cb3e2603e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/audit-upgrade.ts",
+      "bytes": 3498,
+      "sha256": "ae0546cb84d166f1b04b21a38218b4eea57d5ceb65751e064b00fcc1a69cc071"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/audit.ts",
+      "bytes": 4593,
+      "sha256": "8dc9a48eb5e3548b178fa7b25982b57150458a6985dfbeec6bebfa86996f8d74"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-liveness/audio-guard.ts",
+      "bytes": 1616,
+      "sha256": "a65add69346507c9e335e4443b86a4ac80e517d05bd90bcec5a112dc97598c4a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-liveness/authority.ts",
+      "bytes": 66869,
+      "sha256": "1ab55db370ad4685ac380e6aee8e657ca0967ef351ba781aaf72bc68c5e3204f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-liveness/office-audio-guard.test.ts",
+      "bytes": 2106,
+      "sha256": "bed2cd3bd26ee66a4d700109982a55d2436a6e97c02e819754105c56592e5170"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-liveness/qa-game-workforce.ts",
+      "bytes": 21870,
+      "sha256": "6bdcb04cb0c2d7e746d50b68b01ca398aaa599e0b7b87e5cbb93172a5b945cdf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-liveness/residents.ts",
+      "bytes": 50253,
+      "sha256": "d8b50b242b9b9e10de1004eaa37d15e7b4d101de9ad902e11266ce6684197fdf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-observation/authority.ts",
+      "bytes": 67173,
+      "sha256": "82f477c47658453a00a29da412e1f2dd91ab9566dfa6e6993642383bcadd402f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/before-observation/residents.ts",
+      "bytes": 50418,
+      "sha256": "7ae5dcd8ff5cce5274ddc15cb9862b3d47f52d48cdc20df51af1a0498145e5af"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/crossing-diagnostic.json",
+      "bytes": 535,
+      "sha256": "1a3b9270f24ae3cf464a9cbbddf14be05d9a1e86e8f5fb2b4d7c22f45289bda4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/entry-before/app-package.json",
+      "bytes": 332,
+      "sha256": "5158e8adf36f9da523822c72bbc05223a39aba8ebdabab18c5e8d7c953286b37"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/entry-before/build.ts",
+      "bytes": 3149,
+      "sha256": "1ee0273e165588d54692944c57572500a06e3a57b8cf020907f2af46f32a5818"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/entry-before/engine-package.json",
+      "bytes": 3999,
+      "sha256": "e5fa0362e5fcd74bc4d0e9a77bd396ab6e5fb881c09a639cf47103f36f8039cf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/entry-duplicate-package.json",
+      "bytes": 4173,
+      "sha256": "50c4ece04beb8a92f7e753c64e0480d019d0811cb01800abfcea0285efe214c5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/harness-before/workforce-harness.test.ts",
+      "bytes": 17357,
+      "sha256": "9dfe44f0afdc85a4ca6b55c3c4d773884074b592497e5c51a88d7670885d672c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/harness-before/workforce-harness.ts",
+      "bytes": 13343,
+      "sha256": "f741d27a947e6046503bf5923e515deb23b7adc75cdbf5c697d32122afed3d75"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/inspect-actor.ts",
+      "bytes": 642,
+      "sha256": "d8a3a18fd5e92a291a3fe8267ace0698d9a632ed56edaa5324cb2475d472b1b7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/inspect-crossing.ts",
+      "bytes": 1200,
+      "sha256": "c2078e10fb059781d7214ce9f913ea04aac3f85a7d25078a309a95473ef1ec03"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/audit-upgrade.ts",
+      "bytes": 3515,
+      "sha256": "912ff1ae8d96a5b6b3e4338ca5bc9e289e1646c1f2040998a703187b0b4e5646"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart-audit.json",
+      "bytes": 488,
+      "sha256": "fea9970e7d726fcb2c154448163b27a3f269ae433fbb74ff81af7a9569a868eb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart-operation.json",
+      "bytes": 246,
+      "sha256": "419deb3a001731a89eed5a228c5cf2d7b4f7060fc4fd69377abb192cc7608a9e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart-ready.json",
+      "bytes": 237,
+      "sha256": "65c9ccfb4da1faaf7c89dfa8c0e5bb3c7586e74128c5cb9ac963772c6fa07c2f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart-ready.sqlite",
+      "bytes": 10067968,
+      "sha256": "bf55c8cdaebf741c87747cc8ca387b1f9c88fe1f9906904a141bbf024aaaec08"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart-ready.ts",
+      "bytes": 1375,
+      "sha256": "b0bd62f915dde1d20967d9558ca5dda96a2210bb2b2743762c266184807fdd77"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/restart.ps1",
+      "bytes": 2672,
+      "sha256": "34ce5d7bdeadf6fff87e2f0e8334bbc0065de9ca0a4717a540c566b99dc4d024"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/server-before.err.log",
+      "bytes": 2202,
+      "sha256": "485c0315e41dddec00503b71b2d302cb27a5dd93dd49af1baf78ce7d0c090732"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/liveness-upgrade/server-before.log",
+      "bytes": 723,
+      "sha256": "8cc87ca9bc3fa18b1e8abd4381fd4cc1554aaf75ad27c9c133fbdc6cf1a4aff1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/after-audit.json",
+      "bytes": 888,
+      "sha256": "e0e5791abb16f31d841dadcaf4c3b32ae116fc9638b35d790f0853b0a366a1c2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/before.json",
+      "bytes": 1161,
+      "sha256": "41b6e2aa4b02bc23188deb9048e6a0c6a6db3278bd4aecebba0d6fd4f5b9261b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/before.sqlite",
+      "bytes": 9883648,
+      "sha256": "3b9bb71f92fa63e9b5ab872d4d82628b5d9064b970e7510d35e68ce95b8b9c9f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r1/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/after-audit.json",
+      "bytes": 889,
+      "sha256": "4604dd4747ae5dee6925d44a64b7194c60ad2f365ebd28a31cde8528b9b72e3c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/before.json",
+      "bytes": 1162,
+      "sha256": "1e5c0a15176e25357e60a0b389d6d12df9d9728e465ba86fcfe99d7dc7dd8c7e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/before.sqlite",
+      "bytes": 9928704,
+      "sha256": "bd11433c45344d3a243547c918d64db88dec11f666bf9384d7f675c328f0149f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r2/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/after-audit.json",
+      "bytes": 874,
+      "sha256": "ad182dcb6a45dab680266103b8ebe8b7a575a1ac8e4b7e4477096f36261c6574"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/before.json",
+      "bytes": 1162,
+      "sha256": "570b5b9b7645272bd140f965ed141f00416f4a79b6377479bc60670097608388"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/before.sqlite",
+      "bytes": 10117120,
+      "sha256": "ac2355e5fa4ea16525e1292ada29470fb752301ea2b1e47478e6f803bf4952c6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r3/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/after-audit.json",
+      "bytes": 889,
+      "sha256": "57fd854f881033363176bacda0289e3579f3b31efa9392e644d2d555e9d93625"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/before.json",
+      "bytes": 1162,
+      "sha256": "dee5c2e93d7c44b9d49a5328115b225f465168565a554fb46e32b90c99074ac7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/before.sqlite",
+      "bytes": 10141696,
+      "sha256": "055ed61f7f9f9d82b40511f2197a08053fe02b077617956697b0a3ab7e6cda7e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-native-20261017-r4/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/after-audit.json",
+      "bytes": 726,
+      "sha256": "7d1f1abb278423f77e8bc958831f038d0ca32a4982fb9ef2be93f5f0560c104c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/before.json",
+      "bytes": 1162,
+      "sha256": "21cb0ee96f147dc12f8992b337ce98ff74f6e1a53b19ae0fbec886a1c8efd1cf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/before.sqlite",
+      "bytes": 9998336,
+      "sha256": "a982ce8086426205a7f75e1f5076d527da93f2ed9f480b937a729a8f3491166c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/office-before.json",
+      "bytes": 15869,
+      "sha256": "7133cd6429dfbfca3b091ec7c5e43ec8adb9e3726b567d672687157212354b20"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/operation.json",
+      "bytes": 11739,
+      "sha256": "6a721b83e2367b6a9747063b08891cd81968282cc975712cac9e5cc1906714b9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r1/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/after-audit.json",
+      "bytes": 726,
+      "sha256": "26d24b3085b40155edac2f135e6e2d190b304431b8d8675c042abc5a72874350"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/before.json",
+      "bytes": 1162,
+      "sha256": "700ff3b707ca4f63cb752f2648093ece3be98bd041251890d75a4739787f07f6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/before.sqlite",
+      "bytes": 10313728,
+      "sha256": "771f4a863807b5664ec856280eca4d0555d9393402802974136c20dd9a2ad764"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/office-before.json",
+      "bytes": 12004,
+      "sha256": "4491912d0cb76b45db2573c354c17bbb33624be423579afe57604e6edfdd353b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/operation.json",
+      "bytes": 7622,
+      "sha256": "c17139b358724aff76d440bef336c6f9a175e343ea6801a9c80661262b0784ff"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/served-before/game.js",
+      "bytes": 2507633,
+      "sha256": "be0012f10811ca8cc4aedc015ae9e4633fe959a511e8d64696b5a84700d66975"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/office-worker-autonomy-office-20261017-r2/served-before/office-controller.js",
+      "bytes": 1557282,
+      "sha256": "94e3592ead3111b851b78ca91477e9026ecc5d7a1f6ba0410525a07e8632d8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/prior-care-analysis.json",
+      "bytes": 18808,
+      "sha256": "af5862c5a5d03e778836d7efaf186c8e75522d6a8225d5dbe37fa862d5ab50f5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/qa-game-workforce-before.ts",
+      "bytes": 21487,
+      "sha256": "315f045fda83086648f953549bdd559bf72705263b0873e9f5da19f48f0ab4ae"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/requirements-current.json",
+      "bytes": 6494,
+      "sha256": "b722568a8357745b9a8a9720dbd325d6823b86b8850f224da088ae117e625f09"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart-audit.json",
+      "bytes": 487,
+      "sha256": "3b2d22b2d7a86d6cd4858c06a9c7a1575422c6c6e79e53b206f6f2bef5d51c4f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart-operation.json",
+      "bytes": 245,
+      "sha256": "6203dfb4b636f0eb05b0b8b4551daa4110e3b75365997ab48689a7e79443f754"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart-ready.json",
+      "bytes": 236,
+      "sha256": "51c51eb618ef26f30ba71dbc7090a5d4be95ecb535ebf22dc72b5c35c2291978"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart-ready.sqlite",
+      "bytes": 9908224,
+      "sha256": "8f8bc0656e61e3132a7c6e2b5255018a69b1e3ac07ae2e58c90ec14389afb311"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart-ready.ts",
+      "bytes": 1357,
+      "sha256": "d86980600739b480c8ee523a9f082feabd7c9a3f71a20d9a2e7eb161d2b09d40"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/restart.ps1",
+      "bytes": 2654,
+      "sha256": "5b3eb43b0dd8cd56ee7108541ec1d817704655c983e427c9c27b064722051a84"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/run-current-office-before-final-guard.ts",
+      "bytes": 6310,
+      "sha256": "2c4ed23163b60cefe01676d2d44750010798e5f1ec5e0029d4ea18628e9c014f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/run-current-office.ts",
+      "bytes": 6613,
+      "sha256": "af8b4de99ccbac1124feffdfbd216c7a051e7af343d5b795916a8f75fd9b082a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/run-native-any.ps1",
+      "bytes": 1348,
+      "sha256": "dd624e3d475ca69979ccf1901a8c323813a23ce51f91736443b1f1d6e4012255"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/run-native.ps1",
+      "bytes": 1364,
+      "sha256": "4ed61bb48497b632f73a108f640273b1b3b367fa5f082b829e1f5fad5cdd2278"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/server-before.err.log",
+      "bytes": 6685,
+      "sha256": "37013e469900326046ac8a12a48e746d3ac2635af4aa8cca93876901eab10490"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-autonomy/server-before.log",
+      "bytes": 723,
+      "sha256": "8cc87ca9bc3fa18b1e8abd4381fd4cc1554aaf75ad27c9c133fbdc6cf1a4aff1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/archive-helper-validation.js",
+      "bytes": 16180,
+      "sha256": "da764bfd970a1ccb14155588171119defa134a1bdc93762285f367681cc686e7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/archive-helper-validation.log",
+      "bytes": 87,
+      "sha256": "731a99b2c1c4aa729e9babc8aad19fb0c654d861e3f047a8f3b913ef3e65aa08"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/audit-current-requirements.ts",
+      "bytes": 6062,
+      "sha256": "3a07b9ce89d32c2993f155453eab0d8a973faed0373576f14b807070eb696498"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/audit-previous-sources.ts",
+      "bytes": 2370,
+      "sha256": "c603335b7ff7e0b67fdeb4e0d485754c7fcbb42d7f32666321f45212ee328885"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/audit.ts",
+      "bytes": 4587,
+      "sha256": "ffc6aea64fc6c7e88cfcafd23893ab06fa9cd8a9577dc32cf27b04bbc80319ea"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/actor-state.ts",
+      "bytes": 6988,
+      "sha256": "72875cf0138daff9ab9cd43608d75549161a698532cf96dddbe75e0e8ceb1c85"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/company-model.ts",
+      "bytes": 5577,
+      "sha256": "a44b80572a2c714adae56d94cae53ad32ca306510a0af633c1fc311f979dbeff"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/company-view.ts",
+      "bytes": 23259,
+      "sha256": "7d84991e96d5ad02122b64e5e119f3a291167aaac3bef184cd70083978eb59cc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/company.ts",
+      "bytes": 21353,
+      "sha256": "327dca324f1bc840d0f95950666f5b49e5196f00a49a325db2a71c9029aaf72c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/player-actors.ts",
+      "bytes": 18974,
+      "sha256": "96eb11382138ac55a23894dbc0ebc747457c65ec98f98d40a519fad5b18bd81d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/qa-office-residents.ts",
+      "bytes": 16767,
+      "sha256": "fe784f7ff593657b4a17e7dffdda5afe1339aecff2f1a743ad2016e62f6bcba8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/resident-workforce.ts",
+      "bytes": 1142,
+      "sha256": "7793af53d055da2e71489be810a3770723e3c65686b60f89a76a9b8a51ee89f6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/residents.ts",
+      "bytes": 50428,
+      "sha256": "fd6563a7a6e746a25a8e601d8e7450a11d4909c7c978002c1fe3f9547e10908a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/workforce-harness.ts",
+      "bytes": 13652,
+      "sha256": "79a9f46013abd47af2a567996582879e5d9457df0252ecd7b14a4a242be000a6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/before-game/workforce.ts",
+      "bytes": 19930,
+      "sha256": "d4a7b59758bd576251c98250486438091a53e5febce76c9512004d360fc9e615"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/docs-helper-validation.js",
+      "bytes": 22006,
+      "sha256": "1c53dccab211e73dceab7412c09165c6a6f56d2403f2ffee508c1bf85bc0dccb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/docs-helper-validation.log",
+      "bytes": 82,
+      "sha256": "6c12e9240b09d03b184a7bccaa520ff5bf7caaf65171ccedb0aea1e14d258b2f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-native-r1.log",
+      "bytes": 473,
+      "sha256": "570dcaeb615052386c6a9cc0eb2be80d7eae2e7b48c85c7e75856803c281f4ec"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-native-r2.log",
+      "bytes": 308,
+      "sha256": "7619d8706d36109f271a32b4736e396e5ba3723350e3d05055e359efd4359fb0"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/after-audit.json",
+      "bytes": 888,
+      "sha256": "899cab3658d7a07f5ec6fcae955a639077ceeaec457dcdd8890cb9a5a9b1e742"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/before.json",
+      "bytes": 1137,
+      "sha256": "83c8ef7bce6915d10e34331bf3988af3b554c68f8933ed23cf1949ba0d18e748"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/before.sqlite",
+      "bytes": 10489856,
+      "sha256": "8e464c2970d99b4128cc1cfeaebd11df82de09d4296488d10347b8a8c565da37"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-game-20261017-r1/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/after-audit.json",
+      "bytes": 725,
+      "sha256": "63c80e969dfbf19c8524e17ddd298b89282146cae8d1a046a19d537bc2e32cfc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/before.json",
+      "bytes": 1143,
+      "sha256": "994fe6ac1ab20af285661aa813060cd8dbf3c5d70fe4403ce2d4c5060ef43703"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/before.sqlite",
+      "bytes": 10416128,
+      "sha256": "dac6d64663de7375eb7cdbcf2e79426e02236acf962f28c8476ed26c0aab6032"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/office-before.json",
+      "bytes": 11950,
+      "sha256": "df7f8e6ac8206eb4cb63585dfc869bc12a4a65fb24a49979fd51c229b8fabd77"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/operation.json",
+      "bytes": 9452,
+      "sha256": "612f4b5120703a8fabd5cbd8c1fe29187a73d23af49e42741e3c5246ff8c1a11"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r1/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/after-audit.json",
+      "bytes": 725,
+      "sha256": "2decd56f0f99526a3422f8545f9b3f9a1f96d7d0626617279ef9053e41a2b098"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/before.json",
+      "bytes": 1143,
+      "sha256": "ab6e089b3367692e3bcd18d69cddd35bbd2f6a12642a636f34ad961abc5f0541"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/before.sqlite",
+      "bytes": 10473472,
+      "sha256": "a779d56e67c89015b2ffc5363b846db5c8fb5b7f6dcf5425234666573430ce08"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/office-before.json",
+      "bytes": 11981,
+      "sha256": "5fe903d62537a5fbaf1e0b087b5c22ea17b2064614f60cef414111544e713c6f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/operation.json",
+      "bytes": 11720,
+      "sha256": "dfce5f02e903a5ad1b23bb87bcd902adea6eb30669d10431ae368170c91092dc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/served-before/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/office-worker-water-office-20261017-r2/served-before/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/previous-evidence-current-sources.json",
+      "bytes": 110465,
+      "sha256": "eafab5943308ac216a7ac32010538da7d34f26e99c567da542c12d61b396c5bc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/qa-game-workforce-before.ts",
+      "bytes": 22277,
+      "sha256": "d3f8d71847ce6252fe13b5dc07d05b5a46f0904d97b284954eba0549a765d8b8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/requirements-current.json",
+      "bytes": 5972,
+      "sha256": "61e91fd8d78b0fb338ce284a30485a355d36e225706d5b9a4826c513008b2280"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/run-current-office.ts",
+      "bytes": 6607,
+      "sha256": "0725f2ac5e365a75736a3643a7ee920545b0dbbfcfd85e6791b388832d4b2497"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/run-native.ps1",
+      "bytes": 1348,
+      "sha256": "dd624e3d475ca69979ccf1901a8c323813a23ce51f91736443b1f1d6e4012255"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/audit-upgrade.ts",
+      "bytes": 3511,
+      "sha256": "81d075a0c2b54968ca71f17de907cdc1f180a4fa91e792430ee31b082c9ab246"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart-audit.json",
+      "bytes": 487,
+      "sha256": "57251fd85d82d20a11c197a50a4966aa006fda70d0b331692c8f24383baa507a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart-operation.json",
+      "bytes": 279,
+      "sha256": "2c90be8a280be653c07b703b482182f8248ff96df0567b5929832e03154be6b5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart-ready.json",
+      "bytes": 270,
+      "sha256": "ed4c626f4c8629becd1e0fa4b5ed48314a8477f8f5d71327f75801e0c73bbe6b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart-ready.sqlite",
+      "bytes": 10362880,
+      "sha256": "a8e94026550c2c5a2d21fc93361347192a967d78d38a853178a295daa7ba97e8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart-ready.ts",
+      "bytes": 1404,
+      "sha256": "159115faf487ac1acc8394fdc28d2c5027a956421b0dee5145d794daba5775e8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart.log",
+      "bytes": 162,
+      "sha256": "6ad35a791ff03cecb796e9f878a0b444e47b0fef2b3078360cb92966402ddedf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/restart.ps1",
+      "bytes": 2668,
+      "sha256": "21d5a1b91bcbe349f79f3d760c5c18e04e8a8fa7e277b5e9ac4bd26b2738f89c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/server-before.err.log",
+      "bytes": 3278,
+      "sha256": "a00b6c512c85580bececc7aeb0e598ae8d48f9fb51e1680cb67b6f53ca9bd1d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/engine-water/runtime-upgrade/server-before.log",
+      "bytes": 723,
+      "sha256": "8cc87ca9bc3fa18b1e8abd4381fd4cc1554aaf75ad27c9c133fbdc6cf1a4aff1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r1/cleanup.json",
+      "bytes": 1374,
+      "sha256": "fc977a04fba7cee78ed4fcff4ca3a343485f01ae7ba696ecb32757f24e366b00"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r1/failure.json",
+      "bytes": 11921,
+      "sha256": "68b760c6860ffbecf2b4102d6c79c35156d23c63f60645d982efd2e43bfc2861"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r1/game-office-leased.png",
+      "bytes": 399919,
+      "sha256": "d7f0291df5141bcc9683ba92c25caac594615b55eed06257c30dba43834c788c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r1/progress.json",
+      "bytes": 11601,
+      "sha256": "1c11a6011fa25162a2890ba96acc34743041ab3fb46d56330af80569662661cf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/autonomous-progress.json",
+      "bytes": 1073181,
+      "sha256": "8a18539d2caf725df5a2430e3ba1e6746e531bf5a87d0790a7393518692a9e45"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/cleanup.json",
+      "bytes": 1800,
+      "sha256": "b3779a59df921433a7a54ca6d90032702a7d19b76f6e7dd28db34c0f6bc3c830"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/failure.json",
+      "bytes": 1116025,
+      "sha256": "a29433e663a4dbda24f4278fe89481ccfa0cb2cae2e6c36920a0a93533ffdf9b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/game-employee-possessed.png",
+      "bytes": 312687,
+      "sha256": "69b41b4e1c1430dda9c75c18d831db87bbcf5249dd340f0db79c0365ec4cd4b4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/game-office-leased.png",
+      "bytes": 398375,
+      "sha256": "9afe8cc0d3e6d999ef9c820e5468055f3f6dff8f65d05af899235fcf53478a73"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/game-worker-harness.png",
+      "bytes": 421952,
+      "sha256": "6050084801beaec69fa0fc876aa8144de6e14438a92768684345e3129dd70f3a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/progress.json",
+      "bytes": 42797,
+      "sha256": "f974413cfa5ccafb168a99f680b1c9e7cf0a38f7fdc4ec540a3d54656ee14da7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r2/takeover-check.json",
+      "bytes": 6653,
+      "sha256": "f0c1dbfce1787b702895d0f37a70e3b695be7076107c319e8be2e484dacd1320"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r3/cleanup.json",
+      "bytes": 997,
+      "sha256": "a8040526e85331eaaa2694479490aeeff47403b79dbe6166985b5570890da26f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r3/failure.json",
+      "bytes": 11722,
+      "sha256": "6638f7ff751e58a45e3ba06f2006d8259130928f588b80dcb6e8095d9254231a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r3/game-office-leased.png",
+      "bytes": 370232,
+      "sha256": "6e8613bf407a1f1fef3cf8f981c1fbfa57f32088140e5e82eb4009c6ee62e2f9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r3/progress.json",
+      "bytes": 11475,
+      "sha256": "21240181ca6cbcf58a1e0a6c4fc21bb47e2472e7c5581a1335e86c6e8ba589ad"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/autonomous-progress.json",
+      "bytes": 1527616,
+      "sha256": "f6dd4ee9705a0a6fea173d26a441e60d45d97b373059c0bb7658a5764c9651f2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/cleanup.json",
+      "bytes": 1796,
+      "sha256": "a45aa62896e0c0c6fb6a64fa2b460cdc15331bfacb7304a2b6f5446c41a4f8c5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/failure.json",
+      "bytes": 1570702,
+      "sha256": "7c52366d8236891743aba18fa76cf26203a5a87c34fdf217def1fdc1cc57cabc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/game-employee-possessed.png",
+      "bytes": 137151,
+      "sha256": "775287d5adf8a5f69dea8042369bb1be0343f5b553ffe1979e61645da753aa51"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/game-office-leased.png",
+      "bytes": 373441,
+      "sha256": "f5019df3f6b360728e0dd2d1505b79bbbfcbbcd8843c6baf79e238f7e272dfc5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/game-worker-harness.png",
+      "bytes": 377159,
+      "sha256": "7520bbe7d7abd327528a9539428c2da141bb6d49362c9e63ef2268b06beac79c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/progress.json",
+      "bytes": 43039,
+      "sha256": "a893eb4a76b8e3424337556054a6a90db6b510fa0056bb55bd155496c4ab9ff6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/selected-worker.json",
+      "bytes": 2374,
+      "sha256": "682ca4a1d029ad1e49f78504f81feed9c87bb596bb7caae713c039f1e93d0883"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-autonomy/office-worker-autonomy-native-20261017-r4/takeover-check.json",
+      "bytes": 6563,
+      "sha256": "9d29e7d08412ce0b2047db1f4e7737bcfe5448077193636ff6c265fb73a1fe91"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/autonomous-progress.json",
+      "bytes": 1558310,
+      "sha256": "ba001b838ed0f37b7d84099da330007d1faab17d4ab9034fe89590a912764cd3"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/cleanup.json",
+      "bytes": 1798,
+      "sha256": "d4f6103204242e6afc3d5415efaf57672e19c7a13135da090cfec94b4bb24b37"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/failure.json",
+      "bytes": 1601578,
+      "sha256": "d1308e686d0a5a2dd3442ed96146f0476c48f83cca3d07fa9345319980a9fb9a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/game-employee-possessed.png",
+      "bytes": 201732,
+      "sha256": "7a6ad3c8e5d610c57962dcade7b4997b62337df74a786e4168601cc8f271b901"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/game-office-leased.png",
+      "bytes": 409533,
+      "sha256": "8eaa631fa716661788fa3852757b13b37571b91efe2c438c2cf2c3362c21543d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/game-worker-harness.png",
+      "bytes": 414322,
+      "sha256": "2a6305c40a5da5e1401ace74852f51234e9b22ec094004425a70917ecf55399d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/progress.json",
+      "bytes": 43221,
+      "sha256": "99ed09b2d7ee63b2d16d77b6e64b513620397121419770659bd119c631416282"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/selected-worker.json",
+      "bytes": 2755,
+      "sha256": "f60e5b7c8c3e01c37b4a319af407d8c9e8a822da0380c391d0c9a01d2b102c12"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/game-water/office-worker-water-game-20261017-r1/takeover-check.json",
+      "bytes": 6629,
+      "sha256": "b59c5d978fa451d99de0a46246181c7bc22730086a106b6772fa1b7a4daa8169"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/helpers/archive.ts",
+      "bytes": 15392,
+      "sha256": "66e536a19c1095fc716ab81bed63de25dec2cf76e96d1a7ad42856796ec778f7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/helpers/docs.ts",
+      "bytes": 12659,
+      "sha256": "fc5c2e8c8b5415b61f3e538a5eccd801a8526af3ab4339a09f8f8e657adbba70"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-before-r1-20261017.log",
+      "bytes": 976,
+      "sha256": "351118d83669289a074fb39b30d387ab491f777e1faa56ea2a762cb5352599af"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-before-r2-20261017.log",
+      "bytes": 977,
+      "sha256": "532936a29742a03b4cc8baf811e01955c0f4c2e33364582d46a93fc3f13327a9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-before-r3-20261017.log",
+      "bytes": 977,
+      "sha256": "b5032ee160103723369aaab2e4714bed95571a474bd9bc3dab6aa85a3a7c7ba2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-before-r4-20261017.log",
+      "bytes": 977,
+      "sha256": "676224b7a3e9fd9f058a3f03790dc4d4129aab4d03a4c9837b4703d32ec4c8c4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-canonical-office-check-20261017.log",
+      "bytes": 21231,
+      "sha256": "09dd3116d26025d7b9b532f07189a73fd5a4eaf6a0f0c7c654a8b2aeb2b1b71c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-canonical-office-check-r2-20261017.log",
+      "bytes": 16992,
+      "sha256": "60ccf9512a8ac9aa8acec5f49be234fc3882d61829fa001281536a3d2803e9ef"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-entry-build-20261017.log",
+      "bytes": 619,
+      "sha256": "87423b203a66dfe58de7d8807e1a49f008586e223d8403153f033110668bc7b7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-entry-start-20261017.log",
+      "bytes": 133,
+      "sha256": "4d16f07bcceb1987f2c2bd3eae86c630a0df53c9e33ac63f406f5dfe984a0590"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-liveness-upgrade-20261017.log",
+      "bytes": 164,
+      "sha256": "fcf877d26587f6f0a59665e5a310ccadcd54ae67cce858d95e467ea3297c03bf"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-liveness-upgrade-audit-20261017.log",
+      "bytes": 396,
+      "sha256": "21ecfca767d982813be89107e6b82609add9b8a66435b63196d07ab40984a447"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-liveness-upgrade-ready-20261017.log",
+      "bytes": 214,
+      "sha256": "68e17b39ab231c2331bc206fec656eb3589ac5399f443aa79de5af90de5a617c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-audio-tests-r1-20261017.log",
+      "bytes": 951,
+      "sha256": "11f9b0347e086e7929e43718d6715ad5934f45c8bf6f96b8747e22cf562a7e29"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-before-r1-20261017.log",
+      "bytes": 977,
+      "sha256": "992996309ee46e0b1d6e59aa4ce166c2738f1ba2ee43b49d5854abd9d1b29bae"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-before-r2-20261017.log",
+      "bytes": 1190,
+      "sha256": "fae83fc1334501397e221284b730fa66d7a8a3fa1708cabc49efbca354c0e6f3"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-check-20261017.log",
+      "bytes": 721,
+      "sha256": "f2832510df3e5be4d7c94b660895236b867eae6aa764f8c7cfbd2159163af426"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-native-r1-20261017.log",
+      "bytes": 308,
+      "sha256": "f91ee119c621a962e19c1adcdf7360d8cfe2cd4c7de3e3aba16845b5218d7db5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-office-native-r2-20261017.log",
+      "bytes": 726,
+      "sha256": "4dd995fdd93745543f7d87397cc1ee7b0b56ffc1604f8587e586565cc2391159"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-restart-20261017.log",
+      "bytes": 163,
+      "sha256": "28a4ca63ff3d07edbfd7c5972bbeeab6aa964a20d282553c2baf49ec828b42fb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-restart-audit-20261017.log",
+      "bytes": 395,
+      "sha256": "a51260730aa534a556e75935a41419552fba6661806b11f9c9a226181e2ac0b4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-restart-ready-20261017.log",
+      "bytes": 213,
+      "sha256": "d20309365f10a4b308c3269cee508a839fbde6f3fabae67d40bfa9d04629a795"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-ui-build-r1-20261017.log",
+      "bytes": 889,
+      "sha256": "5f4d52e9db0c317cb2624470f15f18854bec7bd261d989fa88a6d5ea1164f29b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-autonomy-water-archive-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-water-office-check-20261017.log",
+      "bytes": 16992,
+      "sha256": "915b4f00576b3cf8a89006d55eb8c4d7f6f97b6767e08db167a04745a17e9316"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-water-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "ba943739ec30261c192b7a6a80e2d2a74cbe32357109316fcfef835fd8ed1c90"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/engine-office-worker-water-ui-typecheck-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-game-build-r1-20261017.log",
+      "bytes": 585,
+      "sha256": "0196f55c43e3e9d917741c170e91ea35447faa2e7f006d676cf9f4dd519c2a6b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-game-build-r2-20261017.log",
+      "bytes": 585,
+      "sha256": "0196f55c43e3e9d917741c170e91ea35447faa2e7f006d676cf9f4dd519c2a6b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-harness-tests-r1-20261017.log",
+      "bytes": 4921,
+      "sha256": "810488d000bc0d492d55f454123df741880b95302b095c4c83969ae309219592"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-liveness-before-20261017.log",
+      "bytes": 4099,
+      "sha256": "ee41a4426f787864721cc1b40a464b97a39590b823d276655e3614f89bb5c58c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-liveness-tests-r1-20261017.log",
+      "bytes": 8298,
+      "sha256": "610c0f7cd33629cacaa7e3ed10bc44180d00bb585d85b6bc0173753a65e13254"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-liveness-tests-r2-20261017.log",
+      "bytes": 2698,
+      "sha256": "98bc12cad46e317084f9ecca801c459e62c9b6b23712c81fc811e23e268a82b2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-native-20261017-r1.log",
+      "bytes": 3464,
+      "sha256": "a94945ed458f491bde4ed199f98d070499f3f6dcd39decafba8ea81411deeeb2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-native-20261017-r2.log",
+      "bytes": 7043,
+      "sha256": "e2a9195b89271d52d9fabe25d504ed9a8adbccf1e3c8eb5c4582235e63bf6365"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-native-20261017-r3.log",
+      "bytes": 2714,
+      "sha256": "77f1da595d937e56ae6caa98302433e86bb4ddccce9ce663e066cf91dcdc114a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-native-20261017-r4.log",
+      "bytes": 9053,
+      "sha256": "0797dfec7ad4d91620fea3f5eda8f4c6698ceeecbec237bee1ce41be04ce68ba"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-observation-before-20261017.log",
+      "bytes": 1020,
+      "sha256": "fab36bb1daaf1aa80f2e6d5ff9914c48531aac6fc294ae89f7f24a751db8ba17"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-observation-before-r2-20261017.log",
+      "bytes": 4243,
+      "sha256": "8dd1a4d069322db04baf378fbc2ef2b47587c420e6aba863dbcbe88f28589da1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-observation-tests-r1-20261017.log",
+      "bytes": 5246,
+      "sha256": "75bd12f8610a201568a78705e6c519ca68b2e331fcc7a15cf31d7b05f1cfe35e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-observation-tests-r2-20261017.log",
+      "bytes": 259,
+      "sha256": "ea6144b8609e6a2593f41069e2355866ba2f279df95835717b4cec31d9c184ee"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-final-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-observation-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-autonomy-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-build-20261017.log",
+      "bytes": 585,
+      "sha256": "6669b3b63013ef73ae6d1e07f713a162cfd3ff4dd90e65565134b02c14f656d3"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-game-20261017-r1.log",
+      "bytes": 9079,
+      "sha256": "6f8c796cca8a79dad5539e301d1bb2595eb09b2c53a002113f65124c728030de"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-harness-test-20261017.log",
+      "bytes": 277,
+      "sha256": "a22bde6a63e4f13c35e75c05e90248fba374ba7d25b7a6bf5e876886a0705484"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-regression-r1-20261017.log",
+      "bytes": 12810,
+      "sha256": "8d34835cd6d28750e9ad36a77981178b1b6d6d9619332227aac6872cb5792f6a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-regression-r2-20261017.log",
+      "bytes": 11291,
+      "sha256": "456e015029f67a13abc16eb2118dda6a99abedd7e4e6098c31c4ad6e1bf2fc78"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-tests-r1-20261017.log",
+      "bytes": 4604,
+      "sha256": "ba6727eb92d8ffd27099b079aeebca9ed9d0673b5a244c4263ab5fd77df9b313"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-typecheck-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-typecheck-r1-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/logs/game-office-worker-water-typecheck-r3-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13536839,
+      "sha256": "1a13d8ee37a75677ec2a533df4af810a0f327c24d75499d41580936dad3665a4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/controller-idle-after.png",
+      "bytes": 374110,
+      "sha256": "48ad14e985425361fb1b78987299fb82ba1d6d1c5fe7a52ce269fcad8050e6c3"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/entered.png",
+      "bytes": 344300,
+      "sha256": "ff009fd8bbaff99cc3a87af54704ef22f7350f0374534fc770ceec33a9b40223"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/observer.png",
+      "bytes": 523976,
+      "sha256": "86543852244f9f5a4a91c148178f003897b3dbd5067d461dfe29d3284ec7d3ac"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/report.json",
+      "bytes": 186740,
+      "sha256": "da74e8a88b76f36daa09e359294cd2d3e6b76a6b7569d7a4b7abf328b87a976d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-before-movement.json",
+      "bytes": 4452,
+      "sha256": "515e69e5e2eda1a00f9ed24a4f1abb4536233d8b487b52ba4878e1af6619a6f2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-moved.png",
+      "bytes": 196404,
+      "sha256": "75333c5ba98306f725b0e414785235c7e8de1f406695edcd989d9ce60cbc3c4d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-movement.json",
+      "bytes": 9762,
+      "sha256": "bcacc38ce9d5bdfa3c652bb9750362a5f9c9c9073f5cf56a32dd2848aa6b0587"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-observed-scope.png",
+      "bytes": 324994,
+      "sha256": "79816827593c01b95d1e8fb26a2120bb4428e0b94b1a347d6456f5924efd1357"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-observing.png",
+      "bytes": 286376,
+      "sha256": "d24d27cab298f2381eab6dbf3baf48c183d87f15b828fe3f81092e566f88d665"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-panel.png",
+      "bytes": 162947,
+      "sha256": "b738d6354a74d33510d0df39a670717418814fe85f4451ba5309c19603d2e7d1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-possessed.png",
+      "bytes": 228891,
+      "sha256": "f660414f307d39d886da27d3bbb1f01cbf7ce1d7766661179cca96fbfb9d149b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-report.json",
+      "bytes": 12058,
+      "sha256": "6b3b4a55c2b5910c204eb31afb4529269c312f6b752881bb1d680fc48004a8c2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-return-start.png",
+      "bytes": 345976,
+      "sha256": "4da6d7e51c6f516b8756de483ac689007f227c489c696c46a5b6ed1890592bb4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-returned.png",
+      "bytes": 351729,
+      "sha256": "e3b8eefd916da5768d582dbcea03f090bb16726fe28cd895f503044d5ed38ae1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-selection.json",
+      "bytes": 1218,
+      "sha256": "de51bf5dc258cabfe6dc5ff78770a79e0ded882250bbed40777274c10a00637e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/residents-stopped.png",
+      "bytes": 186842,
+      "sha256": "54ebd5070cbc00e63bdd7e0baabcd85b07e82d924e34056b8eadf0e6d8885929"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/returned-observer.png",
+      "bytes": 503830,
+      "sha256": "e46e62f31ac5c112c1a18d97595cf46769327f33779e22ad73c2ddb9fbbec99a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r1/walk-KeyW.png",
+      "bytes": 336257,
+      "sha256": "87676893906acd772612a160dfcd9e5f74333bc6df9f562988c998330f3a9b45"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 13383513,
+      "sha256": "cfb59bf53ce72530c00dfb2b24388a99bd212abdced17a8202a8f0903f076d90"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/entered.png",
+      "bytes": 321719,
+      "sha256": "8af3cdd8274638f3c8dd2427e9008c36297b7924bb4e404aaa02ba7cf9bfa0bc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/failure.png",
+      "bytes": 261530,
+      "sha256": "6495cb88344bbf40f5044c79ddc34f17d2f0e770e29e5edb371aa139ef783d06"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/observer.png",
+      "bytes": 603316,
+      "sha256": "7213682be41e0f1ad299ea3fc648e4a23cb530be71fb0c41bccc209cd6e36cd5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/report.json",
+      "bytes": 98015,
+      "sha256": "f85955d5f125a864ef7aed4b399accc129bedc659a84d4f7c5503152f7808652"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/residents-observed-scope.png",
+      "bytes": 141774,
+      "sha256": "1f981ef7ea110ec69d5b52f4b6c68bcb1bbed74b37d35d9d15f9f3cf137e88da"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/residents-observing.png",
+      "bytes": 176192,
+      "sha256": "9baef6162382ca32d99b346dbeb20fc8262e1473392a360333b195bfc1768aec"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/residents-panel.png",
+      "bytes": 175190,
+      "sha256": "fbc5cf8c4f7b6cdde54bd8879fda91fcb11d77591963c6079ab9fafe0324d38b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/residents-selection.json",
+      "bytes": 858,
+      "sha256": "d08bdba4b26a1d0d757f3f6e09d9ed7c91f538f2af7e34435954fb79fc283591"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/returned-observer.png",
+      "bytes": 502629,
+      "sha256": "6a88ae006d7e9445cb82fd33ae071abfd98fdfac970b66a53f38516e0ceaad3b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-autonomy-office-20261017-r2/walk-KeyW.png",
+      "bytes": 355901,
+      "sha256": "2638c801c56140e5afaecf28aa18c1396272aaf0abf0461bae0b4e413c7bcda2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/entered.png",
+      "bytes": 272225,
+      "sha256": "c7653d774cb650f3000ddf6d98407285ed65bd7f2f98ea253d5243a6af90e80a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/failure.png",
+      "bytes": 179358,
+      "sha256": "0bdfe5ca25f1383980854ba87fb720d702caaa3869727ff30125cc5f80170535"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/observer.png",
+      "bytes": 526106,
+      "sha256": "73fa703598ee01e605741ce499127a51fb7da808f5694943ddf178c4183e4ec8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/report.json",
+      "bytes": 64468,
+      "sha256": "2e5342e93f17a1433dd0acd3ece4b73e7ecddb2a8f30510c5f9a145fe9559386"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/residents-selection.json",
+      "bytes": 1411,
+      "sha256": "534881bf348fc158597d9351541fcbc4c5799e0a7c069867902dcba5b9d5a8d8"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/returned-observer.png",
+      "bytes": 462820,
+      "sha256": "a5957ee6836bfb271ef2bd005a8bcd327aa6b15d4818b03b2a700d5005fdeb87"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r1/walk-KeyW.png",
+      "bytes": 277594,
+      "sha256": "64f8aed3fb9c678e686f9bbe2920ad3496d518ab15c9fd5beec62960c07ee17b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/canonical-residents-observed-source.json",
+      "bytes": 13372254,
+      "sha256": "7a3a353b27b16c4ff77d0b717eca64e0ec231c0561a9e86fe10b30ebdbc12ded"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/controller-idle-after.png",
+      "bytes": 474374,
+      "sha256": "6f1fdcc85ca9b3f8f084703f99ee9a6cc1e760a86197ca3f534fe61a0a1a4c0a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/entered.png",
+      "bytes": 376924,
+      "sha256": "112965049201301c3f78b7accd732c8c78acebbced7e0842226889952e09d5bc"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/observer.png",
+      "bytes": 573785,
+      "sha256": "8caae4fedd4f716f27057c1b60b46652b201beec1d79a55a478e8cbe823f0d5e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/report.json",
+      "bytes": 181075,
+      "sha256": "6bc29feedd3d396ca11689b168b251e1247525fb1c132d8ecf2d01c12172b3f4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-before-movement.json",
+      "bytes": 4919,
+      "sha256": "2d05f11716951f41b176bc0ffa6b0a27ac35afaa231cfb5f4bc8a593e64c1fec"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-directory-pages.json",
+      "bytes": 78,
+      "sha256": "bb5bdd3bde3510dd3fb1f0e080c695d073c58518430f5bac6b1f81019c52ba0d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-directory.png",
+      "bytes": 171600,
+      "sha256": "13809ee1e1322a628a04b57f95981c58d9a0a2583efdb46cb6747d975563703c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-moved.png",
+      "bytes": 146690,
+      "sha256": "f772f20f79f35680ea4eda754c58a40868a6df748cfb975b238c50357061ed8a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-movement.json",
+      "bytes": 6354,
+      "sha256": "79e1ccc3d872ca9e74dec65a13b8ce0dfd35b868c9b61de39f432ac6ab7db14e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-observed-scope.png",
+      "bytes": 144890,
+      "sha256": "f4cd1782075025f13b258fcfc90113f314d26870ce391359cc8791a37fa74dba"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-observing.png",
+      "bytes": 151280,
+      "sha256": "dc82d9e1d85f2874f4acaa55ab18da065321dc2810b32b250e46ee3685b479aa"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-possessed.png",
+      "bytes": 151459,
+      "sha256": "40ff619c988e1f139dc5d8617973859d2a7141e70bd41e016fd8b1050e9ac647"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-report.json",
+      "bytes": 8380,
+      "sha256": "b5a172d4305b1be76b6298ed7492da3d9e4c370ea76d14f0ec5d3a9ad034627f"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-return-start.png",
+      "bytes": 456829,
+      "sha256": "c94e96b963c22384bb6dd3b3f6ca84d5b24a6a3278550ed2f9141874bd214532"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-returned.png",
+      "bytes": 464382,
+      "sha256": "1b7c8dfdab87ed33e9f7fc149f83cf9273e7b07131814ac35fe0dfa1b4dcc0b6"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-selection.json",
+      "bytes": 1557,
+      "sha256": "a675a0750b3cbebc2a2787e48639337efad920c3dde8df5f92002ba32b9c593e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-stopped.png",
+      "bytes": 143280,
+      "sha256": "d2f88d1e2338e8e2b4ed4a2f8f9846c3e0f28ed81eca91bbe456818d9fa5aadd"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/residents-takeover-source.json",
+      "bytes": 28049,
+      "sha256": "1e6137ce11b7f7d6dbd667077910cc462163574979c6507dfbd0a795a80df55d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/returned-observer.png",
+      "bytes": 600502,
+      "sha256": "9810ae9f3fbef820069c1fd601bc1740893280ee5ce9ab576c687ffeea7a30df"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/office-native/office-worker-water-office-20261017-r2/walk-KeyW.png",
+      "bytes": 357824,
+      "sha256": "fbae6ddbeea791c0b3e23ac769345eacd0a2988bba8d51b8290c6edd999046f7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/reviewed.json",
+      "bytes": 2229,
+      "sha256": "9bc17c61ea9bd42e909b8e6731f8b017cc2c938754193f6cb51941b56d3dfa4c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/served/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/served/game.js",
+      "bytes": 2508701,
+      "sha256": "4ef45cf1b7bc945392095ee6bf5652bc1627ab0715ade08c317d3c2f34af8bbb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/served/office-controller.js",
+      "bytes": 1558350,
+      "sha256": "4708d4f680ff4595ea565a7a4f7ca97df2fd2575a67c4abd7df95494506324a9"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/build.ts",
+      "bytes": 3299,
+      "sha256": "afddce29ccf9efd11dae1d73116f63552150485624970f0803657cdcec63334b"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 37358,
+      "sha256": "c2118139f1914999f77dd7bcccd36d9a9d6c7ba0a4f2fc6b40046933729163d2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/package.json",
+      "bytes": 427,
+      "sha256": "fec46a3c9a07a20ed9d209be0a1ccf50883c3aa26b4d8268920be56c686574f5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/apps/thegame/README.md",
+      "bytes": 5469,
+      "sha256": "53755968c29b90f563d9db7dad0e5ff7f068d883322af19f6a31e60ce4b172fe"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 219397,
+      "sha256": "22cfb2acbd563484f71b49a1f12d25e54c3fed92537c2cd65e97b5e8577715ce"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/package.json",
+      "bytes": 4185,
+      "sha256": "552af7b52d8e70502953679f2ae0045123ffffad846599aa6a89eaa1868ab400"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/README.md",
+      "bytes": 41085,
+      "sha256": "f4ceefab4a23ffea48f2f5461e197fb717acf9a8d2be3d878332ab32923967fa"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/engine/tools/start-game-office.ps1",
+      "bytes": 3324,
+      "sha256": "d52b57f72f58c6f6303a2c5d091c182536ab5f511febfc59b4f1c6555365b3cb"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/HARNESS.md",
+      "bytes": 11038,
+      "sha256": "203e024e724e468702fbb5d6d034740cf1fd836e16b1f33bddf314ffa3028af7"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/URBAN_DESIGN.md",
+      "bytes": 41396,
+      "sha256": "6cb998a8471e4a0efb1db1389de0fc245e0be6c144e029219e96310adf6dd54e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/docs/VERIFICATION.md",
+      "bytes": 850701,
+      "sha256": "4eec41f9745eec9bfebbab52a0ef7bb93f1e0b5e7390150107fcf3d93c0efa28"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/actor-state.ts",
+      "bytes": 7038,
+      "sha256": "828d6cd788d637fc6a7b6cbf58be46f1dc3d97340e560f31facfbce43dcac75d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/authority.ts",
+      "bytes": 67265,
+      "sha256": "e3514f10e060dd51b59382826f2c887678f5565913db5621cc25688b924630d1"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-model.ts",
+      "bytes": 5743,
+      "sha256": "81b5d315059121f2f354732241d30278dcbfb6753b0b83255c2309d7f908097c"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-offices.ts",
+      "bytes": 2549,
+      "sha256": "75076807a7c3f758e1ca0ce27c5089c520e68d2d6a87265ca71d9cf904f6c01a"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company-view.ts",
+      "bytes": 24323,
+      "sha256": "a4677d0a9c5603c3168dbf13e7cef7072cfc0e5c74381f92351bd37d5000223d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/company.ts",
+      "bytes": 22539,
+      "sha256": "09aed1c3e8f21a16e11e47dad92fe3e81a1bc7015db1a148a12b728a34b6227d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/player-actors.ts",
+      "bytes": 19628,
+      "sha256": "d80260f17488a3e03e6b52adc0cdddf52efa9d15c75204896cde1dd4df654611"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-directory.ts",
+      "bytes": 2559,
+      "sha256": "361e3b54e9eadcfc7354c3810a4bf6e3f8f1846d20679616d681ada2b4c43707"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-panel.ts",
+      "bytes": 17428,
+      "sha256": "594941d614956cd91906b9e6ae6253b04703f9d7160a27f4ea0ef97b97d6dcfd"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/resident-workforce.ts",
+      "bytes": 1307,
+      "sha256": "20ef53fdf8310ab2785c62a728ab497ebbf4b2b0edb45274e822cd2de764dba2"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/residents.ts",
+      "bytes": 51291,
+      "sha256": "7f2adc075498657629c34f82717792dc1ac9d175766e931fc932ff68e4171092"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/workforce-harness.ts",
+      "bytes": 14010,
+      "sha256": "6cefb116b894b68cbd0aead7851d20c105d84a4623bcf64afb167fb891c0c266"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/src/game/workforce.ts",
+      "bytes": 21878,
+      "sha256": "1811ab5770b49f4170e80d85f0366a999d1184d2781d46d938beab3e3d1aa561"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/company-water.test.ts",
+      "bytes": 9570,
+      "sha256": "36da675460d02672656a29b6c6f23a1e3456b480f93a3b0cf7cfa59e99e4e7ba"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/observed-resident-retention.test.ts",
+      "bytes": 1930,
+      "sha256": "8954c311b55a0ba47ace1743947438182c83c12a3c82925900a234bfd4950bc5"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/test/workforce-traffic-interest.test.ts",
+      "bytes": 2365,
+      "sha256": "c33fddc7ebe0d65140c8158b235354fded6aa365804a8467b0fd5dd52847a441"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/tools/qa-game-workforce.ts",
+      "bytes": 22462,
+      "sha256": "836e805d4b0df52c99cb1ac9db70af942b321af7e393030eae390056db72172d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/game/tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/scripts/office-audio-guard.test.ts",
+      "bytes": 3345,
+      "sha256": "380c00449dc883dfe64a700a4268d95d52b1f5e1586f7d835d0694ddf6c4df32"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/package.json",
+      "bytes": 885,
+      "sha256": "db3a56d0818e4d437513bb201b9658acdf3c30e6a53fed114b50c762007cada4"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/audio-guard.ts",
+      "bytes": 1976,
+      "sha256": "179e5d1956299411a5e2d793db4221b3e5242916f14d21281d0749003cd2e0fa"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/Office.tsx",
+      "bytes": 60275,
+      "sha256": "1893f31f64583cbff7d3169a7dbf70664eb6b1da57d38b38cf9770bfd9bb9e25"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/ui/src/office/scene.ts",
+      "bytes": 68747,
+      "sha256": "ff8b3c0a4bb8c7e41a6c0ab9899b4d96184cd073047f0b15cd72d547558c306e"
+    },
+    {
+      "path": "artifacts/office-worker-autonomy-water-evidence-20261017/source/office/VERIFICATION.md",
+      "bytes": 154089,
+      "sha256": "177f69f5ad4c5b08bba96c6fca2f3d4056cf39986593cb9b077f1cb24c5ccf24"
+    }
+  ],
+  "totals": {
+    "files": 355,
+    "bytes": 267033685,
+    "sources": 36,
+    "reviewedImages": 6
+  }
+}

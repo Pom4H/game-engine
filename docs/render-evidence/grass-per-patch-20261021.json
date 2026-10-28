@@ -1,0 +1,343 @@
+{
+  "date": "2026-10-21",
+  "status": "production representation accepted after separate visual review; strict bit-identity gate failed",
+  "problem": {
+    "mechanism": "GrassView concatenated all selected immutable patches into a new 3.5MB Float32Array when distance sorting or membership changed. Geometry identity invalidated projection compilation, Scene validation and GPU mesh packing, with substantial allocations and GC.",
+    "actualCarProfile": "../thegame/artifacts/performance-profile-migration-car-functional-r3.json",
+    "clockBridge": "../thegame/artifacts/performance-profile-clock-migration-car-functional-r3.json",
+    "clockAlignedAnalysis": "../thegame/artifacts/performance-analysis-migration-car-functional-r3.json",
+    "scoreMs": 7875.1,
+    "sampledGcSelfMs": 1070.921,
+    "sampledAppendVertexSelfMs": 1003.124,
+    "sampledCompileGamePrimitiveInclusiveMs": 1443.835,
+    "sampledSetChunksInclusiveMs": 66.076,
+    "limits": "Sparse CPU sampling gives estimates. Actual stacks prove dynamic primitive compilation, not terrain deserialization, dominated this profile; exact group argument is inferred from an independently reproduced GrassView identity mechanism."
+  },
+  "change": {
+    "source": "../thegame/src/game/grass-view.ts",
+    "description": "Emit one immutable cached source per original 2x2m grass patch; transforms carry its location. Only newly generated patches compile. No combined mesh allocation on distance reorder or changed membership.",
+    "preserved": [
+      "Original nearest-first selection and two-patch build budget",
+      "All original patch vertex positions, normals, authored UVs, colors, materials and variation seeds",
+      "7m range, density, wind response, unavailable/paved-ground exclusion",
+      "Cache and group ownership bounded to64; projection releases unloaded groups",
+      "World, physics, collision, shadow eligibility and Game control/authority fences"
+    ]
+  },
+  "cpuOracle": {
+    "status": "pass",
+    "focusedTests": 33,
+    "assertions": 1980325,
+    "worldPositionBound": "At most one Float32 ULP against legacy camera-dependent pre-rounded aggregate; all other vertex attributes and chosen patches match exactly.",
+    "logs": [
+      "../../game-grass-patch-final-focused.log",
+      "../../game-grass-patch-final-typecheck.log"
+    ],
+    "microbenchmark": {
+      "scope": "CPU deterministic-ground diagnostic, not live pacing",
+      "orderOnly": {
+        "original": {
+          "aggregateCompiles": 8,
+          "newPatches": 1,
+          "ms": 3286.165
+        },
+        "candidate": {
+          "patchCompiles": 1,
+          "newPatches": 1,
+          "ms": 12.213
+        }
+      },
+      "membership": {
+        "original": {
+          "aggregateCompiles": 12,
+          "newPatches": 12,
+          "ms": 5124.77
+        },
+        "candidate": {
+          "patchCompiles": 12,
+          "newPatches": 12,
+          "ms": 87.667
+        }
+      },
+      "resident": {
+        "cache": 51,
+        "groups": 51,
+        "visibleEntities": 39
+      }
+    }
+  },
+  "native": {
+    "rawReport": "artifacts/grass-patch-review-20261021/report.json",
+    "numericReview": "artifacts/grass-patch-review-20261021/numeric-review.json",
+    "metrics": [
+      {
+        "case": "nearplane",
+        "png": {
+          "pixels": 0,
+          "channels": 0,
+          "maxChannelDiff": 0,
+          "bbox": null
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0,
+          "maxUlps": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 0,
+          "maxAbs": 0,
+          "maxUlps": 0
+        },
+        "drawCalls": {
+          "before": 17,
+          "after": 28
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 6.472030786516857,
+            "p50Ms": 5.0118,
+            "p95Ms": 10.873759999999999,
+            "maxMs": 11.23616
+          },
+          "after": {
+            "meanMs": 5.271251046511627,
+            "p50Ms": 4.620240000000001,
+            "p95Ms": 9.76656,
+            "maxMs": 10.76001
+          }
+        }
+      },
+      {
+        "case": "coplanar-order",
+        "png": {
+          "pixels": 3,
+          "channels": 6,
+          "maxChannelDiff": 2,
+          "bbox": [
+            918,
+            688,
+            921,
+            689
+          ]
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0,
+          "maxUlps": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 6,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxUlps": 1
+        },
+        "drawCalls": {
+          "before": 26,
+          "after": 28
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 5.53622311827957,
+            "p50Ms": 4.75524,
+            "p95Ms": 8.530589999999998,
+            "maxMs": 9.21283
+          },
+          "after": {
+            "meanMs": 4.93208208791209,
+            "p50Ms": 4.5409999999999995,
+            "p95Ms": 8.194719999999998,
+            "maxMs": 8.58296
+          }
+        }
+      },
+      {
+        "case": "visibility",
+        "png": {
+          "pixels": 0,
+          "channels": 0,
+          "maxChannelDiff": 0,
+          "bbox": null
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0,
+          "maxUlps": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 6,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxUlps": 1
+        },
+        "drawCalls": {
+          "before": 25,
+          "after": 27
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 5.574121999999998,
+            "p50Ms": 4.8774,
+            "p95Ms": 8.548279999999998,
+            "maxMs": 9.36889
+          },
+          "after": {
+            "meanMs": 4.878258913043479,
+            "p50Ms": 4.529759999999999,
+            "p95Ms": 8.11964,
+            "maxMs": 8.53575
+          }
+        }
+      },
+      {
+        "case": "grass-rebase",
+        "png": {
+          "pixels": 0,
+          "channels": 0,
+          "maxChannelDiff": 0,
+          "bbox": null
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 3,
+          "maxAbs": 0.00000762939453125,
+          "maxUlps": 8192
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 7,
+          "maxAbs": 4.470348358154297e-7,
+          "maxUlps": 15
+        },
+        "drawCalls": {
+          "before": 25,
+          "after": 27
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 5.563922608695654,
+            "p50Ms": 4.69396,
+            "p95Ms": 8.543239999999999,
+            "maxMs": 8.832659999999999
+          },
+          "after": {
+            "meanMs": 4.945778387096775,
+            "p50Ms": 4.631519999999999,
+            "p95Ms": 8.177039999999998,
+            "maxMs": 8.936639999999999
+          }
+        }
+      },
+      {
+        "case": "motion",
+        "png": {
+          "pixels": 1,
+          "channels": 1,
+          "maxChannelDiff": 1,
+          "bbox": [
+            611,
+            647,
+            611,
+            647
+          ]
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 2,
+          "maxAbs": 0.00000762939453125,
+          "maxUlps": 8192
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 9,
+          "maxAbs": 1.7881393432617188e-7,
+          "maxUlps": 6
+        },
+        "drawCalls": {
+          "before": 25,
+          "after": 28
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 6.350376043956043,
+            "p50Ms": 6.0948,
+            "p95Ms": 8.61928,
+            "maxMs": 9.0528
+          },
+          "after": {
+            "meanMs": 5.009003586956525,
+            "p50Ms": 4.62476,
+            "p95Ms": 8.272,
+            "maxMs": 8.69423
+          }
+        }
+      },
+      {
+        "case": "cpu-instances",
+        "png": {
+          "pixels": 0,
+          "channels": 0,
+          "maxChannelDiff": 0,
+          "bbox": null
+        },
+        "hdr": {
+          "components": 3686400,
+          "changed": 0,
+          "maxAbs": 0,
+          "maxUlps": 0
+        },
+        "depth": {
+          "components": 921600,
+          "changed": 6,
+          "maxAbs": 2.9802322387695312e-8,
+          "maxUlps": 1
+        },
+        "drawCalls": {
+          "before": 89,
+          "after": 91
+        },
+        "gpu": {
+          "before": {
+            "meanMs": 5.724067717391306,
+            "p50Ms": 5.0674,
+            "p95Ms": 8.45112,
+            "maxMs": 8.93536
+          },
+          "after": {
+            "meanMs": 4.967525714285715,
+            "p50Ms": 4.589639999999999,
+            "p95Ms": 8.287160000000002,
+            "maxMs": 8.849289999999998
+          }
+        }
+      }
+    ],
+    "strictGate": {
+      "result": "failed and retained",
+      "firstFailure": "artifacts/grass-order-identity-20261021/failure.json: six depth pixels differed by one Float32 ULP",
+      "secondFailure": "artifacts/grass-patch-identity-20261021/failure.json: coplanar PNG changed3pixels,6channels,max2/255",
+      "notBitIdentical": true
+    },
+    "visualReview": {
+      "acceptedBy": "Root agent after reviewing all original/candidate 1280x720 images and explicit user priority on useful graphical detail per FPS",
+      "acceptedChanges": "Per-case PNG maximum3pixels,6channels,2/255. Total HDR differences:5 components across rebase/motion, max7.62939453125e-6 (one half-float storage step). Log-depth max absolute4.470348358154297e-7,15Float32ULPs after projection; these are changes in numeric representation and not a claimed strict-pass.",
+      "reason": "Legacy aggregate first rounded patch-local+camera-cell offset into Float32, then applied camera-cell transform, so geometry depended on camera cell. Per-patch retains original local Float32 source and a stable patch transform. No visible loss or artifacts were observed.",
+      "furtherTolerance": "No general new tolerance or default shader/golden changes introduced; raw differences remain in the report."
+    },
+    "productionSmoke": "artifacts/grass-production-smoke-20261021/report.json"
+  },
+  "limits": [
+    "Native GPU timings are instrumented fixture diagnostics, not actual driving acceptance.",
+    "Live car/flight pacing must be remeasured after the source freeze.",
+    "No new60FPS/no-freeze claim is made by these oracles."
+  ],
+  "sourceSha256": {
+    "../thegame/src/game/grass-view.ts": "0e7ede9245c099f49f1c252ce18449dc918076fbfafd03d3b2c2f7d65bc1ec70",
+    "tools/render-stability/fixtures/grass-view-patch-candidate.ts": "00c12ed7ff42d361e1d26edb4d950b74904b4e4851590e12149ee3120e713b88"
+  },
+  "productionSourceMatchesReviewedCandidate": true,
+  "productionSmokeStatus": "nearplane pair pass: full PNG/HDR/depth exact, zero GPU errors"
+}

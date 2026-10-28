@@ -1,0 +1,195 @@
+{
+  "status": "pass",
+  "kind": "unchanged-native-fixture-output-after-using-resource-scopes",
+  "scope": "All eight case/variant records are compared to the preserved earlier native Game-hash oracle; current before/after Game compiler equality is also required by report.json. Not whole-world/FPS/transport acceptance.",
+  "baseline": {
+    "path": "C:\\Users\\Roman\\Documents\\thegame-migration-20261021\\workspace\\game-engine\\artifacts\\game-compiler-hash-native-20261021\\report.json",
+    "sha256": "6581703c365480be430dab8e04fcc2a4cfeb8342e823ed4f6fbb869ea4ab872a",
+    "sources": [
+      {
+        "path": "artifacts/game-compiler-hash-native-20261021/client.ts",
+        "sha256": "47a0117da3be7607089f6555fbf06fae244fff5f5df96bd5a83806b98a2d6c7f"
+      },
+      {
+        "path": "artifacts/game-compiler-hash-native-20261021/run.ts",
+        "sha256": "0c573cfdd2975d7efd96c3a9d1b5146e01a65689878256cc2a314e242cddb129"
+      },
+      {
+        "path": "src/procedural/mesh.ts",
+        "sha256": "d3b89564ff8875bf5b08ceecc824ff4f9d61af9a4785213ca81771a9c3d91aad"
+      },
+      {
+        "path": "src/scene/validate.ts",
+        "sha256": "a11c5a5af9f3ee7f6604c3beb2a6acc2e7816c6b596087ecf640450ae12b98ce"
+      },
+      {
+        "path": "src/render/radiance.ts",
+        "sha256": "0617b65b7c1690148f11ef1535fb03c35c5e607daf7361fcb310dc9d79ae6107"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-geometry.ts",
+        "sha256": "7f09138048d8c9df168adf0023c79fe20bc1f2518dc0ebf4b1500d74ceaa2078"
+      },
+      {
+        "path": "../thegame/test/fixtures/the-engine-geometry-before-smi-hash.ts",
+        "sha256": "6423365ea6d50bb0f5796711d06f4dea7398b3a26e76065767174429a27f18f4"
+      },
+      {
+        "path": "src/render/webgpu.ts",
+        "sha256": "ae3b6223508c88e87ef05c85fb740af58d404b2cb86b4dc67ecf985c84a31f7a"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-projection.ts",
+        "sha256": "fb90c18c1cc3b5dfe9ba8e5d694b049974c0d9729bb70dcd248a560ce80074b5"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-renderer.ts",
+        "sha256": "7c4eefd6b6200cae2b7f79874c28788c5f8db5d7e6a6ee2322a32399fa8e87f6"
+      }
+    ]
+  },
+  "current": {
+    "path": "C:\\Users\\Roman\\Documents\\thegame-migration-20261021\\workspace\\game-engine\\artifacts\\using-resources-native-20261021\\report.json",
+    "sha256": "b1f7bf7178670f7254c1687b21becf426e0c6a73dbc9e83f3665f063d21060fa",
+    "sources": [
+      {
+        "path": "artifacts/using-resources-native-20261021/client.ts",
+        "sha256": "47a0117da3be7607089f6555fbf06fae244fff5f5df96bd5a83806b98a2d6c7f"
+      },
+      {
+        "path": "artifacts/using-resources-native-20261021/run.ts",
+        "sha256": "9cff88d13e25cbe243c71e2813f793a9e8febc9f450383c909f65dc1ed67add1"
+      },
+      {
+        "path": "src/procedural/mesh.ts",
+        "sha256": "d3b89564ff8875bf5b08ceecc824ff4f9d61af9a4785213ca81771a9c3d91aad"
+      },
+      {
+        "path": "src/scene/validate.ts",
+        "sha256": "a11c5a5af9f3ee7f6604c3beb2a6acc2e7816c6b596087ecf640450ae12b98ce"
+      },
+      {
+        "path": "src/render/radiance.ts",
+        "sha256": "0617b65b7c1690148f11ef1535fb03c35c5e607daf7361fcb310dc9d79ae6107"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-geometry.ts",
+        "sha256": "7f09138048d8c9df168adf0023c79fe20bc1f2518dc0ebf4b1500d74ceaa2078"
+      },
+      {
+        "path": "../thegame/test/fixtures/the-engine-geometry-before-smi-hash.ts",
+        "sha256": "6423365ea6d50bb0f5796711d06f4dea7398b3a26e76065767174429a27f18f4"
+      },
+      {
+        "path": "src/render/webgpu.ts",
+        "sha256": "ee404530f7c12b33ecb9bb0880f2379d053b92deb79634d40f7b5bbc3f614c0c"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-projection.ts",
+        "sha256": "fb90c18c1cc3b5dfe9ba8e5d694b049974c0d9729bb70dcd248a560ce80074b5"
+      },
+      {
+        "path": "../thegame/src/game/render/the-engine-renderer.ts",
+        "sha256": "7c4eefd6b6200cae2b7f79874c28788c5f8db5d7e6a6ee2322a32399fa8e87f6"
+      }
+    ]
+  },
+  "comparisons": [
+    {
+      "mode": "before",
+      "name": "dry",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "before",
+      "name": "wet-night",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "before",
+      "name": "mirrored",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "before",
+      "name": "rebased",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "after",
+      "name": "dry",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "after",
+      "name": "wet-night",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "after",
+      "name": "mirrored",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    },
+    {
+      "mode": "after",
+      "name": "rebased",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true,
+      "resolutionExact": true,
+      "zeroPhysics": true,
+      "zeroErrors": true
+    }
+  ]
+}

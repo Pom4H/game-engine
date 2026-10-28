@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-16T11:17:32.3428306Z",
+  "command": "CAPTURE_GPU=1 CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3198 PERF_FIXED_SETTINGS=1 PERF_WARMUP_FRAMES=180 PERF_LIVE_FRAMES=900 PERF_LABEL=fps-answer-20261016 bun tools/capture.ts --live",
+  "hardware": {
+    "Name": "AMD Radeon 760M Graphics",
+    "DriverVersion": "32.0.31041.1004"
+  },
+  "frames": 900,
+  "warmupFrames": 180,
+  "averageFPS": 41.70760190557399,
+  "measuredDurationMs": 21578.8,
+  "p50Ms": 19.69999999999709,
+  "p95Ms": 39.099999999998545,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [
+      704,
+      396
+    ]
+  },
+  "backend": "webgpu",
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "hiz": false,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "motionBlur": 0,
+    "dof": 0,
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "visual": {
+      "sunElevation": 0.9075712110370514,
+      "sunTemperature": 5700,
+      "skyTurbidity": 2.2,
+      "humidity": 0.42,
+      "cloudCoverage": 0.16,
+      "fogDensity": 0.00065,
+      "wetness": 0,
+      "exposureBias": -0.25,
+      "artificialLightIntensity": 0.02,
+      "sunIntensity": 4.2,
+      "skyIntensity": 0.7
+    }
+  },
+  "gpuErrors": [],
+  "networkStatus": "online",
+  "networkTransport": "WebTransport / QUIC",
+  "selfPose": {
+    "x": -345,
+    "animation": "idle",
+    "z": -66,
+    "y": 0.16999999999999998
+  },
+  "serverPid": 1960,
+  "healthAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "rawMetrics": "../../../thegame/artifacts/performance-live-fps-answer-20261016.json",
+  "rawMetricsSha256": "bb855832a27d6c3ee13057ee4e3c4572a3ef1e147fdb7e02ab42e7a8e5a2e656",
+  "gameBundleSha256": "c9957d15bd3cdbfcc573eeaebcfa2377652e0e8377d2927b4ce3c6f1760a34e3",
+  "log": "../../../thegame/artifacts/fps-answer-20261016.log",
+  "limits": [
+    "Short stationary live-world measurement at the real starting position; not a whole-map or walking benchmark.",
+    "Internal rendering is 704x396; viewport is 1280x720.",
+    "No profiler or client bundle override. Not a paired speedup comparison.",
+    "Does not establish sustained 60 FPS, Office UI FPS, or performance at higher resolution.",
+    "Browser log retains autoplay and Windows powerPreference warnings."
+  ]
+}

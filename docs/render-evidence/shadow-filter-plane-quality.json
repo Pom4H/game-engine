@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "status": "completed",
+  "kind": "visual-review-with-independent-numeric-reference",
+  "sourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "c50e80a4b1c70f459b63bd2a7acd54f2ba29fa4fb9b3169cee97f7cf0670d56e",
+    "distSha256": "0997096b229d06dd0ae60d62b8736822e23746b12847b34515190e216b4787ac",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "fullBenchmarkSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "c50e80a4b1c70f459b63bd2a7acd54f2ba29fa4fb9b3169cee97f7cf0670d56e",
+    "distSha256": "0997096b229d06dd0ae60d62b8736822e23746b12847b34515190e216b4787ac",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "numericReport": "artifacts/engine-compare/shadow-filter-plane-contract/report.json",
+  "numericControls": {
+    "cases": 4177,
+    "staticSamples": 4,
+    "dynamicSamples": 2,
+    "binaryCases": 64,
+    "filteredCases": 4096,
+    "dynamicDisabledCases": 17,
+    "receiverPlanes": 225,
+    "receiverPlaneAbsoluteTolerance": 0.000001
+  },
+  "numericGates": {
+    "nativeHardware": true,
+    "productionContractPresent": true,
+    "normalizedCoverage": true,
+    "receiverPlaneDepth": true,
+    "originalErrorExposed": true
+  },
+  "inspected": [
+    {
+      "run": "2026-10-12T00-46-33.345Z",
+      "file": "artifacts/engine-compare/shadow-filter-after/images/2026-10-12T00-46-33.345Z/quality-wet-front.png",
+      "sha256": "7c71ac44f22de40561ab633b7a0102e92cd625cd813bf6bb3ad46e64df744b1f",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-05-41.163Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-wet/images/2026-10-12T01-05-41.163Z/quality-wet-front.png",
+      "sha256": "ae74f5e120f3ef520b0a08ccb136c19f66a1cd7d8706d084ffb7ab40aca3c158",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-05-41.163Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-wet/images/2026-10-12T01-05-41.163Z/quality-wet-back.png",
+      "sha256": "734b5c319b7d174420905c64213b90152b6fbfd3aad907bbd63b0edc18f6735a",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-05-41.163Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-wet/images/2026-10-12T01-05-41.163Z/quality-wet-low.png",
+      "sha256": "f283defd206ba16a5b01e2d20dc4f598d549dd81ca3f59a04ff092da0f79c167",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-06-18.983Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-after/images/2026-10-12T01-06-18.983Z/quality-wet-front.png",
+      "sha256": "ae74f5e120f3ef520b0a08ccb136c19f66a1cd7d8706d084ffb7ab40aca3c158",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-06-18.983Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-after/images/2026-10-12T01-06-18.983Z/10000-static-engine-r0.png",
+      "sha256": "a6eb1cc1f7785d055da57f5c5028ff14fe11a86ca5a586f4baff163d93aa301f",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-06-18.983Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-after/images/2026-10-12T01-06-18.983Z/10000-static-three-r0.png",
+      "sha256": "e5754df712a15b7ca867cc66406fbfac168fd222d741e54451af065d7871f974",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    },
+    {
+      "run": "2026-10-12T01-06-18.983Z",
+      "file": "artifacts/engine-compare/shadow-filter-plane-after/images/2026-10-12T01-06-18.983Z/10000-static-babylon-r0.png",
+      "sha256": "0519ba0cd87652e7f57728dbe32d396affe1ee7b627b4e25e63a4bfeb1ae2633",
+      "method": "Assistant viewed the original 1920x1080 PNG directly using view_image, with original image detail."
+    }
+  ],
+  "observations": [
+    {
+      "view": "wet-front",
+      "finding": "Normalization alone exposed clearly visible repeated self-shadow stripes in the sunlit wet-road highlight. In the receiver-plane capture those stripes are no longer apparent; the highlight remains. The independently captured full-benchmark front view was also personally viewed and shows the same improvement."
+    },
+    {
+      "view": "wet-back",
+      "finding": "The viewed corrected frame retains reflected colored boxes, emission spheres, textured columns, labels, transparent panels and foreground snow geometry. No gross new holes or lost objects were apparent."
+    },
+    {
+      "view": "wet-low",
+      "finding": "The viewed corrected frame retains vertex-color triangles, nearby wet-surface reflections, glass and emission. This single static image does not establish motion stability."
+    },
+    {
+      "view": "10000-static-three-way",
+      "finding": "The actual full-benchmark Engine, Three and Babylon r0 PNGs were personally viewed. Object layout matches, but fog/sky, illumination, contrast and edge smoothing visibly differ. These are distinct native pipelines; this review does not establish an equal-quality winner."
+    }
+  ],
+  "comparisons": [
+    {
+      "beforeRun": "2026-10-12T00-15-32.752Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-front",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 47959,
+      "maxPresentationError": 75,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T00-15-32.752Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-back",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 28440,
+      "maxPresentationError": 24,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T00-15-32.752Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-low",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 27689,
+      "maxPresentationError": 21,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T00-46-33.345Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-front",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 852040,
+      "maxPresentationError": 17,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T00-46-33.345Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-back",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 431695,
+      "maxPresentationError": 21,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T00-46-33.345Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-low",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 380122,
+      "maxPresentationError": 16,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T01-06-18.983Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-front",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 0,
+      "maxPresentationError": 0,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T01-06-18.983Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-back",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 0,
+      "maxPresentationError": 0,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    },
+    {
+      "beforeRun": "2026-10-12T01-06-18.983Z",
+      "afterRun": "2026-10-12T01-05-41.163Z",
+      "name": "wet-low",
+      "presentationChannels": 8294400,
+      "changedPresentationChannels": 0,
+      "maxPresentationError": 0,
+      "reflectionChannels": 3240000,
+      "changedReflectionChannels": 0,
+      "maxReflectionError": 0
+    }
+  ],
+  "gates": {
+    "sameWetInputs": true,
+    "physicalReplayPreserved": true,
+    "numericShadowContract": true,
+    "finiteHDRReflection": true,
+    "reflectionByteExact": true,
+    "manualStripeRemovalObserved": true,
+    "equalPixelQualityEstablished": false,
+    "competitiveQualityEstablished": false
+  },
+  "limitations": "Human-style visual inspection is qualitative and covers these three static views. Original strict pixel equality remains false because corrected coverage and tap depth intentionally change shadows. Eight preparatory cube frames with one warmup are setup, not performance evidence. The separate complete native three-way benchmark and all-frame repeatability diagnostic determine frame and temporal gates."
+}

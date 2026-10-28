@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-16T16:01:06.0841306Z",
+  "command": "CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3198 CAPTURE_GPU=1 PERF_FIXED_SETTINGS=1 PERF_WARMUP_FRAMES=180 PERF_LIVE_FRAMES=900 PERF_LABEL=fps-current-residents-20261016 bun tools/capture.ts --live",
+  "hardware": [
+    {
+      "Name": "AMD Radeon 760M Graphics",
+      "DriverVersion": "32.0.31041.1004"
+    }
+  ],
+  "frames": 900,
+  "warmupFrames": 180,
+  "profiled": false,
+  "averageFPS": 55.81672269011794,
+  "measuredDurationMs": 16124.200000000004,
+  "p50Ms": 18.400000000001455,
+  "p95Ms": 38,
+  "browser": {
+    "mode": "native-gpu",
+    "batterySaverRequested": "default",
+    "backend": "webgpu",
+    "width": 1280,
+    "height": 720,
+    "renderResolution": [
+      704,
+      396
+    ]
+  },
+  "engine": "the-engine",
+  "settings": {
+    "environmentMode": "world",
+    "preset": "clear",
+    "hiz": false,
+    "taa": true,
+    "bloom": false,
+    "groundLitter": true,
+    "motionBlur": 0,
+    "dof": 0,
+    "renderScale": 0.55,
+    "drawDistance": 420,
+    "visual": {
+      "sunElevation": 0.9075712110370514,
+      "sunTemperature": 5700,
+      "skyTurbidity": 2.2,
+      "humidity": 0.42,
+      "cloudCoverage": 0.16,
+      "fogDensity": 0.00065,
+      "wetness": 0,
+      "exposureBias": -0.25,
+      "artificialLightIntensity": 0.02,
+      "sunIntensity": 4.2,
+      "skyIntensity": 0.7
+    }
+  },
+  "gpuErrors": [],
+  "networkStatus": "online",
+  "selfPose": {
+    "x": -345,
+    "y": 0.16999999999999998,
+    "z": -66,
+    "animation": "idle"
+  },
+  "serverPid": 23712,
+  "healthAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "rawMetrics": "../../../thegame/artifacts/performance-live-fps-current-residents-20261016.json",
+  "rawMetricsSha256": "32d14271225fba21ad33b2ec7809f14eb7be1fe96df181c23b97dda315ba291a",
+  "gameBundleSha256": "0aa02c4e7154bccee3167794ad9e220e1042e3a6b2a0aac7ddd8cb8a6ba62ee8",
+  "log": "../../../thegame/artifacts/fps-current-residents-20261016.log",
+  "limits": [
+    "Short stationary measurement of the current live Game at the starting position; not a whole-map, walking or Office UI benchmark.",
+    "Native Windows GPU WebGPU, viewport 1280x720, internal render 704x396, TAA and 420 m draw distance, adaptive resolution disabled.",
+    "No profiler or client bundle override. Different live world state prevents a paired speedup claim against prior measurements.",
+    "Does not establish sustained 60 FPS or performance at higher resolution."
+  ]
+}

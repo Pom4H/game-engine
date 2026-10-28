@@ -1,0 +1,540 @@
+{
+  "date": "2026-10-16T16:28:06.803Z",
+  "scope": "Original Game residents panel and reliable actor commands in the installed native Office; account rights remain with the account; one canonical authority and original model source.",
+  "fullGoalComplete": false,
+  "nativeCommand": "CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3198 CAPTURE_GPU=1 OFFICE_WALKING_QA=1 OFFICE_CAMERA_QA=0 OFFICE_TRANSPORT_QA=0 OFFICE_URBAN_QA=1 OFFICE_SCENERY_QA=1 OFFICE_RESIDENTS_QA=1 PERF_LABEL=office-residents-healthy-20261016 bun tools/capture.ts --office-entry",
+  "native": {
+    "browserMode": "native-gpu",
+    "walkingDistance": 3.1384635372248244,
+    "records": 12,
+    "transport": {
+      "sourceReport": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-report.json",
+      "ok": true,
+      "steps": [
+        {
+          "name": "driver"
+        },
+        {
+          "name": "engine-off"
+        },
+        {
+          "name": "drive",
+          "travel": 1.1800004237287374
+        },
+        {
+          "name": "passenger",
+          "travel": 0
+        }
+      ],
+      "exitFrames": 121,
+      "minExitCameraDistance": 7.999999999999995
+    },
+    "residents": {
+      "date": "2026-10-16T16:24:57.909Z",
+      "ok": true,
+      "accountId": "cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182",
+      "ownerActorId": "resident:human:cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182",
+      "originalBody": "player:cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182",
+      "targetActor": "resident:16162:1",
+      "targetBody": "resident:16162:1",
+      "observed": {
+        "body": "resident:16162:1",
+        "scope": {
+          "kind": "controller",
+          "center": [
+            -192,
+            0,
+            -64
+          ],
+          "geometryKey": "controller:-192:-64:1:-4:-1,-4:-2,-4:0"
+        },
+        "oldBodyMovement": 8.141297460810137e-12
+      },
+      "takeoverDistance": 2.13100460741495,
+      "takeoverSpeed": 5.632719059211102,
+      "moved": 0.4923837037417932,
+      "moveSeq": 362,
+      "inputToMovementMs": 386,
+      "stopped": {
+        "ack": 398,
+        "releaseSeq": 394,
+        "speed": 0.036758235499396996,
+        "alive": true,
+        "health": 100,
+        "animation": "idle"
+      },
+      "returnInitiallyVisible": true,
+      "rightsBefore": {
+        "accountId": "cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182",
+        "companies": [],
+        "leases": []
+      },
+      "returnedBody": "player:cd2e1b82-d4bb-4ca9-a2c0-3c8c4d1cf182"
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "gameOfficeParts": 231,
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "checks": {
+    "canonical": "48 pass / 4400 assertions; includes actor receipt identity, stale focus, same presented body/account and rounded timer 60 Hz / bounded stall catch-up",
+    "accountWorkforceHarness": "44 pass / 9662 assertions",
+    "companyApi": "3 pass / 41 assertions; real account owner funding survives NPC possession",
+    "typescript": [
+      "Game full",
+      "Engine app",
+      "Office UI"
+    ],
+    "builds": [
+      "Game/library and Engine before native checks",
+      "Office UI after final clock change; existing >1500 kB warning"
+    ]
+  },
+  "restart": {
+    "oldPid": 1960,
+    "newPid": 23712,
+    "beforeRows": 2151,
+    "afterRows": 2164,
+    "missingRows": 0,
+    "protectedRows": 105,
+    "changedProtectedRows": 0,
+    "accounts": 8,
+    "accountDifferences": 0,
+    "ownerDifferences": 0,
+    "integrity": "ok",
+    "method": "Windows process stop; consistent VACUUM INTO backup after a fresh automatic population checkpoint; Office/backend/microphone untouched"
+  },
+  "sourceHashes": [
+    {
+      "path": "../thegame/src/game/account-model.ts",
+      "sha256": "795733b402c1196d4fb4c5a97f3608b2001a4a09351a73eedb51ff66af8d0567"
+    },
+    {
+      "path": "../thegame/src/game/account-control.ts",
+      "sha256": "b905e1c8c60280472184047a57dd441f38d34e4dfd19bd1167936a3ffac9e726"
+    },
+    {
+      "path": "../thegame/src/game/resident-model.ts",
+      "sha256": "563c7162eb11410b83c083b827403a06ccb5c268551f15b6c6adf927927c53a6"
+    },
+    {
+      "path": "../thegame/src/game/actor-state.ts",
+      "sha256": "0928eefed17bc22aa8169ca8aede6b7e6936a93c7fc0a7314365bd8136b03997"
+    },
+    {
+      "path": "../thegame/src/game/resident-navigation.ts",
+      "sha256": "364bc65e1da88d217ee18813a375143ec259021168df0bbcecbe263a3687b6eb"
+    },
+    {
+      "path": "../thegame/src/game/resident-panel.ts",
+      "sha256": "175656d8a184e740158d6c100a98b1db8970fec5f6aba07f4b6380c5f7d48d2c"
+    },
+    {
+      "path": "../thegame/src/game/resident-view.ts",
+      "sha256": "2e9106b54704900916dc18405bd4f4aca5cebf97ab1df31d0ea7882e04b5f079"
+    },
+    {
+      "path": "../thegame/src/game/panel-controls.ts",
+      "sha256": "6c188a10b9f5238842ebeff1e287cf6df8322042cd05703453c60a1e6ddebad1"
+    },
+    {
+      "path": "../thegame/src/game/game-hud.ts",
+      "sha256": "9ebfc66f1164aac2b690c444b2414096a2da32dcb9cc8983fba113149247d0bf"
+    },
+    {
+      "path": "../thegame/src/game/net/client.ts",
+      "sha256": "767ee45289c2ff1342e1d7c92cdcd8a85bc13e67a08b44b67fbee1553c2a2f53"
+    },
+    {
+      "path": "../thegame/src/server/office-world.ts",
+      "sha256": "7c7a86f3f94ade3e7d183cc59a7024b42b0cc20f41e1859f3c24ab9fe3a0dc22"
+    },
+    {
+      "path": "../thegame/test/account-control.test.ts",
+      "sha256": "f605d831825db83b21a6a93dd68e072e69e1c875a0aed1d900059ce1fcf57b7e"
+    },
+    {
+      "path": "../thegame/test/company-api.test.ts",
+      "sha256": "43b2b8eb4ae2ffed62169cf1afe31b6da96a30d3a97a1a3145d060ef9b71fe6e"
+    },
+    {
+      "path": "../thegame/test/workforce-harness.test.ts",
+      "sha256": "9dfe44f0afdc85a4ca6b55c3c4d773884074b592497e5c51a88d7670885d672c"
+    },
+    {
+      "path": "../thegame/tools/qa-office-residents.ts",
+      "sha256": "266610e514020f5a524cbec925ca0d49b2ef831731a5c97607d5c3d4f36a4ab6"
+    },
+    {
+      "path": "../thegame/tools/qa-office-walking.ts",
+      "sha256": "0d397a91253b310d8b331e142eb892e22808cfcb978985fcabd77581482c6f62"
+    },
+    {
+      "path": "apps/thegame/shared.ts",
+      "sha256": "acca7face8f3f59ae3ce0f5b1d4d3827adf8e188b4df2942f34666ad01b56d38"
+    },
+    {
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "sha256": "fc768a4d5eaf3d79dfee869ab1ab3d78553dffba56b1e430a6ba1b365acf5e54"
+    },
+    {
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "sha256": "7ce9e58cadbb77018ab90eb4104d5b4023a93967ace05df1e8bb8b5be65ed894"
+    },
+    {
+      "path": "apps/thegame/test/canonical-connection.test.ts",
+      "sha256": "bbde43978caf61aebd844bd3117a4fe322cad3de75bcece96bb27851b0c9f277"
+    },
+    {
+      "path": "src/core/fixed-clock.ts",
+      "sha256": "0370108cc51fb2c00068bfdb40bfa281a83eedb2122fce6fa3871abee32aa5a7"
+    },
+    {
+      "path": "src/render/types.ts",
+      "sha256": "e4d8616f32fbd89f4384d09b8570c1fe27859ba29b4ca4f3104f1402f7e22505"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/ResidentsDialog.tsx",
+      "sha256": "7f2d7964502f6833ecc7929a3db5cdf2348ccf170eeeae231b3305ea6a9092fb"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/residents-dialog.css",
+      "sha256": "99ca3d1cfd70d201570af1ea39e0e065dae8ca8f652942c5dd45a49e7488913e"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/CompanyDialog.tsx",
+      "sha256": "9ba612d91d07375e7cf4d0aef2f6fb77ec84c5d691e9e1515f8cfbd7aa2c588b"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/GamePanel.tsx",
+      "sha256": "1ae9ed3ced5018d81b102e80a6a9c58a7e255b75e3bb7646e202caf77c310d8d"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/Office.tsx",
+      "sha256": "ac9e60e6418f0f03530dbe2b64ad29ba46be7d170bee5eb8b81d80733ad54dcd"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/scene.ts",
+      "sha256": "b2378219687b190cf9d80777934161b5a57bd10de75145b4d1cae687b0ecb428"
+    }
+  ],
+  "servedBundles": [
+    {
+      "path": "../thegame/public/build/game.js",
+      "sha256": "0aa02c4e7154bccee3167794ad9e220e1042e3a6b2a0aac7ddd8cb8a6ba62ee8"
+    },
+    {
+      "path": "../thegame/public/build/office-controller.js",
+      "sha256": "a3e070365d6e546d4256610b062f51219630373d746ed349cf45833a3efec4bb"
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/index-LuWSeBDQ.js",
+      "sha256": "243c312475c52aea3a2822207170d207232920e89a6cb34a380bee8c5704021b"
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/index-CmdiYlhj.css",
+      "sha256": "f616fcf9ea5c97e442d047738d763e61cd5524bf7da04c3e4a32c2702799101a"
+    }
+  ],
+  "logs": [
+    {
+      "path": "artifacts/office-residents-canonical-final-tests.log",
+      "sha256": "f52bec03c9f52684990b7271453c325fae998124bba300c8fa28ea22968619a5"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-account-tests.log",
+      "sha256": "4c4ad71e2299e0ab410fe2f8f6018b4de9fd7577970c2141326dc59792027215"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-company-api-tests.log",
+      "sha256": "dbf6b7affddadae373ef0dafad734638bfbceb36f579b7ba60b1e3bcf1585aed"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-final-types.log",
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "artifacts/office-residents-final-types-app.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-residents-final-types-ui.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/office-residents-final-build-ui.log",
+      "sha256": "b5ea39fd39c9f344fbc69dae97e1aa929d5fbd10366ed1ac45574586db70ebb9"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-healthy-20261016.log",
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-20261016.log",
+      "sha256": "3bdb4273ffc8f9b31e047b463daeb883e01ac0a247cb5ebb5bfad4510d83e7e0"
+    }
+  ],
+  "pngs": [
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/entered.png",
+      "sha256": "5f78cfb1ced16ff5bbc5bf682c1eb18b1ba427f971d4c24fd41d1e3232a70327"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/observer.png",
+      "sha256": "5ec8be51dba95d43618ab99ad77b8728023e6fb5dfe82ad052a2f7dde2f2ee48"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-moved.png",
+      "sha256": "9cbe21627a16cec22a0a1f8ab5377cc2aac40cda81a791ddb9e8b8bbc8411955"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-observed-scope.png",
+      "sha256": "c4d14fa48fb628e8c6d0174070264f024285fbb3f10830401b38d3620e4ffa26"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-observing.png",
+      "sha256": "36e0bae1b2f1adeae345f16e7c25ea78119ada8ca6ee912a4f7ccfecac697f7e"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-panel.png",
+      "sha256": "1a84b3e3e96a643085c6dff1840140bd4ca0bd7a2f4355e8c0c26b79e1fafbe9"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-possessed.png",
+      "sha256": "430a6d8ddd607fbf10117a19bf951efa210a53f56d121d282940eb61e97357b5"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-return-start.png",
+      "sha256": "95b477a98290d5d36c1696fc522a0c27f6d07e5092a3cfb85cb7b60e93b06f49"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-returned.png",
+      "sha256": "ee8ae5a61e0321e4d37038efd97f47399feb9ea2879464579476540f77f8e75b"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-stopped.png",
+      "sha256": "6acdeb65a5adb17854a863910bd1af4b933fdfd92be108b427ffa56ddb35c11a"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/returned-observer.png",
+      "sha256": "f1c3cf4e1ccb94654efd9e883ebd2dc14dae0beb369f1ae9f74c447b2467d671"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/walk-KeyW.png",
+      "sha256": "63720fe6958bdbb71d5afe16cc94ba8394d3948c38b217f1559973887dd7d7c2"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-game/canonical-lobby.png",
+      "sha256": "71b03382cf529506e01e76d363ecf607610f21890e19f55fba99d26df5c7668a"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-game/entrance.png",
+      "sha256": "2a04dc613319300dc767adc8bb21775ee723ec0979490bc443fa9f1e3f476619"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-game/upper-office.png",
+      "sha256": "6d8932b39c4a4c228e7ff4d272e6cc8b79064c8481d1d1106e4357283199b4cd"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-game/workplaces.png",
+      "sha256": "2512847c2acc79f27ce7fc3e7e28f330e23acc137a6c1dfc2c669a0b531622c3"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/entered.png",
+      "sha256": "8f075b7922f76c002f99e6fa89d43d0872d5c05529668f4bf1fa958422aa82fa"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/failure.png",
+      "sha256": "e5d434e3449427e83170def241b436cf7a6641dd0946e1e4b62d443eb586a823"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/observer.png",
+      "sha256": "fea5049783835f48e2aeacae2a47dad41dd271a16d5d36f1985c990c76b10f34"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/orbit-1.png",
+      "sha256": "a7a4529f3e12cbf9da18a83055a853483d14127e693932d86a8925f3a7483b29"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/orbit-2.png",
+      "sha256": "3d23269f29b0d36d7a6d79cb8dd050317296978370f60ba211e2f2a3c691cab5"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/orbit-3.png",
+      "sha256": "0f2cc23f6c4475afb586b8797ccaf4546cc38a2dfae2891f7f3e7f4b5f31b903"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/orbit-4.png",
+      "sha256": "79c2ee909938b165abd0b2512e267facc6a8e099cd8734e96e3f285335a73887"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/residents-observed-scope.png",
+      "sha256": "513cece900a13d11b75f795c5296f08eec663e350d638dda8867bb3bde11f8bc"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/residents-observing.png",
+      "sha256": "b777dca06588119a0978f099b5d3d3358a08e1840028c5f5fd93f4e61bc69d24"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/residents-panel.png",
+      "sha256": "c42606f60d4ea8afc2f22f27893e98d92b7fdd1e02d85f5fdf86dfbf01b671f4"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/residents-possessed.png",
+      "sha256": "271335f230a08cf5200babf285f6ea6bbbafca4418556ee2efc2955f1f1f3562"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/returned-observer.png",
+      "sha256": "ec35338029b8e91ee264a626e7a95165f5bfd9a777d2d093228f0fb6edff2f9a"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-clearance-restored.png",
+      "sha256": "b557cdf4a646f63a80d7d681b43e14f5d1574f6799d15f8fda5dc4f27b72bb29"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-driver.png",
+      "sha256": "621529d80775f5056090296b6bcbb880bcdfa0f58a8a64acbbdd4afb4e4de1ba"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-driving.png",
+      "sha256": "824228f0acb73793b2cdec960504c6b66ab4505212d499935502624cc5c00575"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-engine-off.png",
+      "sha256": "6a0ffde4e46808c0e26fbfd91c7e9e098a8997aaac09980a956dfee599b5f57d"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-1.png",
+      "sha256": "7c8bbebd04ddd5daed3e3a55548a455a7e2f4855f7a8201dceaf7509dc5bacb8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-2.png",
+      "sha256": "abcbbfda2bc748f2853d9ff440b9c0287c0676def13679c045ac0daf3a183fe3"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-3.png",
+      "sha256": "b4ed20434bd9a143994bc5c6ac21a75c6147c932733bbee41d7ff737ed67eb53"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-4.png",
+      "sha256": "e98eb9b29a2df18e9153708dd06043c82202260c9bab8623f6052ec54053dbcd"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-5.png",
+      "sha256": "ce8711b04410dc87f8029b96b5ffa1da57cb8b61a89b918bdbeb1b9f6fd498c7"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-6.png",
+      "sha256": "ca91b3406cc1d1ee850d8b05e33e452ef2f83317786f5b77612b7c5948f9ce4a"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-7.png",
+      "sha256": "d259ed9b084d13b8af993503b878d5507911fa8c3bc0849c226066833f57bba0"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited-8.png",
+      "sha256": "2af51290deb6ae94edce90a81a3184731314b0be600d16eb1ccaa499ae0e57f8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-exited.png",
+      "sha256": "ab77ca9cbf8f02e27471b3f07315e06e47f7bbc9e6f2eb38029de171dbfb8e23"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-passenger.png",
+      "sha256": "83f63ab8a774b5cb60a241cec5acc4ceb2ab4fa90d658b9d5d17910ec48a5cbc"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/walk-KeyW.png",
+      "sha256": "2b903756bd47d41ba1f879c4bec2961db49029093b57a676f0c1646d25c7c53f"
+    }
+  ],
+  "visuallyReviewed": [
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-panel.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-observing.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-possessed.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-moved.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-stopped.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-return-start.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-returned.png",
+    "../thegame/artifacts/office-walking/office-residents-healthy-20261016/returned-observer.png",
+    "../thegame/artifacts/office-residents-clock-game/workplaces.png"
+  ],
+  "healthAfter": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "limits": [
+    "The earlier packet diagnostic run was inconclusive for WASD: a scooter collision incapacitated that NPC. The final healthy run requires alive=true and rendered visibility during movement and after key release.",
+    "The full long transport + NPC sequence closed with Input rate exceeded after NPC possession. This remains open. The final focused healthy NPC scenario passed independently; it does not turn the failed combined sequence green.",
+    "Native QA account has no companies or leases; native equality is of an empty account snapshot. Actual funded company/leased workforce and harness rights across possession are covered by the backend tests.",
+    "First return frame and input latency are recorded separately. Passing settled body/terrain and ACK checks does not prove seamless first-frame continuity or consistently low input latency.",
+    "The fixed input clock removes fractional timer overfeeding; it does not prove that every source of input backlog or server stalls is resolved.",
+    "Native Office uses the running Vite UI on 8765. Production UI build is a separate check. Physical microphone/ASR and Office/backend processes were not restarted or enabled.",
+    "All image hashes are recorded; only the listed PNGs were visually reviewed in this phase. No new averaged FPS is inferred from these UI/transport checks.",
+    "Vector road details, outer terrain/water/colors, native Office core/facade/lift materials, lighting/first-frame fidelity, audio and broader gameplay still require work."
+  ],
+  "fullSequence": {
+    "label": "office-residents-clock-20261016",
+    "ok": false,
+    "error": "TypeError: null is not an object (evaluating 'c.self.x')",
+    "serverError": "Input rate exceeded",
+    "observedServerErrorFileMtime": "2026-10-16T19:17:31.3177793+03:00",
+    "serverErrorsThroughFailure": {
+      "path": "artifacts/office-residents/clock-server-errors-through-failure.log",
+      "sha256": "97b1b1d898b9704de6084a9c602309e21496d4eaef108409156bb7ec01f56b17"
+    },
+    "walkingDistance": 2.9241214855873428,
+    "transportPassed": true,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "limits": "The combined long transport + NPC session is not verified successful. Input packet burst timing and the rate-limit closure still require diagnosis; the fixed input clock does not prove this resolved."
+  },
+  "rawReports": [
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/report.json",
+      "sha256": "aef5c820eb4b505f00c8dedc16392d33ce304a4b68cdee2138e822888215f5d8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-report.json",
+      "sha256": "375bcbf7f1046758766117e0403a0ed17f770736e2a1d41fb2769c17d24bf768"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-selection.json",
+      "sha256": "44972597222ddf91ec5f6123970ac7a380e6d44193a3d0cba31663a19a09dea3"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-healthy-20261016/residents-movement.json",
+      "sha256": "c0c19138a2c9edcfa2618e7e7245fac036019925f4df3b74560267fd39d41198"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/report.json",
+      "sha256": "192404ca773691bd14ef0198e7e7bddd2a65a5331a40ec9ae4cc94d762d9e5ce"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-residents-clock-20261016/transport-report.json",
+      "sha256": "bf71f292cbf879d649ed3fa3ec31bb5ec2323a7b1bd4a4bea9ba14bdeca35c50"
+    },
+    {
+      "path": "../thegame/artifacts/office-residents-clock-game/report.json",
+      "sha256": "0a0c2bb4c9496b8290f04db63da8a58fe7bf1ce6faf3a035e6e8d3870873465b"
+    },
+    {
+      "path": "artifacts/office-residents/restart-audit.json",
+      "sha256": "c3ed8c212a4af4ce1e71f2ede93a367d90d5a9a8700720d8f5180b116828de9a"
+    }
+  ]
+}

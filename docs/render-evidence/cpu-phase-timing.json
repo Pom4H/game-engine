@@ -1,0 +1,492 @@
+{
+  "status": "completed-cpu-phase-observation",
+  "sourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "119f2592e0097f86158297a1d161af9b21bf4455ae15289c14f0454d1126d3eb"
+  },
+  "report": "artifacts/engine-compare/surface-presence-cpu-phases/report.json",
+  "archive": "artifacts/engine-compare/surface-presence-cpu-phases/measured-state",
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "frames": 1440,
+    "devices": 6,
+    "productionSourceAtCaptureUnchanged": true,
+    "gpuProfilerEnabled": false
+  },
+  "rows": [
+    {
+      "scenario": "static",
+      "frames": 720,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 5.699999988079071,
+        "p95": 8,
+        "mean": 5.819861111458805
+      },
+      "coveredMs": {
+        "samples": 720,
+        "p50": 4.899999976158142,
+        "p95": 7.199999988079071,
+        "mean": 5.0977777779930165
+      },
+      "remainingMs": {
+        "samples": 720,
+        "p50": 0.6000000238418579,
+        "p95": 1.300000011920929,
+        "mean": 0.7220833334657881
+      },
+      "phases": [
+        {
+          "name": "projection",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.800000011920929,
+            "p95": 3.5,
+            "mean": 1.9884722234474288
+          }
+        },
+        {
+          "name": "prepare",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.300000011920929,
+            "p95": 2.600000023841858,
+            "mean": 1.478611111227009
+          }
+        },
+        {
+          "name": "cull",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.100000023841858,
+            "p95": 2.099999964237213,
+            "mean": 1.2099999993211694
+          }
+        },
+        {
+          "name": "frame",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0.09999996423721313,
+            "p95": 0.19999998807907104,
+            "mean": 0.07791666661699613
+          }
+        },
+        {
+          "name": "encode.shadow",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0.09999996423721313,
+            "p95": 0.19999998807907104,
+            "mean": 0.06041666641831398
+          }
+        },
+        {
+          "name": "encode.main",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.19999998807907104,
+            "mean": 0.05458333318432172
+          }
+        },
+        {
+          "name": "encode.visibility",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.047638888822661506
+          }
+        },
+        {
+          "name": "encode.present",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.04611111142569118
+          }
+        },
+        {
+          "name": "encode.reflection",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.03902777814202839
+          }
+        },
+        {
+          "name": "submit",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.03250000062916014
+          }
+        },
+        {
+          "name": "encode.bloom",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.023888888623979358
+          }
+        },
+        {
+          "name": "environment",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.01041666641831398
+          }
+        },
+        {
+          "name": "encode.taa",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.00805555565489663
+          }
+        },
+        {
+          "name": "encode.effects",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.006944444113307529
+          }
+        },
+        {
+          "name": "resize",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.006666666517655055
+          }
+        },
+        {
+          "name": "lifecycle",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0029166666997803583
+          }
+        },
+        {
+          "name": "lights",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0015277777281072404
+          }
+        },
+        {
+          "name": "encode.probe",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0009722220400969187
+          }
+        },
+        {
+          "name": "materials",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.000555555522441864
+          }
+        },
+        {
+          "name": "visibility",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0005555554396576352
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "camera-motion",
+      "frames": 720,
+      "cpuMs": {
+        "samples": 720,
+        "p50": 6,
+        "p95": 8,
+        "mean": 6.113333333118094
+      },
+      "coveredMs": {
+        "samples": 720,
+        "p50": 5.300000011920929,
+        "p95": 7.100000083446503,
+        "mean": 5.372638890064425
+      },
+      "remainingMs": {
+        "samples": 720,
+        "p50": 0.6999999284744263,
+        "p95": 1.399999976158142,
+        "mean": 0.7406944430536694
+      },
+      "phases": [
+        {
+          "name": "projection",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.899999976158142,
+            "p95": 3.300000011920929,
+            "mean": 2.008611110515065
+          }
+        },
+        {
+          "name": "prepare",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.5999999642372131,
+            "p95": 2.600000023841858,
+            "mean": 1.6127777778440051
+          }
+        },
+        {
+          "name": "cull",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 1.199999988079071,
+            "p95": 2.100000023841858,
+            "mean": 1.3204166677263047
+          }
+        },
+        {
+          "name": "frame",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0.09999996423721313,
+            "p95": 0.19999998807907104,
+            "mean": 0.07847222098045879
+          }
+        },
+        {
+          "name": "encode.shadow",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0.09999996423721313,
+            "p95": 0.19999998807907104,
+            "mean": 0.05958333363135656
+          }
+        },
+        {
+          "name": "encode.main",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0.09999996423721313,
+            "p95": 0.19999998807907104,
+            "mean": 0.05652777850627899
+          }
+        },
+        {
+          "name": "encode.visibility",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.049999999586078855
+          }
+        },
+        {
+          "name": "encode.present",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.047500000066227385
+          }
+        },
+        {
+          "name": "encode.reflection",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.04069444504049089
+          }
+        },
+        {
+          "name": "submit",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.03263888955116272
+          }
+        },
+        {
+          "name": "encode.bloom",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.020555555406543944
+          }
+        },
+        {
+          "name": "environment",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "mean": 0.014166666650109822
+          }
+        },
+        {
+          "name": "encode.taa",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.007361111044883728
+          }
+        },
+        {
+          "name": "encode.effects",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.006527777761220932
+          }
+        },
+        {
+          "name": "lights",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.006250000082784229
+          }
+        },
+        {
+          "name": "resize",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0.09999996423721313,
+            "mean": 0.006111110912428962
+          }
+        },
+        {
+          "name": "lifecycle",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.002361111342906952
+          }
+        },
+        {
+          "name": "encode.probe",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0008333333664470249
+          }
+        },
+        {
+          "name": "visibility",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0008333332836627961
+          }
+        },
+        {
+          "name": "materials",
+          "exclusiveMs": {
+            "samples": 720,
+            "p50": 0,
+            "p95": 0,
+            "mean": 0.0004166667660077413
+          }
+        }
+      ]
+    }
+  ],
+  "pixels": [
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-static-engine-r0.png",
+      "scenario": "static",
+      "repetition": 0,
+      "changedChannels": 0,
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f"
+    },
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-static-engine-r1.png",
+      "scenario": "static",
+      "repetition": 1,
+      "changedChannels": 0,
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f"
+    },
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-static-engine-r2.png",
+      "scenario": "static",
+      "repetition": 2,
+      "changedChannels": 0,
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f"
+    },
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-camera-motion-engine-r0.png",
+      "scenario": "camera-motion",
+      "repetition": 0,
+      "changedChannels": 2,
+      "pngSha256": "d44a56ba6aaed9c121fa011ecdd1aed98c7e66f1f80112a9f87398ea6e13b3ab"
+    },
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-camera-motion-engine-r1.png",
+      "scenario": "camera-motion",
+      "repetition": 1,
+      "changedChannels": 0,
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f"
+    },
+    {
+      "file": "artifacts/engine-compare/surface-presence-cpu-phases/images/2026-10-12T05-37-53.329Z/10000-camera-motion-engine-r2.png",
+      "scenario": "camera-motion",
+      "repetition": 2,
+      "changedChannels": 0,
+      "pngSha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f"
+    }
+  ],
+  "gates": {
+    "cpuAccounting": true,
+    "physicalReplay": true,
+    "timestampCoverage": true,
+    "canonicalPixelsExact": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "tests": {
+    "passed": 314,
+    "failed": 0,
+    "log": "artifacts/cpu-phase-timing-check.log"
+  },
+  "limitations": [
+    "Phase durations include their synchronous native API calls and observer cost. Remaining time includes code outside phases.",
+    "Sequential runs do not isolate phase observer overhead. Many fast phase timings are quantized to zero.",
+    "Final canonical PNG equality does not establish multi-frame temporal determinism or peer-quality parity."
+  ]
+}

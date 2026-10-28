@@ -1,0 +1,146 @@
+{
+  "status": "rejected",
+  "productionChangeRetained": false,
+  "experiment": "Fuse visibility membership observation into Render IR",
+  "baseline": "artifacts/engine-compare/moss-demand-after/report.json",
+  "prototype": "artifacts/engine-compare/visibility-projection-paired-v1/report.json",
+  "candidateSourceState": {
+    "srcSha256": "09f7825cfcc0c24ed7f4d6d7c4bbaaf5d9890321a49a8ea381b08e5584119dab",
+    "distSha256": "5dcee4944f6c209204ca59b00f6c5ccc60274c2df4cf97a8db8f0c7229e0d04e",
+    "harnessSha256": "468c5eecf68f17b5ee8ac2abf7e81228bb42c92abfcfd5eecad65ae664f1601f",
+    "diagnosticSha256": "c4603dc6d9fd7dfbec2e6070594479c26944d8f873a8f024533a8744b43f0f18"
+  },
+  "productionRestoredSourceState": {
+    "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+    "dirty": true,
+    "srcSha256": "258aca741086525ab09f2b1114b41a906137d1bacb6dc466e48976706e2db88b",
+    "distSha256": "0d3a3b23fcbe805c959f5d550677347dddf8c8553f79b63084f138e17e560bff",
+    "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+  },
+  "archive": "artifacts/engine-compare/visibility-projection-paired-v1/measured-state",
+  "reason": "Mean CPU projection+cull saving is 0.126ms for static and only 0.022ms for moving cameras. Moving p95 regresses 3.0 to 3.1ms; ordering groups disagree on the sign of the moving-camera change. The added production protocol is not supported by a consistent improvement.",
+  "runs": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 0.7000000476837158,
+        "mean": -0.12578124785795808
+      },
+      "scanCombinedMs": {
+        "samples": 128,
+        "p50": 2.300000011920929,
+        "p95": 3.100000023841858,
+        "mean": 2.3984375004656613
+      },
+      "fusedCombinedMs": {
+        "samples": 128,
+        "p50": 2.199999988079071,
+        "p95": 3,
+        "mean": 2.272656252607703
+      },
+      "improvedPairs": 72,
+      "byFirst": {
+        "scan": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.699999988079071,
+          "mean": -0.16718750074505806
+        },
+        "fused": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.7999999523162842,
+          "mean": -0.0843749949708581
+        }
+      }
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "combinedDeltaMs": {
+        "samples": 128,
+        "p50": 0,
+        "p95": 0.6000000238418579,
+        "mean": -0.021874998230487108
+      },
+      "scanCombinedMs": {
+        "samples": 128,
+        "p50": 2.300000011920929,
+        "p95": 3.0000000596046448,
+        "mean": 2.4078124975785613
+      },
+      "fusedCombinedMs": {
+        "samples": 128,
+        "p50": 2.300000011920929,
+        "p95": 3.099999964237213,
+        "mean": 2.385937499348074
+      },
+      "improvedPairs": 62,
+      "byFirst": {
+        "scan": {
+          "samples": 64,
+          "p50": 0,
+          "p95": 0.6000000238418579,
+          "mean": 0.04218749888241291
+        },
+        "fused": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.5000000596046448,
+          "mean": -0.08593749534338713
+        }
+      }
+    }
+  ],
+  "quality": [
+    {
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "taa",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    }
+  ],
+  "visualInspection": {
+    "file": "artifacts/engine-compare/visibility-projection-paired-v1/fused-frame-31.png",
+    "sha256": "d0a705656d29958783aa9e9de2ba5041eeb8b79ece75e228757e41a1b3a9392f",
+    "observed": "Inspected original 1920x1080 capture. Dense colored cubes, small spheres, ground, shadows and emissive highlights remain visible. Final opaque/HDR/TAA arrays match scan exactly; this inspection does not establish superior peer quality."
+  },
+  "candidateTests": {
+    "command": "npm run check",
+    "tests": 289,
+    "passed": 289
+  },
+  "gates": {
+    "nativePairedCorrectness": true,
+    "performanceImprovementSupported": false,
+    "fullFrameAdvantageEstablished": false,
+    "equalPeerQualityEstablished": false
+  },
+  "limitations": "Current-detector same-device AB/BA experiment, not a historical executable comparison. Profiled waits are not display FPS. No full benchmark or multi-frame gate was promoted for this rejected candidate.",
+  "restoredTests": {
+    "command": "npm run check",
+    "tests": 287,
+    "passed": 287,
+    "log": "artifacts/visibility-projection-restored-check.log"
+  },
+  "restorationVerified": {
+    "srcSha256": "258aca741086525ab09f2b1114b41a906137d1bacb6dc466e48976706e2db88b",
+    "distSha256": "0d3a3b23fcbe805c959f5d550677347dddf8c8553f79b63084f138e17e560bff",
+    "matchedFrozenBaseline": true
+  }
+}

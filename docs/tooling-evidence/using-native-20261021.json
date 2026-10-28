@@ -1,0 +1,323 @@
+{
+  "status": "pass",
+  "scope": "Original unsigned Game hash vs corrected compact-tag hash, both compact triangle storage, on native headless Radeon, complete 1280x720 PNG/HDR/depth equality. Fixed TAA/bloom and opaque depth prepass. Synthetic original Game MeshBuilder materials/callbacks, exact dry/wet/night/mirror/rebase cases; not captured whole-world frames, no FPS or transport acceptance.",
+  "elapsedMs": 10089.828099999999,
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "sources": [
+    {
+      "path": "artifacts/using-resources-native-20261021/client.ts",
+      "sha256": "47a0117da3be7607089f6555fbf06fae244fff5f5df96bd5a83806b98a2d6c7f"
+    },
+    {
+      "path": "artifacts/using-resources-native-20261021/run.ts",
+      "sha256": "9cff88d13e25cbe243c71e2813f793a9e8febc9f450383c909f65dc1ed67add1"
+    },
+    {
+      "path": "src/procedural/mesh.ts",
+      "sha256": "d3b89564ff8875bf5b08ceecc824ff4f9d61af9a4785213ca81771a9c3d91aad"
+    },
+    {
+      "path": "src/scene/validate.ts",
+      "sha256": "a11c5a5af9f3ee7f6604c3beb2a6acc2e7816c6b596087ecf640450ae12b98ce"
+    },
+    {
+      "path": "src/render/radiance.ts",
+      "sha256": "0617b65b7c1690148f11ef1535fb03c35c5e607daf7361fcb310dc9d79ae6107"
+    },
+    {
+      "path": "../thegame/src/game/render/the-engine-geometry.ts",
+      "sha256": "7f09138048d8c9df168adf0023c79fe20bc1f2518dc0ebf4b1500d74ceaa2078"
+    },
+    {
+      "path": "../thegame/test/fixtures/the-engine-geometry-before-smi-hash.ts",
+      "sha256": "6423365ea6d50bb0f5796711d06f4dea7398b3a26e76065767174429a27f18f4"
+    },
+    {
+      "path": "src/render/webgpu.ts",
+      "sha256": "ee404530f7c12b33ecb9bb0880f2379d053b92deb79634d40f7b5bbc3f614c0c"
+    },
+    {
+      "path": "../thegame/src/game/render/the-engine-projection.ts",
+      "sha256": "fb90c18c1cc3b5dfe9ba8e5d694b049974c0d9729bb70dcd248a560ce80074b5"
+    },
+    {
+      "path": "../thegame/src/game/render/the-engine-renderer.ts",
+      "sha256": "7c4eefd6b6200cae2b7f79874c28788c5f8db5d7e6a6ee2322a32399fa8e87f6"
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "dry",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true
+    },
+    {
+      "name": "wet-night",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true
+    },
+    {
+      "name": "mirrored",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true
+    },
+    {
+      "name": "rebased",
+      "pngExact": true,
+      "hdrExact": true,
+      "depthExact": true,
+      "callbackTraceExact": true,
+      "geometryExact": true
+    }
+  ],
+  "records": [
+    {
+      "mode": "before",
+      "name": "dry",
+      "pngSha256": "d40b9cd7fc8b2c77c41eef1110dc191ca5e53cd79ae201d6c92430382391758c",
+      "pngBytes": 345767,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "6054a65d9bdaacc158be5ad335ee505a2004d527f5b7ee77e068a8eb5bdc7e34",
+        "depthSha256": "a074a5b86f9f8c114d3d41e95a771935b911c95609cbce21da70df21889efc42",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484478
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "before",
+      "name": "wet-night",
+      "pngSha256": "e3f6de9efb86e14d7a2f801dbfe4325cc53f0ba40fc1ca658bced1006e7b2699",
+      "pngBytes": 280241,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "1910d3d9ed5beb6dfebf1f1f4d8748da4b4c8553bd2dca81a89f8aae9c6b8620",
+        "depthSha256": "43c560a8c40988894ac8e1772b11d8ceb661c2abbbfbd52ae6ed09c1203a49b8",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484990
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "before",
+      "name": "mirrored",
+      "pngSha256": "56b3013e7dff0d696cc3277fee068143a15daf7202f587f56afd52f52ea27525",
+      "pngBytes": 340287,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "b7321849062e1d92b4204e1d61f73a6d6f14704141e91277874e2db93562b144",
+        "depthSha256": "8344c1c70c1a5dfc507ae7cb26fa5ad91284c3579ce515aef7a69b9a129df77b",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 481787
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "before",
+      "name": "rebased",
+      "pngSha256": "95b6d219adaf5f559f2aa4b7947404f9fe098ef1086a134996e52b61ddb00a88",
+      "pngBytes": 312920,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "2e5af996e87b93b034a4eb952770a87cf40bfbeec4759d0718dcaa4d8a0a8168",
+        "depthSha256": "a00d2b79a7d6bddbaecb3fb1561555eb39e39cb96cc6b44d2166c58deda4bb10",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484895
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "after",
+      "name": "dry",
+      "pngSha256": "d40b9cd7fc8b2c77c41eef1110dc191ca5e53cd79ae201d6c92430382391758c",
+      "pngBytes": 345767,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "6054a65d9bdaacc158be5ad335ee505a2004d527f5b7ee77e068a8eb5bdc7e34",
+        "depthSha256": "a074a5b86f9f8c114d3d41e95a771935b911c95609cbce21da70df21889efc42",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484478
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "after",
+      "name": "wet-night",
+      "pngSha256": "e3f6de9efb86e14d7a2f801dbfe4325cc53f0ba40fc1ca658bced1006e7b2699",
+      "pngBytes": 280241,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "1910d3d9ed5beb6dfebf1f1f4d8748da4b4c8553bd2dca81a89f8aae9c6b8620",
+        "depthSha256": "43c560a8c40988894ac8e1772b11d8ceb661c2abbbfbd52ae6ed09c1203a49b8",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484990
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "after",
+      "name": "mirrored",
+      "pngSha256": "56b3013e7dff0d696cc3277fee068143a15daf7202f587f56afd52f52ea27525",
+      "pngBytes": 340287,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "b7321849062e1d92b4204e1d61f73a6d6f14704141e91277874e2db93562b144",
+        "depthSha256": "8344c1c70c1a5dfc507ae7cb26fa5ad91284c3579ce515aef7a69b9a129df77b",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 481787
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    },
+    {
+      "mode": "after",
+      "name": "rebased",
+      "pngSha256": "95b6d219adaf5f559f2aa4b7947404f9fe098ef1086a134996e52b61ddb00a88",
+      "pngBytes": 312920,
+      "compact": true,
+      "fixture": {
+        "parts": 10,
+        "triangles": 296,
+        "factoryPathVerified": true
+      },
+      "traceSha256": "2b64ed953d52a52d4eed7463f21cd31de7622af9d5010811a79dd0946f73cd3c",
+      "targets": {
+        "hdrSha256": "2e5af996e87b93b034a4eb952770a87cf40bfbeec4759d0718dcaa4d8a0a8168",
+        "depthSha256": "a00d2b79a7d6bddbaecb3fb1561555eb39e39cb96cc6b44d2166c58deda4bb10",
+        "hdrBytes": 7372800,
+        "depthBytes": 3686400,
+        "geometryPixels": 484895
+      },
+      "drawCalls": 10,
+      "triangles": 296,
+      "meshCount": 10,
+      "resolution": [
+        1280,
+        720
+      ],
+      "physics": 0,
+      "errors": []
+    }
+  ],
+  "errors": []
+}

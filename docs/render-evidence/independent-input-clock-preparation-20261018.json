@@ -1,0 +1,211 @@
+{
+  "date": "2026-10-18",
+  "status": "candidate_preparation_only_production_integration_on_hold",
+  "noProductionChangedByThisPreparation": true,
+  "plan": "artifacts/network-stability-20261018/independent-input-clock-PLAN.md",
+  "artifactHashes": {
+    "artifacts/network-stability-20261018/independent-input-clock-prototype.ts": "ee861946eaf9a977d01954cfc0cc61a3c144030bad3cce33fb2e250040d36473",
+    "artifacts/network-stability-20261018/independent-input-clock-prototype.test.ts": "d6553e6cf25065bbbcd0c597da017e8f6fb9271f54a6e50acff365e7dd298e9b",
+    "artifacts/network-stability-20261018/independent-input-clock-admission.test.ts": "cd0adc7516a6ee83fe13c89865459a4bb1e235affedd2d24858a3e3907802099",
+    "artifacts/network-stability-20261018/independent-input-clock-blank-browser.ts": "b2a7506c02e1e530ab0c1f45a4f72a0af9ba0fd5fe37c01df9af631a7b623b17",
+    "artifacts/network-stability-20261018/independent-input-clock-blank-browser.json": "02479d6fdc50233b8536e69ebfd177b5e1ef392842bc767921472c736b07dc5e",
+    "artifacts/network-stability-20261018/independent-input-clock-PLAN.md": "e64241fbbd7d4c09268d3ac0fe504106397276f1bcecfd3735c59ff691b07a5d",
+    "artifacts/network-stability-20261018/independent-input-clock-integration-tests.log": "439de629a1caecdcbe0cb4e28b9a41b5c36f001a3a515a368831d1dfa02cd99e",
+    "artifacts/network-stability-20261018/independent-input-clock-typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "observedProductionHashes": {
+    "src/game/client.ts": "b4eea991af010eabedbd61a91680ab38915347b37a7e2cc81266610cd5b5a0ec",
+    "src/game/client-character-prediction.ts": "15893beec047b9f09d9efad6d322b20ea6afa1ff4607bf796678087b9c7816b7",
+    "src/game/input.ts": "300c24d6474d9fe31c6842e9858ef6d03c0f56217db332d6d6da169c10b9b2f4",
+    "src/game/input-controls.ts": "0bdd53eaa95b2cdeebeb9403c8adb3eed57ade5aba23e1ff1b3f1d6a9c09fe89",
+    "src/game/net/client.ts": "70bcc4e40cb8a6611e0af64e46875fc51f9d20cd74d94fee853bcbda0ca96455",
+    "src/game/net/causal/browser.ts": "9d5760df469e46f6b7e340b59da0ed6ecedd21b3b0bd69f33f467a5c75b0ec20"
+  },
+  "targetBug": {
+    "source": "client.ts fixed243–254 samples/sends/predicts only from frame305/310 accumulator. Archived314ms-trace game bundle preserves the same logic at50827/50932/50982.",
+    "evidence": "Existing314.5ms RAF hole coincides with compositor BeginFrame absence while main traced task union is33.462ms; this identifies RAF clock coupling, not an exact admitted-command deficit or a driver cause.",
+    "constraint": "No already-admitted1/60duration,48window capacity, ACK/repair sequence, physics rate or motion policy is changed."
+  },
+  "prototype": {
+    "path": "artifacts/network-stability-20261018/independent-input-clock-prototype.ts",
+    "sourceSha256": "ee861946eaf9a977d01954cfc0cc61a3c144030bad3cce33fb2e250040d36473",
+    "api": "advance() reads the same injected performance.now for both timer and pre-render RAF; no RAF timestamp argument. setEnabled/rebase/manual/dispose/inspect.",
+    "invariants": [
+      "One accumulator/one fenced timer, absolute deadlines, zero same-time or reentrant duplicate debt spending.",
+      "Exact original min(.1,elapsedSeconds),1/60 step threshold/subtraction,max6catchup slots per actual clock wake; no epsilon/variable motor delta.",
+      "Mode reset drops only unadmitted fractional debt; disabled wall time is not replayed.",
+      "One-shot failure report with latch; repeated enabled observations cannot retry; canceled callbacks/page disposal cannot rearm.",
+      "This is generic poll scheduling, not a safe fullfixed-on-timer implementation."
+    ]
+  },
+  "validation": [
+    {
+      "command": "bun test ./artifacts/network-stability-20261018/independent-input-clock-prototype.test.ts",
+      "tests": 9,
+      "passed": 9,
+      "failed": 0,
+      "assertions": 380,
+      "scope": "Fake timers: RAF withheld, exact frozen accumulator arithmetic/cap, paused/manual/reentry/generation, shared RAF+timer, full48counter and failstop."
+    },
+    {
+      "command": "bun test ./artifacts/network-stability-20261018/independent-input-clock-prototype.test.ts ./artifacts/network-stability-20261018/independent-input-clock-admission.test.ts",
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
+      "assertions": 415,
+      "log": "artifacts/network-stability-20261018/independent-input-clock-integration-tests.log",
+      "scope": "Nine scheduler cases plus five actual online GameNetwork/GameControlSampler/MotionPulseBuffer cases with real encode/decodeMotion and an injected transport sink."
+    },
+    {
+      "command": "bun node_modules/typescript/bin/tsc --noEmit -p artifacts/network-stability-20261018/independent-input-clock-tsconfig.json",
+      "exit": 0,
+      "log": "artifacts/network-stability-20261018/independent-input-clock-typecheck.log"
+    },
+    {
+      "command": "bun artifacts/network-stability-20261018/independent-input-clock-blank-browser.ts",
+      "exit": 0,
+      "scope": "Actual visible HeadlessChrome155 about:blank, no Game/server/GPUDevice or FPS benchmark."
+    }
+  ],
+  "blankBrowser": {
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/155.0.8059.80",
+      "revision": "@43a195105613ac83c21d3f14de279f4a045c7da0",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+      "jsVersion": "15.5.35.23"
+    },
+    "state": {
+      "url": "about:blank",
+      "hidden": false,
+      "visibilityState": "visible"
+    },
+    "withheld": {
+      "elapsedMs": 355.5999999642372,
+      "rafPolls": 0,
+      "timerPolls": 21,
+      "callbackSeconds": 0.35,
+      "heartbeats": 71,
+      "heldRAFs": 1,
+      "clock": {
+        "enabled": false,
+        "disposed": false,
+        "failure": null,
+        "pendingTimer": 0,
+        "generation": 2,
+        "lastMs": 523.3999999761581,
+        "deadlineMs": null,
+        "remainderSeconds": 0,
+        "polls": 27,
+        "automaticSteps": 21,
+        "manualSteps": 0,
+        "lastBatchSteps": 1,
+        "maxBatchSteps": 1,
+        "cappedWallSeconds": 0
+      }
+    },
+    "blocked": {
+      "busyMs": 350,
+      "before": 22,
+      "during": 22,
+      "after": 28,
+      "catchup": 6,
+      "clock": {
+        "enabled": false,
+        "disposed": false,
+        "failure": null,
+        "pendingTimer": 0,
+        "generation": 5,
+        "lastMs": 945.5,
+        "deadlineMs": null,
+        "remainderSeconds": 0,
+        "polls": 29,
+        "automaticSteps": 28,
+        "manualSteps": 0,
+        "lastBatchSteps": 6,
+        "maxBatchSteps": 6,
+        "cappedWallSeconds": 0.26449999999999996
+      }
+    },
+    "final": {
+      "enabled": false,
+      "disposed": true,
+      "failure": null,
+      "pendingTimer": 0,
+      "generation": 6,
+      "lastMs": 945.5,
+      "deadlineMs": null,
+      "remainderSeconds": 0,
+      "polls": 29,
+      "automaticSteps": 28,
+      "manualSteps": 0,
+      "lastBatchSteps": 6,
+      "maxBatchSteps": 6,
+      "cappedWallSeconds": 0.26449999999999996
+    },
+    "events": [],
+    "cleanup": "Owned Chrome/CDP closed; checked dedicated temporary profile removed; no server created."
+  },
+  "actualAdmission": {
+    "tests": 5,
+    "assertions": 35,
+    "results": [
+      "Actual pending reaches48 and stays bounded; repair packets still pass through real codec while no new command is admitted.",
+      "After ACK, short jump/interact/passenger/door/attack taps and current movement/look emit once then release; a formerly admitted held jump retains false,true,false barrier.",
+      "Body/controlRevision transition clears old pulse ownership and retransmits only new revision.",
+      "Sequence wrap across65535 and seated reliable gear-up edge preserve sender semantics without repeated operation.",
+      "Manual pause/Studio-neutral resume create only explicit rows and no disabled timer work."
+    ],
+    "scopeLimit": "No actual GameWorld, shared-motor movement, authority reorder/ACK execution, QUIC/TLS, cursor reconciliation or full client lifecycle is verified."
+  },
+  "lifecycleDecisions": {
+    "enabled": "!paused && !studio.active && !document.hidden; exact online/offline timer ownership remains to be designed.",
+    "manual": "Root decided API step enters paused/manual as present, preserving keys.",
+    "visibility": "Explicit hidden suspend/reset plus existing GameInput neutral clear.",
+    "bfcache": "Stop on pagehide and rebase the same existing clock on persisted pageshow, not duplicate construction.",
+    "failure": "Failstop/report once, no implicit per-frame enabled-gate retry."
+  },
+  "productionBlockers": [
+    "Fullfixed timer prediction would query dynamic colliders updated only by RAF single network.present/syncBodies; disconnect seat cleanup is also RAF-owned.",
+    "Input-only online timer must not consume offline short taps: current offline path immediately predicts consumed controls and has no pending network row. Require exclusive offline RAF ownership or another proved bounded path.",
+    "A bounded prediction-through cursor must fence connection generation, first self, body/controlRevision/observer and seq wrap; advance only successful steps, reset to authorityACK after replay rollback and preserve already-ACKed-but-never-locally-predicted durations in authoritative state.",
+    "Current onSelf replay also has the preexisting dynamic-collider freshness limitation; adding more pending during RAF holes does not solve it. A fresh-collider authoritative-baseline/RAF replay variant needs exact reconciliation tests.",
+    "No second network.present, extra/unbounded input queue, allpending replay each frame, NPC advance, rate/cap reduction or pedestrian coalescing.",
+    "input.lookBlocked currently refreshes only in RAF and must be made fresh before independent online sampling; mode/Studio/QA/connection boundaries require actual client integration tests."
+  ],
+  "limitations": [
+    "Headless blank timers demonstrate mechanism only; this is not native GPU/VSync/OS scheduling, FPS, input-latency or GC improvement evidence.",
+    "A timer cannot run during actual main-thread JS/GC blocking or OS descheduling; the busy-loop negative control preserves that fact.",
+    "The314.5ms historical trace lacks per-fixed-call chronology, so exact lost/admitted input counts are not claimed.",
+    "Full48 window and authority throughput remain unresolved; independent sampling may sustain lead rather than fix it."
+  ],
+  "latestConcreteIntegration": {
+    "status": "ignored_candidate_native_fresh_ack_gate_failed_not_adopted",
+    "evidence": "docs/render-evidence/independent-input-native-gates-20261018.json",
+    "evidenceSha256": "f5671655d6672ded7cad6aebc65ec3d5fb6ee54d95c762ca3651b9bd029021f3",
+    "stagedDirectory": "../thegame/artifacts/network-stability-20261018/frame-owned-client-integration",
+    "productionCheckpoint": "docs/render-evidence/quiet-motion-playback-integration-20261018.json",
+    "productionClientBaseSha256": "c67c64be22aa412e52945286d370be6e8d085169f1649d0542cd52aba5c4961b",
+    "productionNetworkBaseSha256": "2502b5ceb868d19ebc770d5160d0db4ed39ce3969604a65baafbadd5b82eb687",
+    "patchSha256": "78efe24da217af6d20b2ecd8a8cc282387fdb2e6fc2b92e77891ba2db3bb00b3",
+    "checks": {
+      "pass": 73,
+      "fail": 0,
+      "assertions": 1088,
+      "files": 7
+    },
+    "strictTypeScript": "exit0",
+    "applyCheck": "exit0",
+    "candidateNativeRun": true,
+    "nativeAckGatePassed": false,
+    "nativeLifecycleAndMovementPassed": true,
+    "productionInputStillRafOwned": true,
+    "remaining": [
+      "Attribute native delivery/ACK latency with bounded passive pump/I/O observation before changing scheduling policy.",
+      "Reduce demonstrated indivisible navigation cost while preserving paths, query semantics and quality.",
+      "Production adoption and permanent regressions require native gates and current global checks; candidate stays ignored.",
+      "Known341ms frame tail and temporal object/shadow/reflection quality require further measured verification."
+    ]
+  },
+  "phaseNote": "Prototype preparation sections retain their historical scope. latestConcreteIntegration and its evidence contain current frozen stage, lifecycle/native results and remaining delivery gate."
+}

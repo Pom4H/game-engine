@@ -1,0 +1,4490 @@
+{
+  "status": "completed",
+  "controls": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "pairs": 128,
+    "warmup": 128,
+    "settleFramesPerVariant": 2,
+    "scenarios": [
+      "static",
+      "camera-motion"
+    ]
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "device": "",
+    "description": "",
+    "isFallbackAdapter": false
+  },
+  "sourceHash": "6f90dfdbbc9da4f6e8408da8b46b00908d861b7b7572633ccce5c9bf6c424377",
+  "geometryHash": "adcedf76d671deb9902774efd331b2c840335e361ed0ee796991e4d272ba0b07",
+  "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+  "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+  "selected": {
+    "legacy": 800,
+    "indexed": 928
+  },
+  "preparation": {
+    "entries": 10009,
+    "lights": 4,
+    "builds": 1,
+    "modelUpdates": 10009,
+    "radiance": {
+      "fusedFrames": 1728,
+      "observations": 17281728,
+      "reusedPoses": 17271727,
+      "checkedPoses": 10001,
+      "fallbackFrames": 0
+    },
+    "batchPlanBuilds": 1,
+    "batchCauseEntries": 10009,
+    "modelHistory": {
+      "entries": 10009,
+      "frame": 32,
+      "allocations": 30027,
+      "commits": 17307279,
+      "modelChanges": 0
+    },
+    "visibilityPlan": {
+      "entries": 10009,
+      "sourceBuilds": 1,
+      "passes": {
+        "cameraOpaque": {
+          "staticCandidates": 1,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 14081,
+          "lastTests": 8,
+          "revision": 257
+        },
+        "cameraTransparent": {
+          "staticCandidates": 0,
+          "movingCandidates": 0,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 0,
+          "lastTests": 0,
+          "revision": 257
+        },
+        "reflection": {
+          "staticCandidates": 1,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 257,
+          "tests": 14081,
+          "lastTests": 8,
+          "revision": 257
+        },
+        "staticShadow": {
+          "staticCandidates": 10001,
+          "movingCandidates": 0,
+          "sourceBuilds": 1,
+          "staticBuilds": 1,
+          "tests": 10001,
+          "lastTests": 0,
+          "revision": 1
+        },
+        "dynamicShadow": {
+          "staticCandidates": 0,
+          "movingCandidates": 8,
+          "sourceBuilds": 1,
+          "staticBuilds": 1,
+          "tests": 13824,
+          "lastTests": 8,
+          "revision": 1
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "scenario": "static",
+      "pairs": 128,
+      "modes": {
+        "legacy": {
+          "prepareMs": {
+            "samples": 128,
+            "p50": 1.2999999523162842,
+            "p95": 1.7999999523162842,
+            "mean": 1.2937500029802322
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 3.899999976158142,
+            "p95": 5,
+            "mean": 4.017968749627471
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.11908,
+            "p95": 13.544560000000002,
+            "mean": 12.251140937499995
+          }
+        },
+        "indexed": {
+          "prepareMs": {
+            "samples": 128,
+            "p50": 1.100000023841858,
+            "p95": 1.5,
+            "mean": 1.186718754004687
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 3.800000011920929,
+            "p95": 5,
+            "mean": 3.978124998975545
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 12.138759999999998,
+            "p95": 14.1532,
+            "mean": 12.2581034375
+          }
+        }
+      },
+      "prepareDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 0.3999999165534973,
+        "mean": -0.10703124897554517
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 1.100000023841858,
+        "mean": -0.0398437506519258
+      },
+      "improvedPairs": 88,
+      "byFirst": {
+        "legacy": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.3999999761581421,
+          "mean": -0.08125000074505806
+        },
+        "indexed": {
+          "samples": 64,
+          "p50": -0.10000002384185791,
+          "p95": 0.30000001192092896,
+          "mean": -0.13281249720603228
+        }
+      },
+      "rawPairs": [
+        {
+          "pair": 0,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 13.6952
+          },
+          "indexed": {
+            "prepareMs": 2,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 14.53112
+          },
+          "prepareDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 1,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.8000000715255737,
+            "cpuTotalMs": 5.599999964237213,
+            "gpuTotalMs": 14.238519999999998
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 13.960840000000001
+          },
+          "prepareDeltaMs": -0.5000000596046448,
+          "totalDeltaMs": -1.4999999403953552
+        },
+        {
+          "pair": 2,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 13.16904
+          },
+          "indexed": {
+            "prepareMs": 0.9999999403953552,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 13.5226
+          },
+          "prepareDeltaMs": -0.2000001072883606,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 3,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 13.426799999999998
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 13.00712
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 4,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.81536
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.97452
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 5,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 12.5252
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 13.10176
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 6,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.591199999999999
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.543000000000001
+          },
+          "prepareDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 7,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.238439999999999
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.457080000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 8,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.45408
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.743
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 9,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.605439999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.33968
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 10,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.90656
+          },
+          "indexed": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.61956
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 11,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.98828
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.748759999999999
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.9999999403953552
+        },
+        {
+          "pair": 12,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.13728
+          },
+          "indexed": {
+            "prepareMs": 2.799999952316284,
+            "cpuTotalMs": 10,
+            "gpuTotalMs": 14.31864
+          },
+          "prepareDeltaMs": 1.4999999403953552,
+          "totalDeltaMs": 5.899999976158142
+        },
+        {
+          "pair": 13,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 13.678239999999999
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 14.605359999999997
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 14,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 13.159
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.7748
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 15,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 13.048080000000002
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 13.141440000000003
+          },
+          "prepareDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.6999999284744263
+        },
+        {
+          "pair": 16,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.930159999999999
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.624680000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 17,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.7000000476837158,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.43152
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.593639999999999
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 18,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.44896
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.76328
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 19,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.389079999999998
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.135000000000002
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 20,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.74336
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.457600000000003
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 1.300000011920929
+        },
+        {
+          "pair": 21,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.390360000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.62324
+          },
+          "prepareDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 22,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.03732
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.62012
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 23,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.49076
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.79044
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 24,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 2.600000023841858,
+            "cpuTotalMs": 6.699999988079071,
+            "gpuTotalMs": 13.544560000000002
+          },
+          "indexed": {
+            "prepareMs": 0.7999999523162842,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 13.148159999999999
+          },
+          "prepareDeltaMs": -1.8000000715255737,
+          "totalDeltaMs": -3.599999964237213
+        },
+        {
+          "pair": 25,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.984160000000001
+          },
+          "indexed": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 5.199999988079071,
+            "gpuTotalMs": 13.05404
+          },
+          "prepareDeltaMs": 0.40000003576278687,
+          "totalDeltaMs": 1.5999999642372131
+        },
+        {
+          "pair": 26,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.768239999999999
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.67008
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 27,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.2712
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 5.399999976158142,
+            "gpuTotalMs": 12.24572
+          },
+          "prepareDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 1
+        },
+        {
+          "pair": 28,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.41272
+          },
+          "indexed": {
+            "prepareMs": 0.8999999165534973,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 11.83612
+          },
+          "prepareDeltaMs": -0.40000009536743164,
+          "totalDeltaMs": -1.300000011920929
+        },
+        {
+          "pair": 29,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.01804
+          },
+          "indexed": {
+            "prepareMs": 1.6999999284744263,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 12.424960000000002
+          },
+          "prepareDeltaMs": 0.3999999165534973,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 30,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.7999999523162842,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.10204
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.13572
+          },
+          "prepareDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 31,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.98172
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.24152
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 32,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.96872
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.946200000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.19999992847442627
+        },
+        {
+          "pair": 33,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.45036
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.03196
+          },
+          "prepareDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 34,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.4928
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.447399999999998
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 35,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.005840000000001
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 11.813479999999998
+          },
+          "prepareDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 1.100000023841858
+        },
+        {
+          "pair": 36,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 12.06004
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.762079999999997
+          },
+          "prepareDeltaMs": -0.2000001072883606,
+          "totalDeltaMs": 0.10000008344650269
+        },
+        {
+          "pair": 37,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.08012
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.053839999999997
+          },
+          "prepareDeltaMs": 0.10000008344650269,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 38,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.386559999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.15656
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 39,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.90268
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.78856
+          },
+          "prepareDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 40,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.85032
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.803040000000001
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 41,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.800000011920929,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 11.706599999999998
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.962200000000001
+          },
+          "prepareDeltaMs": -0.800000011920929,
+          "totalDeltaMs": -1.2000000476837158
+        },
+        {
+          "pair": 42,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.0556
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.7338
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 43,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.20296
+          },
+          "indexed": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.898600000000002
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 44,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.74288
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 11.13236
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 45,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.11908
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.810880000000001
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 46,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.68956
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.900680000000001
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 47,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.164
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.101079999999998
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 48,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.699999988079071,
+            "cpuTotalMs": 5.699999988079071,
+            "gpuTotalMs": 12.667720000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.59584
+          },
+          "prepareDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -2.300000011920929
+        },
+        {
+          "pair": 49,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.2686
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.970040000000003
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 50,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.551000000000002
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.24796
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 51,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.999960000000002
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.48592
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 52,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.799999952316284,
+            "gpuTotalMs": 12.02744
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.20232
+          },
+          "prepareDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.8999999165534973
+        },
+        {
+          "pair": 53,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.653800000000002
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.986320000000001
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 54,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.327319999999999
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.406959999999998
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 55,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.181799999999999
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.671320000000001
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 56,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.29488
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.38408
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 57,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.6898
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.454479999999998
+          },
+          "prepareDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": -0.30000007152557373
+        },
+        {
+          "pair": 58,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.04172
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.127880000000001
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 59,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.74664
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.024000000000003
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 60,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.85884
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.141680000000001
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 61,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.69808
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.798479999999998
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 62,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.62016
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.805159999999999
+          },
+          "prepareDeltaMs": -0.30000007152557373,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 63,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.899999976158142,
+            "cpuTotalMs": 5.199999988079071,
+            "gpuTotalMs": 12.77896
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.21904
+          },
+          "prepareDeltaMs": -0.7999999523162842,
+          "totalDeltaMs": -1.5
+        },
+        {
+          "pair": 64,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.560759999999998
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.62792
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 65,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.247120000000002
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.49032
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 66,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.699999988079071,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.415639999999998
+          },
+          "indexed": {
+            "prepareMs": 4.900000035762787,
+            "cpuTotalMs": 12.199999988079071,
+            "gpuTotalMs": 14.1532
+          },
+          "prepareDeltaMs": 3.200000047683716,
+          "totalDeltaMs": 7.399999976158142
+        },
+        {
+          "pair": 67,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 13.415760000000002
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 14.966000000000003
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 68,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.922759999999998
+          },
+          "indexed": {
+            "prepareMs": 1.0000000596046448,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.49912
+          },
+          "prepareDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.7999999523162842
+        },
+        {
+          "pair": 69,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.16708
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.828599999999998
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 70,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.14748
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 12.107240000000001
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 71,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.565
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.369119999999999
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 72,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.699999988079071,
+            "gpuTotalMs": 11.787999999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.138759999999998
+          },
+          "prepareDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.9000000357627869
+        },
+        {
+          "pair": 73,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.888839999999998
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.09588
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 74,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.10548
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.19888
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 75,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.44944
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.615719999999998
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 5.960464477539063e-8
+        },
+        {
+          "pair": 76,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.834240000000001
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.051200000000001
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0.3999999165534973
+        },
+        {
+          "pair": 77,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.107199999999999
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.57708
+          },
+          "prepareDeltaMs": -0.2000001072883606,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 78,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.024159999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.9836
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.09999996423721313
+        },
+        {
+          "pair": 79,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.669239999999999
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.67792
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 80,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 12.323
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.5124
+          },
+          "prepareDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 81,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.048280000000002
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.03636
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 82,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.11216
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.81424
+          },
+          "prepareDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 83,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.880479999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.93452
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 84,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.03984
+          },
+          "indexed": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 12.15168
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 85,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.6000000834465027,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.673600000000002
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.47956
+          },
+          "prepareDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 86,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.024039999999998
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.5928
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 87,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.1062
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.38004
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 88,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 11.350679999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.06476
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 89,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.517759999999999
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 10.7312
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 90,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 10.510280000000002
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 10.439879999999999
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 91,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.30744
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 10.71984
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 92,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.62796
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.17772
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 93,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 10.679039999999999
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 10.3038
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 94,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 10.127320000000001
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 10.4122
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -1.100000023841858
+        },
+        {
+          "pair": 95,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.699999988079071,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 10.583920000000003
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 10.523520000000001
+          },
+          "prepareDeltaMs": -0.699999988079071,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 96,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.8058
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 11.271400000000002
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -1.0999999642372131
+        },
+        {
+          "pair": 97,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.276360000000002
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.2466
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 98,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.31836
+          },
+          "indexed": {
+            "prepareMs": 0.7999999523162842,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 10.772079999999999
+          },
+          "prepareDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 99,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.9999999403953552,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 10.691440000000002
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 10.734520000000002
+          },
+          "prepareDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 100,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.0348
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 10.7072
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 101,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 10.43556
+          },
+          "indexed": {
+            "prepareMs": 0.8999999165534973,
+            "cpuTotalMs": 2.799999952316284,
+            "gpuTotalMs": 10.42244
+          },
+          "prepareDeltaMs": -0.2000001072883606,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 102,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 10.377719999999998
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 10.1778
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 103,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.02388
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.899999976158142,
+            "gpuTotalMs": 10.32048
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.5000000596046448
+        },
+        {
+          "pair": 104,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.0396
+          },
+          "indexed": {
+            "prepareMs": 1.5000000596046448,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.27176
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 105,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.4042
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.502839999999999
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.3999999761581421
+        },
+        {
+          "pair": 106,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 5.299999952316284,
+            "gpuTotalMs": 13.237
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 5.100000023841858,
+            "gpuTotalMs": 12.581399999999999
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999992847442627
+        },
+        {
+          "pair": 107,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.9999999403953552,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.57824
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 13.46368
+          },
+          "prepareDeltaMs": 0.40000003576278687,
+          "totalDeltaMs": 0.4999999403953552
+        },
+        {
+          "pair": 108,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 12.597199999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.522599999999999
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 109,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 11.42932
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.014560000000001
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 110,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.14212
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.60916
+          },
+          "prepareDeltaMs": -0.19999992847442627,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 111,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.054240000000002
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.81644
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 112,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.7999999523162842,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 11.98912
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.359760000000001
+          },
+          "prepareDeltaMs": -0.6999999284744263,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 113,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 13.03264
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.663560000000002
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 114,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.950239999999997
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.29148
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 115,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.2296
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.40388
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 116,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.03992
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.98876
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.19999992847442627
+        },
+        {
+          "pair": 117,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.94392
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 11.6924
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.800000011920929
+        },
+        {
+          "pair": 118,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 25.070800000000006
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 19.6936
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 119,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 14.92052
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 16.48492
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 120,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 13.977
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 13.618280000000002
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 121,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.800000011920929,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.78524
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 13.593840000000002
+          },
+          "prepareDeltaMs": -1,
+          "totalDeltaMs": -1.4000000357627869
+        },
+        {
+          "pair": 122,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.56672
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 11.975919999999999
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 1.399999976158142
+        },
+        {
+          "pair": 123,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.96724
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.062120000000002
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.40000003576278687
+        },
+        {
+          "pair": 124,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.9916
+          },
+          "indexed": {
+            "prepareMs": 1.3999999165534973,
+            "cpuTotalMs": 5.100000023841858,
+            "gpuTotalMs": 12.45564
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 1.100000023841858
+        },
+        {
+          "pair": 125,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.586160000000001
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.98216
+          },
+          "prepareDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.9000000357627869
+        },
+        {
+          "pair": 126,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.86528
+          },
+          "indexed": {
+            "prepareMs": 1.699999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.072400000000002
+          },
+          "prepareDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 127,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.658240000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.99068
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.6000000238418579
+        }
+      ]
+    },
+    {
+      "scenario": "camera-motion",
+      "pairs": 128,
+      "modes": {
+        "legacy": {
+          "prepareMs": {
+            "samples": 128,
+            "p50": 1.2000000476837158,
+            "p95": 1.7999999523162842,
+            "mean": 1.284375000745058
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 3.899999976158142,
+            "p95": 4.900000035762787,
+            "mean": 4.001562498509884
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.9924,
+            "p95": 13.00288,
+            "mean": 12.136503749999997
+          }
+        },
+        "indexed": {
+          "prepareMs": {
+            "samples": 128,
+            "p50": 1.199999988079071,
+            "p95": 1.5,
+            "mean": 1.188281252514571
+          },
+          "cpuTotalMs": {
+            "samples": 128,
+            "p50": 3.800000011920929,
+            "p95": 4.600000023841858,
+            "mean": 3.849218752235174
+          },
+          "gpuTotalMs": {
+            "samples": 128,
+            "p50": 11.966199999999997,
+            "p95": 12.96696,
+            "mean": 12.120478125000007
+          }
+        }
+      },
+      "prepareDeltaMs": {
+        "samples": 128,
+        "p50": -0.09999996423721313,
+        "p95": 0.3999999761581421,
+        "mean": -0.09609374823048711
+      },
+      "totalDeltaMs": {
+        "samples": 128,
+        "p50": -0.10000002384185791,
+        "p95": 1,
+        "mean": -0.1523437462747097
+      },
+      "improvedPairs": 71,
+      "byFirst": {
+        "legacy": {
+          "samples": 64,
+          "p50": -0.09999996423721313,
+          "p95": 0.30000007152557373,
+          "mean": -0.0953125013038516
+        },
+        "indexed": {
+          "samples": 64,
+          "p50": -0.09999990463256836,
+          "p95": 0.40000009536743164,
+          "mean": -0.09687499515712261
+        }
+      },
+      "rawPairs": [
+        {
+          "pair": 0,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.22732
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.83992
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.19999992847442627
+        },
+        {
+          "pair": 1,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.14128
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.09944
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 2,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 12.15332
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.79844
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.7999999523162842
+        },
+        {
+          "pair": 3,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.000320000000002
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.2452
+          },
+          "prepareDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": 0.800000011920929
+        },
+        {
+          "pair": 4,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.904639999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.58016
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 5,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.44704
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 11.767000000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 6,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.54592
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.53124
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.10000008344650269
+        },
+        {
+          "pair": 7,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.45244
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.88488
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.5999999642372131
+        },
+        {
+          "pair": 8,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.115920000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.6254
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 9,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.900000035762787,
+            "gpuTotalMs": 11.787360000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.16628
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -1.199999988079071
+        },
+        {
+          "pair": 10,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.75852
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.72344
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 11,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.658039999999998
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 2.699999988079071,
+            "gpuTotalMs": 11.31416
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 12,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.664480000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.805320000000002
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 13,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.8000000715255737,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.83652
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.8312
+          },
+          "prepareDeltaMs": -0.5000001192092896,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 14,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5000000596046448,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.00596
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.665920000000003
+          },
+          "prepareDeltaMs": -0.30000007152557373,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 15,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.93228
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.07188
+          },
+          "prepareDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": -0.30000007152557373
+        },
+        {
+          "pair": 16,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.3999999165534973,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.181119999999998
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.2686
+          },
+          "prepareDeltaMs": -0.2999999523162842,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 17,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.495040000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.410479999999998
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 18,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.84676
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.64528
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 19,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.313080000000001
+          },
+          "indexed": {
+            "prepareMs": 1.0000000596046448,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.813920000000001
+          },
+          "prepareDeltaMs": -0.3999999165534973,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 20,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.325040000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.64372
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 21,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 3.099999964237213,
+            "cpuTotalMs": 11,
+            "gpuTotalMs": 13.48388
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 12.642280000000003
+          },
+          "prepareDeltaMs": -2.199999988079071,
+          "totalDeltaMs": -7.899999976158142
+        },
+        {
+          "pair": 22,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 13.315040000000002
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.854360000000002
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 1
+        },
+        {
+          "pair": 23,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.027920000000002
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.11756
+          },
+          "prepareDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": 0.10000008344650269
+        },
+        {
+          "pair": 24,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.299999952316284,
+            "gpuTotalMs": 12.533760000000001
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 12.546000000000001
+          },
+          "prepareDeltaMs": 0.20000004768371582,
+          "totalDeltaMs": 0.7000000476837158
+        },
+        {
+          "pair": 25,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.663
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.93608
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 26,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.77108
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.2298
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 27,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.49772
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.34344
+          },
+          "prepareDeltaMs": -0.3999999761581421,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 28,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.696919999999999
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.691640000000001
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 29,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.6116
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.478439999999999
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 30,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.510520000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.03948
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 31,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.89492
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.12196
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 32,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.81748
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.668199999999997
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.7000000476837158
+        },
+        {
+          "pair": 33,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.949119999999999
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.8094
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 34,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.986360000000001
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.10656
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 35,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.850719999999999
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.84848
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 36,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.04872
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.907959999999997
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 37,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 11.517159999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.348
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": 0.10000008344650269
+        },
+        {
+          "pair": 38,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.7018
+          },
+          "indexed": {
+            "prepareMs": 2.099999964237213,
+            "cpuTotalMs": 7.199999988079071,
+            "gpuTotalMs": 11.763
+          },
+          "prepareDeltaMs": 0.8999999761581421,
+          "totalDeltaMs": 3.199999988079071
+        },
+        {
+          "pair": 39,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.65364
+          },
+          "indexed": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.73364
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 40,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.74516
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.10852
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 41,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.88524
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.100000023841858,
+            "gpuTotalMs": 11.83492
+          },
+          "prepareDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -0.7999999523162842
+        },
+        {
+          "pair": 42,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.94388
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.843440000000001
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 43,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.052760000000001
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.857959999999999
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 44,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 6.800000011920929,
+            "gpuTotalMs": 12.573759999999998
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.900000035762787,
+            "gpuTotalMs": 12.96696
+          },
+          "prepareDeltaMs": -0.4999999403953552,
+          "totalDeltaMs": -3.899999976158142
+        },
+        {
+          "pair": 45,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.584159999999999
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.36336
+          },
+          "prepareDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 46,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.7999999523162842,
+            "cpuTotalMs": 5.300000011920929,
+            "gpuTotalMs": 12.178960000000002
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 12.1318
+          },
+          "prepareDeltaMs": -0.7999999523162842,
+          "totalDeltaMs": -1.0999999642372131
+        },
+        {
+          "pair": 47,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.25952
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.997599999999998
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 48,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.91576
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.86264
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 49,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.187959999999999
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.24536
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 50,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5999999642372131,
+            "cpuTotalMs": 4.900000035762787,
+            "gpuTotalMs": 15.060839999999997
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 14.133400000000002
+          },
+          "prepareDeltaMs": -0.3999999165534973,
+          "totalDeltaMs": -1.2000000476837158
+        },
+        {
+          "pair": 51,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 13.192079999999999
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 13.73996
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 52,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 13.00288
+          },
+          "indexed": {
+            "prepareMs": 1.4999999403953552,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 12.4528
+          },
+          "prepareDeltaMs": 0.3999999165534973,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 53,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.90172
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.24484
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.10000008344650269
+        },
+        {
+          "pair": 54,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.800000011920929,
+            "cpuTotalMs": 4.900000035762787,
+            "gpuTotalMs": 12.147680000000001
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.9578
+          },
+          "prepareDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -1.100000023841858
+        },
+        {
+          "pair": 55,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.737
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 11.787560000000001
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.5999999642372131
+        },
+        {
+          "pair": 56,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.79064
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.57292
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 57,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.05484
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.22336
+          },
+          "prepareDeltaMs": 0.10000008344650269,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 58,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.22556
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.9412
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 59,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.971440000000001
+          },
+          "indexed": {
+            "prepareMs": 2.100000023841858,
+            "cpuTotalMs": 5.599999964237213,
+            "gpuTotalMs": 11.59616
+          },
+          "prepareDeltaMs": 0.8000000715255737,
+          "totalDeltaMs": 1.9999999403953552
+        },
+        {
+          "pair": 60,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.74148
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.800000011920929,
+            "gpuTotalMs": 11.92808
+          },
+          "prepareDeltaMs": -0.5999999642372131,
+          "totalDeltaMs": -0.9999999403953552
+        },
+        {
+          "pair": 61,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.0392
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.401640000000002
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 62,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.828520000000001
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.25464
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 63,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.836
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.838560000000001
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 64,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.826359999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.198400000000001
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 65,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.037799999999999
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.80072
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 66,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.76184
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.991679999999999
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 67,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.36332
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.13412
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.19999998807907104
+        },
+        {
+          "pair": 68,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 11.949919999999999
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.600000023841858,
+            "gpuTotalMs": 12.25432
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0.8000000715255737
+        },
+        {
+          "pair": 69,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 12.44764
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.849040000000002
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.800000011920929
+        },
+        {
+          "pair": 70,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 12.852120000000001
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.238959999999999
+          },
+          "prepareDeltaMs": 0.30000007152557373,
+          "totalDeltaMs": 0.5
+        },
+        {
+          "pair": 71,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.2404
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.479080000000002
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 72,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.35352
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 12.540919999999998
+          },
+          "prepareDeltaMs": 0.10000002384185791,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 73,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 12.44404
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 12.50924
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -1.5
+        },
+        {
+          "pair": 74,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.366240000000001
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.989840000000001
+          },
+          "prepareDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.3999999761581421
+        },
+        {
+          "pair": 75,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.98356
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 12.162560000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.19999992847442627
+        },
+        {
+          "pair": 76,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.99308
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.85788
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 77,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 11.779240000000001
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.29216
+          },
+          "prepareDeltaMs": 1.1920928955078125e-7,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 78,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.9924
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 12.12364
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": -0.2999999523162842
+        },
+        {
+          "pair": 79,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.39628
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.147359999999999
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0.5999999642372131
+        },
+        {
+          "pair": 80,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 12.013720000000001
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.369
+          },
+          "prepareDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 81,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.305399999999999
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.49304
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 82,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 11.800159999999998
+          },
+          "indexed": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.672720000000002
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 83,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.21232
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.64892
+          },
+          "prepareDeltaMs": -0.09999990463256836,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 84,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.283479999999999
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.05612
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 85,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.30216
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 12.43656
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 86,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.7796
+          },
+          "indexed": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.161800000000001
+          },
+          "prepareDeltaMs": 1.1920928955078125e-7,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 87,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.4422
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.1492
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 88,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.200000047683716,
+            "gpuTotalMs": 11.973799999999999
+          },
+          "indexed": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.966199999999997
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 89,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.83232
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 12.11308
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 90,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.7999999523162842,
+            "cpuTotalMs": 4.800000011920929,
+            "gpuTotalMs": 12.15916
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.8918
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -0.699999988079071
+        },
+        {
+          "pair": 91,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 11.79148
+          },
+          "indexed": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.1928
+          },
+          "prepareDeltaMs": 0.30000001192092896,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 92,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.9000000357627869,
+            "cpuTotalMs": 4.899999976158142,
+            "gpuTotalMs": 11.92724
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.87012
+          },
+          "prepareDeltaMs": -0.699999988079071,
+          "totalDeltaMs": -1.0999999642372131
+        },
+        {
+          "pair": 93,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.525000000000002
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.0216
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 94,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.48336
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.49392
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 95,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3,
+            "gpuTotalMs": 12.1908
+          },
+          "indexed": {
+            "prepareMs": 1.699999988079071,
+            "cpuTotalMs": 4.300000011920929,
+            "gpuTotalMs": 11.89392
+          },
+          "prepareDeltaMs": 0.5,
+          "totalDeltaMs": 1.300000011920929
+        },
+        {
+          "pair": 96,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.9216
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.51116
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.40000003576278687
+        },
+        {
+          "pair": 97,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.800000011920929,
+            "cpuTotalMs": 4.5,
+            "gpuTotalMs": 11.855
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 11.909759999999999
+          },
+          "prepareDeltaMs": -0.6000000238418579,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 98,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.830720000000001
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.534999999999998
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 99,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.226999999999999
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.56316
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 0
+        },
+        {
+          "pair": 100,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.721680000000003
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.78752
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 101,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.4000000357627869,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.835400000000002
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.908119999999998
+          },
+          "prepareDeltaMs": -5.960464477539063e-8,
+          "totalDeltaMs": -0.09999996423721313
+        },
+        {
+          "pair": 102,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 12.76144
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 12.4896
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": 0.10000002384185791
+        },
+        {
+          "pair": 103,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.883360000000001
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.3182
+          },
+          "prepareDeltaMs": 0.09999996423721313,
+          "totalDeltaMs": -0.10000002384185791
+        },
+        {
+          "pair": 104,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 12.677040000000002
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.81508
+          },
+          "prepareDeltaMs": -0.19999998807907104,
+          "totalDeltaMs": -0.8999999761581421
+        },
+        {
+          "pair": 105,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 12.696240000000003
+          },
+          "indexed": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 13.91152
+          },
+          "prepareDeltaMs": -0.3999999165534973,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 106,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.1888
+          },
+          "indexed": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.699999988079071,
+            "gpuTotalMs": 11.407960000000001
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.9000000357627869
+        },
+        {
+          "pair": 107,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 2.699999988079071,
+            "gpuTotalMs": 10.74424
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.300000011920929,
+            "gpuTotalMs": 11.3894
+          },
+          "prepareDeltaMs": 0.2999999523162842,
+          "totalDeltaMs": 0.6000000238418579
+        },
+        {
+          "pair": 108,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 0.9000000357627869,
+            "cpuTotalMs": 2.699999988079071,
+            "gpuTotalMs": 10.594879999999996
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 11.031559999999999
+          },
+          "prepareDeltaMs": 0.19999992847442627,
+          "totalDeltaMs": 1.2000000476837158
+        },
+        {
+          "pair": 109,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.27964
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.900000035762787,
+            "gpuTotalMs": 10.883600000000001
+          },
+          "prepareDeltaMs": -0.09999996423721313,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 110,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 11.559159999999999
+          },
+          "indexed": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.14956
+          },
+          "prepareDeltaMs": -0.10000008344650269,
+          "totalDeltaMs": -0.20000004768371582
+        },
+        {
+          "pair": 111,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 11.215959999999999
+          },
+          "indexed": {
+            "prepareMs": 0.699999988079071,
+            "cpuTotalMs": 2.599999964237213,
+            "gpuTotalMs": 11.21128
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -0.6000000238418579
+        },
+        {
+          "pair": 112,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 0.800000011920929,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 10.88124
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.400000035762787,
+            "gpuTotalMs": 10.833440000000001
+          },
+          "prepareDeltaMs": 0.3999999761581421,
+          "totalDeltaMs": -0.19999998807907104
+        },
+        {
+          "pair": 113,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.3999999165534973,
+            "cpuTotalMs": 4.400000035762787,
+            "gpuTotalMs": 11.02192
+          },
+          "indexed": {
+            "prepareMs": 1.8000000715255737,
+            "cpuTotalMs": 4.399999976158142,
+            "gpuTotalMs": 10.81536
+          },
+          "prepareDeltaMs": 0.4000001549720764,
+          "totalDeltaMs": -5.960464477539063e-8
+        },
+        {
+          "pair": 114,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.800000011920929,
+            "cpuTotalMs": 6.099999964237213,
+            "gpuTotalMs": 11.795840000000002
+          },
+          "indexed": {
+            "prepareMs": 1.300000011920929,
+            "cpuTotalMs": 3.200000047683716,
+            "gpuTotalMs": 12.064079999999999
+          },
+          "prepareDeltaMs": -0.5,
+          "totalDeltaMs": -2.8999999165534973
+        },
+        {
+          "pair": 115,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.899999976158142,
+            "gpuTotalMs": 12.15104
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 5.199999988079071,
+            "gpuTotalMs": 11.63724
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": 1.300000011920929
+        },
+        {
+          "pair": 116,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.48608
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.399999976158142,
+            "gpuTotalMs": 11.345320000000001
+          },
+          "prepareDeltaMs": 0,
+          "totalDeltaMs": -0.30000001192092896
+        },
+        {
+          "pair": 117,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.1999999284744263,
+            "cpuTotalMs": 3.099999964237213,
+            "gpuTotalMs": 11.71588
+          },
+          "indexed": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 5,
+            "gpuTotalMs": 11.32752
+          },
+          "prepareDeltaMs": 0.40000009536743164,
+          "totalDeltaMs": 1.9000000357627869
+        },
+        {
+          "pair": 118,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 11.65804
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 11.3626
+          },
+          "prepareDeltaMs": -0.40000003576278687,
+          "totalDeltaMs": -1.0999999642372131
+        },
+        {
+          "pair": 119,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.600000023841858,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 11.792160000000003
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.599999964237213,
+            "gpuTotalMs": 11.69472
+          },
+          "prepareDeltaMs": -0.7000000476837158,
+          "totalDeltaMs": -0.5
+        },
+        {
+          "pair": 120,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.699999988079071,
+            "gpuTotalMs": 11.63616
+          },
+          "indexed": {
+            "prepareMs": 1.2999999523162842,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 11.226920000000002
+          },
+          "prepareDeltaMs": 0.09999990463256836,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 121,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1,
+            "cpuTotalMs": 3.5,
+            "gpuTotalMs": 18.14636
+          },
+          "indexed": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 24.53424
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.699999988079071
+        },
+        {
+          "pair": 122,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.0000000596046448,
+            "cpuTotalMs": 3.700000047683716,
+            "gpuTotalMs": 15.849120000000003
+          },
+          "indexed": {
+            "prepareMs": 1.0999999642372131,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 14.17048
+          },
+          "prepareDeltaMs": 0.09999990463256836,
+          "totalDeltaMs": 0.2999999523162842
+        },
+        {
+          "pair": 123,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.70844
+          },
+          "indexed": {
+            "prepareMs": 0.8999999761581421,
+            "cpuTotalMs": 3.199999988079071,
+            "gpuTotalMs": 13.41396
+          },
+          "prepareDeltaMs": -0.30000001192092896,
+          "totalDeltaMs": -1
+        },
+        {
+          "pair": 124,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 4.099999964237213,
+            "gpuTotalMs": 12.546919999999998
+          },
+          "indexed": {
+            "prepareMs": 1.2000000476837158,
+            "cpuTotalMs": 3.600000023841858,
+            "gpuTotalMs": 12.5528
+          },
+          "prepareDeltaMs": 5.960464477539063e-8,
+          "totalDeltaMs": -0.4999999403953552
+        },
+        {
+          "pair": 125,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.199999988079071,
+            "cpuTotalMs": 3.800000011920929,
+            "gpuTotalMs": 11.79732
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.100000023841858,
+            "gpuTotalMs": 11.999279999999999
+          },
+          "prepareDeltaMs": 0.19999998807907104,
+          "totalDeltaMs": 0.30000001192092896
+        },
+        {
+          "pair": 126,
+          "first": "legacy",
+          "legacy": {
+            "prepareMs": 1.3000000715255737,
+            "cpuTotalMs": 3.799999952316284,
+            "gpuTotalMs": 12.03284
+          },
+          "indexed": {
+            "prepareMs": 1.100000023841858,
+            "cpuTotalMs": 4,
+            "gpuTotalMs": 12.212879999999998
+          },
+          "prepareDeltaMs": -0.20000004768371582,
+          "totalDeltaMs": 0.20000004768371582
+        },
+        {
+          "pair": 127,
+          "first": "indexed",
+          "legacy": {
+            "prepareMs": 1.5,
+            "cpuTotalMs": 4.599999964237213,
+            "gpuTotalMs": 12.2702
+          },
+          "indexed": {
+            "prepareMs": 1.399999976158142,
+            "cpuTotalMs": 4.199999988079071,
+            "gpuTotalMs": 12.203520000000001
+          },
+          "prepareDeltaMs": -0.10000002384185791,
+          "totalDeltaMs": -0.3999999761581421
+        }
+      ]
+    }
+  ],
+  "quality": [
+    {
+      "stage": "opaque",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "hdr",
+      "changedChannels": 0,
+      "maxEncodedError": 0,
+      "coordinates": []
+    },
+    {
+      "stage": "taa",
+      "changedChannels": 54,
+      "maxEncodedError": 3,
+      "coordinates": [
+        {
+          "x": 1147,
+          "y": 452,
+          "channel": 1,
+          "before": 11988,
+          "after": 11987
+        },
+        {
+          "x": 1149,
+          "y": 452,
+          "channel": 1,
+          "before": 11990,
+          "after": 11989
+        },
+        {
+          "x": 1149,
+          "y": 453,
+          "channel": 1,
+          "before": 11846,
+          "after": 11845
+        },
+        {
+          "x": 962,
+          "y": 508,
+          "channel": 0,
+          "before": 10674,
+          "after": 10675
+        },
+        {
+          "x": 963,
+          "y": 508,
+          "channel": 0,
+          "before": 10799,
+          "after": 10800
+        },
+        {
+          "x": 964,
+          "y": 508,
+          "channel": 0,
+          "before": 10752,
+          "after": 10753
+        },
+        {
+          "x": 965,
+          "y": 508,
+          "channel": 0,
+          "before": 10668,
+          "after": 10669
+        },
+        {
+          "x": 962,
+          "y": 509,
+          "channel": 0,
+          "before": 11330,
+          "after": 11331
+        },
+        {
+          "x": 963,
+          "y": 509,
+          "channel": 0,
+          "before": 11182,
+          "after": 11183
+        },
+        {
+          "x": 964,
+          "y": 509,
+          "channel": 0,
+          "before": 10965,
+          "after": 10966
+        },
+        {
+          "x": 965,
+          "y": 509,
+          "channel": 0,
+          "before": 10817,
+          "after": 10818
+        },
+        {
+          "x": 962,
+          "y": 510,
+          "channel": 0,
+          "before": 11256,
+          "after": 11257
+        }
+      ]
+    }
+  ],
+  "captures": [
+    {
+      "mode": "legacy",
+      "frame": 31,
+      "file": "legacy-frame-31.png"
+    },
+    {
+      "mode": "indexed",
+      "frame": 31,
+      "file": "indexed-frame-31.png"
+    }
+  ],
+  "gates": {
+    "nativeTimestamps": true,
+    "variantsExecuted": true,
+    "physicalReplay": true,
+    "finalCanonicalStages": false
+  },
+  "interpretation": "Same-device AB/BA pairs isolate the original three readers versus the published presence index. No shader, scene, physical map value, instance packing, Render IR or pass changes between variants. Counter overhead is one getter selection per frame in both modes. Profiled waits are not display FPS or frame interval. Final snapshots do not replace multi-frame and full wet quality gates.",
+  "startedAt": "2026-10-12T02:11:36.279Z",
+  "completedAt": "2026-10-12T02:12:27.699Z",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "468c5eecf68f17b5ee8ac2abf7e81228bb42c92abfcfd5eecad65ae664f1601f",
+    "diagnosticSha256": "92fae28b4cf819be84805077db00ba93bd840cb47d22a63335f7d496839d28a7"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

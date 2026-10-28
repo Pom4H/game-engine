@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "passed",
+  "problem": "Appearance-driven residency cleanup can release image A while an offscreen object's bind group still references it. Reloading A under the same URL previously reused the old bind group and sampled the destroyed generation. Label collection has the same lifetime boundary.",
+  "beforeProof": {
+    "method": "Actual WebGPURenderer.object() from the built Engine with fake GPU texture identities",
+    "reusedObject": true,
+    "boundTexture": "A generation 1",
+    "boundTextureDestroyed": true,
+    "expectedTexture": "A generation 2"
+  },
+  "fix": {
+    "file": "src/render/webgpu.ts",
+    "behavior": "Record and compare actual albedo, normal, ORM, height and label texture identities in both needsPrepare() and object() before reusing a GPU bind group.",
+    "scope": "Geometry, shader math, material values and texture residency policy remain unchanged."
+  },
+  "regression": {
+    "file": "test/renderer-post.test.mjs",
+    "scenario": "Full renderer transaction: visible A, move outside all views, patch to B and collect, patch back to A and reload, return to the visible scene.",
+    "checks": [
+      "The offscreen object retains its old binding while all A images and label are evicted.",
+      "Reentry replaces the bind group with the new image and label generations.",
+      "A draw fails the fake GPU check if any bound image or label has been destroyed.",
+      "Each image channel also refreshes when the URL, material identity and pose remain unchanged.",
+      "A removed label generation refreshes under the same text and color key."
+    ]
+  },
+  "validation": {
+    "typecheck": "passed",
+    "build": "passed",
+    "focusedTests": {"passed":35,"failed":0},
+    "nativeGpuRun": "The extended native render stability harness subsequently passed on AMD RDNA-3 with zero validation errors. The A-to-B-to-A binding-lifetime regression itself executes production renderer methods against a resource-lifetime-checking fake GPU."
+  }
+}

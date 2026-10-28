@@ -1,0 +1,269 @@
+{
+  "date": "2026-10-16T04:28:01.126Z",
+  "browserMode": "native-gpu",
+  "scope": "sole Game entry; same renderer; presentation-only fixed source; 512 actual linear HDR samples, UI mouse click and real GPU pass routing; not a performance/parity gate",
+  "samplePointsPerComparison": 512,
+  "controls": [
+    {
+      "name": "Стабилизация TAA",
+      "disabled": false
+    },
+    {
+      "name": "Сияние света",
+      "disabled": false
+    },
+    {
+      "name": "Размытие движения",
+      "disabled": false
+    },
+    {
+      "name": "Фокус камеры",
+      "disabled": false
+    }
+  ],
+  "stages": [
+    {
+      "mode": "bloom",
+      "diff": {
+        "max": 0.0047149658203125,
+        "mean": 0.0000466667115688324,
+        "signedMean": 0.0000466667115688324
+      },
+      "postProcessing": {
+        "temporalAA": false,
+        "bloom": true,
+        "motionBlur": 0
+      },
+      "focus": {
+        "focusDistance": 8.089499366462674,
+        "aperture": 0
+      },
+      "cpuPasses": [
+        "encode.bloom"
+      ],
+      "gpuQuanta": {
+        "visibility": 0.44992,
+        "shadow": 0.2268,
+        "probe": 0,
+        "reflection": 0.66796,
+        "main": 5.3468,
+        "main.transparent": 0.06348,
+        "bloom.downsample": 0.06332,
+        "bloom.horizontal": 0.10436,
+        "bloom.vertical": 0.10376,
+        "effects": 0.679,
+        "taa": 0,
+        "motionBlur": 0,
+        "present": 0.06728
+      },
+      "errors": [],
+      "physicalBodies": 0
+    },
+    {
+      "mode": "focus",
+      "diff": {
+        "max": 0.51849365234375,
+        "mean": 0.005281849453846614,
+        "signedMean": 0.000289397935072581
+      },
+      "postProcessing": {
+        "temporalAA": false,
+        "bloom": false,
+        "motionBlur": 0
+      },
+      "focus": {
+        "focusDistance": 8.089499366462674,
+        "aperture": 8
+      },
+      "cpuPasses": [],
+      "gpuQuanta": {
+        "visibility": 0.46008,
+        "shadow": 0.23856,
+        "probe": 0,
+        "reflection": 0.69916,
+        "main": 5.37124,
+        "main.transparent": 0.07452,
+        "bloom.downsample": 0,
+        "bloom.horizontal": 0,
+        "bloom.vertical": 0,
+        "effects": 0.68236,
+        "taa": 0,
+        "motionBlur": 0,
+        "present": 0.07232
+      },
+      "errors": [],
+      "physicalBodies": 0
+    },
+    {
+      "mode": "stationary",
+      "diff": {
+        "max": 0,
+        "mean": 0,
+        "signedMean": 0
+      },
+      "postProcessing": {
+        "temporalAA": true,
+        "bloom": false,
+        "motionBlur": 1
+      },
+      "focus": {
+        "focusDistance": 8.089499366462674,
+        "aperture": 0
+      },
+      "cpuPasses": [
+        "encode.taa",
+        "encode.motionBlur"
+      ],
+      "gpuQuanta": {
+        "visibility": 0.44176,
+        "shadow": 0.2228,
+        "probe": 0,
+        "reflection": 0.66596,
+        "main": 5.3128,
+        "main.transparent": 0.0608,
+        "bloom.downsample": 0,
+        "bloom.horizontal": 0,
+        "bloom.vertical": 0,
+        "effects": 0.6804,
+        "taa": 0.17148,
+        "motionBlur": 0.10332,
+        "present": 0.06732
+      },
+      "errors": [],
+      "physicalBodies": 0
+    },
+    {
+      "mode": "motion-taa",
+      "diff": {
+        "max": 0.02093505859375,
+        "mean": 0.0007347868134578069,
+        "signedMean": 0.0000959516813357671
+      },
+      "postProcessing": {
+        "temporalAA": true,
+        "bloom": false,
+        "motionBlur": 1
+      },
+      "focus": {
+        "focusDistance": 8.089499366462674,
+        "aperture": 0
+      },
+      "cpuPasses": [
+        "encode.taa",
+        "encode.motionBlur"
+      ],
+      "gpuQuanta": {
+        "visibility": 0.4536,
+        "shadow": 2.48952,
+        "probe": 0,
+        "reflection": 0.6738,
+        "main": 5.42772,
+        "main.transparent": 0.06304,
+        "bloom.downsample": 0,
+        "bloom.horizontal": 0,
+        "bloom.vertical": 0,
+        "effects": 0.68224,
+        "taa": 0.16916,
+        "motionBlur": 0.10508,
+        "present": 0.06752
+      },
+      "errors": [],
+      "physicalBodies": 0
+    },
+    {
+      "mode": "motion-no-taa",
+      "diff": {
+        "max": 0.05804443359375,
+        "mean": 0.000989690733452638,
+        "signedMean": 0.00002563900003830592
+      },
+      "postProcessing": {
+        "temporalAA": false,
+        "bloom": false,
+        "motionBlur": 1
+      },
+      "focus": {
+        "focusDistance": 8.089499366462674,
+        "aperture": 0
+      },
+      "cpuPasses": [
+        "encode.motionBlur"
+      ],
+      "gpuQuanta": {
+        "visibility": 0.45904,
+        "shadow": 2.52228,
+        "probe": 0,
+        "reflection": 0.66612,
+        "main": 5.42436,
+        "main.transparent": 0.06664,
+        "bloom.downsample": 0,
+        "bloom.horizontal": 0,
+        "bloom.vertical": 0,
+        "effects": 0.677,
+        "taa": 0,
+        "motionBlur": 0.11568,
+        "present": 0.07112
+      },
+      "errors": [],
+      "physicalBodies": 0
+    }
+  ],
+  "final": {
+    "settings": {
+      "environmentMode": "manual",
+      "preset": "night",
+      "hiz": false,
+      "taa": false,
+      "bloom": false,
+      "groundLitter": false,
+      "motionBlur": 0,
+      "dof": 0,
+      "renderScale": 0.55,
+      "drawDistance": 200,
+      "visual": {
+        "sunElevation": -0.41887902047863906,
+        "sunTemperature": 9000,
+        "skyTurbidity": 2.6,
+        "humidity": 0.62,
+        "cloudCoverage": 0.22,
+        "fogDensity": 0.0015,
+        "wetness": 0.1,
+        "exposureBias": 0.8,
+        "artificialLightIntensity": 1,
+        "sunIntensity": 0,
+        "skyIntensity": 0.2
+      }
+    },
+    "postProcessing": {
+      "temporalAA": false,
+      "bloom": false,
+      "motionBlur": 0
+    },
+    "projectionPhysicalBodies": 0,
+    "gpuErrors": []
+  },
+  "tests": {
+    "engine": 52,
+    "game": 27,
+    "gameAssertions": 15281,
+    "compiledFeatureCombinations": 32,
+    "engineGameOfficeTypechecksAndBuilds": true
+  },
+  "imagesInspected": [
+    "controls",
+    "bloom-off",
+    "bloom-on",
+    "focus",
+    "motion-taa",
+    "motion-no-taa",
+    "disabled"
+  ],
+  "delivery": {
+    "canonicalBundleMatchesDiskSha256": true
+  },
+  "limits": [
+    "Presentation-only Game source, no installed Office in the isolated save",
+    "Not visual parity against legacy, not a sustained FPS gate",
+    "No new voice, Office visual or real mobile-device acceptance"
+  ]
+}

@@ -2,6 +2,12 @@
 //! State is owned by a single Wasm instance and shared as TypedArray views with
 //! StructuralBody. No per-tick array marshalling. F64, fixed constraint order.
 //! Keep parity with src/physics/structure.ts and the older C-Wasm experiment.
+#[cfg(feature="simd-distance")]
+mod distance_batch;
+#[cfg(all(test,feature="simd-distance"))]
+mod distance_batch_tests;
+mod sparse_factor;
+
 #[cfg(target_arch="wasm32")]
 mod host {
     #[link(wasm_import_module="math")]
@@ -139,6 +145,8 @@ fn project_static(
 
 const N_FIELDS:usize=23;
 pub struct Structure {
+    #[cfg(feature="simd-distance")]
+    distance_simd:bool,
     n:usize,m:usize,
     floats:Vec<Vec<f64>>,kind:Vec<u8>,ia:Vec<u16>,ib:Vec<u16>,ic:Vec<u16>,id:Vec<u16>,broken:Vec<u8>,
     /// [plasticWorkJ, quietTimeSeconds, steps].
@@ -153,6 +161,8 @@ impl Structure {
         if !(2..=2048).contains(&n)||!(1..=16384).contains(&m){return None;}
         let lengths=[n*3,n*3,n*3,n*3,n,n,n*3,m,m,m,m,m,m,m,m,m,n];
         Some(Self{
+            #[cfg(feature="simd-distance")]
+            distance_simd:true,
             n,m,
             floats:lengths.iter().map(|len|vec![0.0;*len]).collect(),
             kind:vec![0;m],ia:vec![0;m],ib:vec![0;m],ic:vec![0;m],id:vec![0;m],broken:vec![0;m],
@@ -222,7 +232,19 @@ impl Structure {
         }
         let thermal_cubed=host::power(thermal,3.0);
         for iteration in 0..iterations{
+            #[cfg(feature="simd-distance")]
+            let mut paired_until=0;
             for i in 0..m{
+                #[cfg(feature="simd-distance")]
+                {
+                    if i<paired_until{continue;}
+                    if self.distance_simd && distance_batch::try_solve_pair(
+                        i,p,inverse,kind,ia,ib,broken,rest,compliance,lambda,dt,thermal,
+                    ){
+                        paired_until=i+2;
+                        continue;
+                    }
+                }
                 if broken[i]!=0{continue;}
                 let a=ia[i] as usize;let b=ib[i] as usize;
                 let alpha=compliance[i]/(dt*dt);
@@ -316,7 +338,7 @@ impl Structure {
     }
 }
 
-#[cfg(target_arch="wasm32")]
+#[cfg(all(target_arch="wasm32",not(feature="linear-algebra-only")))]
 mod abi {
     use super::*;
     #[no_mangle]

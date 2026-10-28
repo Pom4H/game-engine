@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-18",
+  "status": "Adopted minimal guard; focused build, typecheck and correctness checks passed",
+  "change": "PlaybackClock.sample validates its argument and absence of observations first, then returns its current value for now <= sampled without moving the host-time baseline. No timers, public API, interpolation math, authority observation, rates, delay, queue or render settings changed.",
+  "cause": "The previous implementation clamped a negative sample interval to zero but still assigned sampled=now. A stale callback therefore did not immediately move the presentation, yet the next current callback consumed part of an already-consumed interval again. Simulation time was already monotonic; explicit reverse seeking is separately supported by Replica.at(time).",
+  "sourceSha256": {
+    "before/src/network/playback.ts": "b37e10fa793add80ddd2c56b22e9f648e732a11cc903ce9ad4df56e3af5e5820",
+    "src/network/playback.ts": "3affdc5bab26f17e2762ec0675ea57fb07994f19fc6bca2563e9553f042caff6",
+    "before/dist/network/playback.js": "7605cd9d9f4350b735699d5c9d9cf27adf43b063a49b42b1465601ef92b47aa3",
+    "dist/network/playback.js": "fab307fcab94d5d4afa6932c347026d2d48933d89a13b66903efaac052e429c0",
+    "test/playback-monotonic-sample.test.mjs": "fd774e927b5dc92ef112e9c0e8f62eabec8847c796e88ff51c9e3ea988ebdf95",
+    "test/fixtures/playback-clock-before-monotonic-sample.mjs": "e101bbe1723078308fc59f7235b4d246d891e9f1207fc7d5ce4286425360aa61",
+    "../thegame/src/game/net/causal/replication.ts": "7e938387c39a60b180eb648d6d07963ec8b132a53760a8b77aa8ddfa5bb148ea"
+  },
+  "independentReference": {
+    "description": "Permanent fixture contains the full pre-change compiled PlaybackClock, with unrelated module import and following Replica removed. Actual class source equals the ignored original full-module class. Removing only the adopted source guard restores the original playback.ts hash.",
+    "ordinaryCoverage": "7,200 increasing/equal timestamp positions, 14,400 sample calls per implementation, across delays 0/.1/.3/2 seconds, .55/.85/1.1 authority rates, calibration, long gaps and resets. Float64 result bytes and complete clock own state match the frozen reference.",
+    "additionalCoverage": "Stale timestamp, actual Replica output, equal timestamp after a new cause, finite-argument validation before any observation, held-at-latest packet gaps, reset to an earlier epoch and explicit reverse Replica.at seeking.",
+    "ignoredPreparationReport": "artifacts/playback-monotonic-timestamp-prototype/report.json",
+    "ignoredPreparationReportSha256": "45fb0ea89e03d3e2ca62785fe6a85169b7fa88443fa9a316df40db426710d6b8"
+  },
+  "visibleProof": {
+    "description": "A confirmed latest cause at simulation time 1 second and host time 0; samples at host seconds [0,.02,.01,.03], compared with [0,.02,.03]. Replica projects x=10*time; canonical CausalReceiver uses its actual publisher/fixture with x=4*time and sampled audio RPM.",
+    "before": {
+      "time": 0.943312,
+      "replicaX": 9.43312,
+      "causalX": 3.773248,
+      "causalRpm": 1457
+    },
+    "productionAndNoStaleControl": {
+      "time": 0.932856,
+      "replicaX": 9.32856,
+      "causalX": 3.731424,
+      "causalRpm": 1456
+    },
+    "actualCanonicalConsumer": "The unchanged canonical CausalReceiver with its default production Engine clock exactly matches the complete no-stale presentation object. Injecting the independent old clock reproduces the position and audio difference.",
+    "consumerReport": "artifacts/playback-monotonic-timestamp-prototype/production-consumer.json",
+    "consumerReportSha256": "23ba69fdf0195d6fe27a7ba0379784f2e9fa1eb8e342a17ccd3f7cb771cafc2e"
+  },
+  "validation": [
+    {
+      "command": "bun run build",
+      "exitCode": 0,
+      "log": "artifacts/playback-monotonic-timestamp-prototype/production-build.log",
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb"
+    },
+    {
+      "command": "node --test test/playback-monotonic-sample.test.mjs test/network-foundation.test.mjs",
+      "exitCode": 0,
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "newRegressions": 4,
+      "log": "artifacts/playback-monotonic-timestamp-prototype/production-tests.log",
+      "sha256": "2274db1d6e353a5eb1e6991412c5d1b7bd2e5c7f5250c3996ed0ff7cbeb3304c"
+    },
+    {
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": "artifacts/playback-monotonic-timestamp-prototype/production-typecheck.log",
+      "sha256": "d66548006c5c7c54f315f252a8864713f539323f6c6187c23bb7db83274361fa"
+    },
+    {
+      "command": "bun artifacts/playback-monotonic-timestamp-prototype/verify-production.ts",
+      "exitCode": 0,
+      "log": "artifacts/playback-monotonic-timestamp-prototype/production-consumer.log",
+      "sha256": "7fa614398e73223477494ec728ef2a70cda29f31263c26bedc538ae0da538711"
+    }
+  ],
+  "limits": "This demonstrates an externally observable timestamp-order correctness defect and its bounded correction. It does not establish the frequency of stale live callbacks, screenshot attribution, native GPU behavior, FPS, allocation or whole-server gains. No Game production source was edited; canonical consumer validation executes actual classes directly without a browser or server.",
+  "integration": "docs/render-evidence/quiet-motion-playback-integration-20261018.json"
+}

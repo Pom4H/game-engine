@@ -56,6 +56,9 @@ fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:
  for(var i=0u;i<count;i++){
   let t=along+core*tan(mix(a,b,(f32(i)+.5)/f32(count)));
   let fromLight=origin+ray*t-source.position.xyz;let distance=length(fromLight);
+  // Housing/cone masks can make this quadrature sample exactly zero. Keep
+  // the original samples and their order, but avoid evaluating empty paths.
+  let emission=emissionWeight(source,fromLight);if(emission<=0.0){continue;}
   let rangeWeight=pow(max(0.0,1.0-distance/radius),2.0);
   let cosine=dot(fromLight/max(distance,.0001),-ray);let g=.45;
   let denominator=max(.001,1.0+g*g-2.0*g*cosine);
@@ -63,7 +66,7 @@ fn pointFogIntegral(source:PointSource,origin:vec3<f32>,ray:vec3<f32>,rayLength:
   let samplePosition=origin+ray*t;
   let attenuation=exp(-fogViewDepth(origin,samplePosition,density)-fogOpticalDepth(source.position.xyz,samplePosition,density));
   let ramp=clamp((t-f.fogMedium.z)/max(f.fogMedium.w,.0001),0.0,1.0);
-  sum+=emissionWeight(source,fromLight)*rangeWeight*attenuation*phase*fogLocalDensity(samplePosition,density)*ramp;
+  sum+=emission*rangeWeight*attenuation*phase*fogLocalDensity(samplePosition,density)*ramp;
  }
  return source.color.rgb*source.color.w*.78*(b-a)/core*sum/f32(count);
 }

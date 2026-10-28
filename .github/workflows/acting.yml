@@ -1,0 +1,31 @@
+name: Acting contracts
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/acting/**'
+      - 'src/animation/**'
+      - 'src/math.ts'
+      - 'test/acting.test.mjs'
+      - 'test/npc-mind.test.mjs'
+      - 'tools/acting/**'
+      - 'package.json'
+      - '.github/workflows/acting.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: acting-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: node tools/acting/demo.mjs

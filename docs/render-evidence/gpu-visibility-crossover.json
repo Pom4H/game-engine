@@ -1,0 +1,1074 @@
+{
+  "date": "2026-10-11",
+  "execution": "Local Windows, headless Chrome, native AMD RDNA 3, 1920x1080",
+  "reference": "Current working tree; the CPU path differs from the October 10 Engine Compare revision",
+  "correctness": "correctness-passed",
+  "frameBudgetMs": 16.666666666666668,
+  "frameBudgetPassed": false,
+  "framesPerMode": 120,
+  "warmupFrames": 32,
+  "comparisons": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "replayMatch": true,
+      "sourceMatch": true,
+      "linearMaxError": 0,
+      "linearRmsError": 0,
+      "pixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "measuredPixelComparison": {
+        "maxError": 0,
+        "rmsError": 0,
+        "differentChannels": 0,
+        "totalChannels": 8294400
+      },
+      "timestampQueries": true,
+      "indirectDraws": 1,
+      "visibilityFrame": 136,
+      "visibleCountsMatch": true
+    }
+  ],
+  "measurements": [
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 20.80000001192093,
+        "p95": 26.899999976158142,
+        "mean": 21.32666666507721
+      },
+      "cpuCullingMs": {
+        "p50": 1.399999976158142,
+        "p95": 1.9000000357627869,
+        "mean": 1.3941666667660078
+      },
+      "gpuMs": {
+        "meanMs": 13.847914333333335,
+        "p50Ms": 13.475920000000002,
+        "p95Ms": 16.295319999999997,
+        "maxMs": 18.09868
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 20,
+        "p95": 29.900000000001455,
+        "mean": 22.592436974789916
+      },
+      "fps": 44.262599962804536,
+      "uploadBytes": {
+        "p50": 3588,
+        "p95": 3588,
+        "mean": 3588
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu",
+        "batches": 0,
+        "candidates": 0,
+        "currentVisible": 0
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 19.19999998807907,
+        "p95": 25,
+        "mean": 19.892499996225038
+      },
+      "cpuCullingMs": {
+        "p50": 0.40000003576278687,
+        "p95": 0.6000000238418579,
+        "mean": 0.4233333324392637
+      },
+      "gpuMs": {
+        "meanMs": 12.85524733333333,
+        "p50Ms": 12.42892,
+        "p95Ms": 15.924280000000001,
+        "maxMs": 20.16868
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 20,
+        "p95": 29.900000000001455,
+        "mean": 21.115126050420173
+      },
+      "fps": 47.35941417598598,
+      "uploadBytes": {
+        "p50": 20648,
+        "p95": 20648,
+        "mean": 20648
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 17060,
+        "p95": 17060,
+        "mean": 17060
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu-batched",
+        "batches": 1,
+        "candidates": 5000,
+        "currentVisible": 4260,
+        "diagnostics": {
+          "frame": 119,
+          "sourceInstances": 5000,
+          "visibleInstances": 4260,
+          "triangles": 51120,
+          "samples": 97,
+          "pending": 0,
+          "droppedSamples": 23,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "static",
+      "mode": "gpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 17.900000035762787,
+        "p95": 23.899999976158142,
+        "mean": 18.519999999801318
+      },
+      "cpuCullingMs": {
+        "p50": 0.09999996423721313,
+        "p95": 0.20000004768371582,
+        "mean": 0.07500000347693761
+      },
+      "gpuMs": {
+        "meanMs": 11.762472000000008,
+        "p50Ms": 11.398679999999999,
+        "p95Ms": 15.267199999999999,
+        "maxMs": 16.0694
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0.022440666666666675,
+        "p50Ms": 0.0216,
+        "p95Ms": 0.02544,
+        "maxMs": 0.04348
+      },
+      "frameIntervalMs": {
+        "p50": 19.900000000001455,
+        "p95": 29.100000000002183,
+        "mean": 19.675630252100852
+      },
+      "fps": 50.824293157939664,
+      "uploadBytes": {
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 3720
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 132,
+        "p95": 132,
+        "mean": 132
+      },
+      "geometryCountBasis": "candidate-upper-bound",
+      "visibility": {
+        "mode": "gpu",
+        "batches": 1,
+        "candidates": 5000,
+        "currentVisible": null,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 5000,
+          "visibleInstances": 4260,
+          "triangles": 51120,
+          "samples": 96,
+          "pending": 0,
+          "droppedSamples": 24,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 21.30000001192093,
+        "p95": 28.5,
+        "mean": 21.819999996821085
+      },
+      "cpuCullingMs": {
+        "p50": 5,
+        "p95": 8.400000035762787,
+        "mean": 5.520000001291434
+      },
+      "gpuMs": {
+        "meanMs": 13.86162933333333,
+        "p50Ms": 13.319119999999998,
+        "p95Ms": 18.537240000000004,
+        "maxMs": 18.96512
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 20,
+        "p95": 30.099999999998545,
+        "mean": 22.960504201680635
+      },
+      "fps": 43.55305054349822,
+      "uploadBytes": {
+        "p50": 3588,
+        "p95": 3588,
+        "mean": 5090.133333333333
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu",
+        "batches": 0,
+        "candidates": 0,
+        "currentVisible": 0
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 19.299999952316284,
+        "p95": 26,
+        "mean": 20.359999998410544
+      },
+      "cpuCullingMs": {
+        "p50": 2.200000047683716,
+        "p95": 3.5,
+        "mean": 2.3691666702429455
+      },
+      "gpuMs": {
+        "meanMs": 13.133897999999999,
+        "p50Ms": 12.514560000000001,
+        "p95Ms": 18.031039999999997,
+        "maxMs": 20.10712
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 20,
+        "p95": 30,
+        "mean": 21.656302521008392
+      },
+      "fps": 46.17593418959298,
+      "uploadBytes": {
+        "p50": 19764,
+        "p95": 20276,
+        "mean": 21257.566666666666
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 16152,
+        "p95": 16668,
+        "mean": 16167.433333333332
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu-batched",
+        "batches": 1,
+        "candidates": 5000,
+        "currentVisible": 3905,
+        "diagnostics": {
+          "frame": 119,
+          "sourceInstances": 5000,
+          "visibleInstances": 3907,
+          "triangles": 46884,
+          "samples": 100,
+          "pending": 0,
+          "droppedSamples": 20,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 5000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "1395b1056932e2f721e91abc6e35f5eff3b1c95c11633c98f5bfb148d181683d",
+      "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "cpuMs": {
+        "p50": 19.399999976158142,
+        "p95": 23.100000023841858,
+        "mean": 19.55833333283663
+      },
+      "cpuCullingMs": {
+        "p50": 1.699999988079071,
+        "p95": 2.900000035762787,
+        "mean": 1.881666665772597
+      },
+      "gpuMs": {
+        "meanMs": 12.581977333333327,
+        "p50Ms": 12.35748,
+        "p95Ms": 14.25788,
+        "maxMs": 16.227439999999998
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0.021391333333333328,
+        "p50Ms": 0.02116,
+        "p95Ms": 0.02184,
+        "maxMs": 0.03944
+      },
+      "frameIntervalMs": {
+        "p50": 20,
+        "p95": 29.900000000001455,
+        "mean": 20.770588235294092
+      },
+      "fps": 48.145001416029515,
+      "uploadBytes": {
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 5222.133333333333
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 132,
+        "p95": 132,
+        "mean": 132
+      },
+      "geometryCountBasis": "candidate-upper-bound",
+      "visibility": {
+        "mode": "gpu",
+        "batches": 1,
+        "candidates": 5000,
+        "currentVisible": null,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 5000,
+          "visibleInstances": 3905,
+          "triangles": 46860,
+          "samples": 100,
+          "pending": 0,
+          "droppedSamples": 20,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 29.5,
+        "p95": 38.10000002384186,
+        "mean": 30.620833333333334
+      },
+      "cpuCullingMs": {
+        "p50": 1.699999988079071,
+        "p95": 3.599999964237213,
+        "mean": 1.910833332935969
+      },
+      "gpuMs": {
+        "meanMs": 19.705338666666655,
+        "p50Ms": 19.65468,
+        "p95Ms": 22.462759999999996,
+        "maxMs": 22.6478
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 29.900000000001455,
+        "p95": 40.099999999998545,
+        "mean": 31.643697478991584
+      },
+      "fps": 31.601869555980468,
+      "uploadBytes": {
+        "p50": 3588,
+        "p95": 3588,
+        "mean": 3588
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu",
+        "batches": 0,
+        "candidates": 0,
+        "currentVisible": 0
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "cpu-batched",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 32.69999998807907,
+        "p95": 38.09999996423721,
+        "mean": 33.42749999860923
+      },
+      "cpuCullingMs": {
+        "p50": 0.699999988079071,
+        "p95": 1.100000023841858,
+        "mean": 0.7374999985098839
+      },
+      "gpuMs": {
+        "meanMs": 21.865705,
+        "p50Ms": 21.527279999999998,
+        "p95Ms": 26.686400000000003,
+        "maxMs": 27.04644
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 30.299999999995634,
+        "p95": 40,
+        "mean": 34.85630252100835
+      },
+      "fps": 28.689216229899507,
+      "uploadBytes": {
+        "p50": 25000,
+        "p95": 25000,
+        "mean": 25000
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 21412,
+        "p95": 21412,
+        "mean": 21412
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu-batched",
+        "batches": 1,
+        "candidates": 10000,
+        "currentVisible": 5348,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 10000,
+          "visibleInstances": 5348,
+          "triangles": 64176,
+          "samples": 114,
+          "pending": 0,
+          "droppedSamples": 6,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "static",
+      "mode": "gpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 32.799999952316284,
+        "p95": 39.69999998807907,
+        "mean": 33.17833333214124
+      },
+      "cpuCullingMs": {
+        "p50": 0.09999996423721313,
+        "p95": 0.19999998807907104,
+        "mean": 0.06666666766007741
+      },
+      "gpuMs": {
+        "meanMs": 21.884712999999998,
+        "p50Ms": 21.338119999999996,
+        "p95Ms": 26.088400000000004,
+        "maxMs": 26.41344
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0.045067666666666645,
+        "p50Ms": 0.03316,
+        "p95Ms": 0.0686,
+        "maxMs": 0.07868
+      },
+      "frameIntervalMs": {
+        "p50": 30.10000000000582,
+        "p95": 40.60000000000582,
+        "mean": 34.70504201680667
+      },
+      "fps": 28.814257003801586,
+      "uploadBytes": {
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 3720
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 132,
+        "p95": 132,
+        "mean": 132
+      },
+      "geometryCountBasis": "candidate-upper-bound",
+      "visibility": {
+        "mode": "gpu",
+        "batches": 1,
+        "candidates": 10000,
+        "currentVisible": null,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 10000,
+          "visibleInstances": 5348,
+          "triangles": 64176,
+          "samples": 111,
+          "pending": 0,
+          "droppedSamples": 9,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 40.700000047683716,
+        "p95": 60.299999952316284,
+        "mean": 42.12166666686535
+      },
+      "cpuCullingMs": {
+        "p50": 11.100000023841858,
+        "p95": 16.100000023841858,
+        "mean": 11.718333333730698
+      },
+      "gpuMs": {
+        "meanMs": 21.984498666666674,
+        "p50Ms": 21.98568,
+        "p95Ms": 22.239440000000002,
+        "maxMs": 22.38012
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 40,
+        "p95": 59.30000000000291,
+        "mean": 43.426050420168046
+      },
+      "fps": 23.027652534009338,
+      "uploadBytes": {
+        "p50": 3588,
+        "p95": 3588,
+        "mean": 5090.133333333333
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu",
+        "batches": 0,
+        "candidates": 0,
+        "currentVisible": 0
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "cpu-batched",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 37.69999998807907,
+        "p95": 48.69999998807907,
+        "mean": 38.71333333452542
+      },
+      "cpuCullingMs": {
+        "p50": 4.400000035762787,
+        "p95": 8.099999964237213,
+        "mean": 5.223333333432675
+      },
+      "gpuMs": {
+        "meanMs": 24.72977000000001,
+        "p50Ms": 25.09056,
+        "p95Ms": 26.47208,
+        "maxMs": 26.69528
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "maxMs": 0
+      },
+      "frameIntervalMs": {
+        "p50": 39.5,
+        "p95": 50,
+        "mean": 40.221008403361246
+      },
+      "fps": 24.86262875289896,
+      "uploadBytes": {
+        "p50": 25144,
+        "p95": 25252,
+        "mean": 26648.666666666668
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 21556,
+        "p95": 21660,
+        "mean": 21558.533333333333
+      },
+      "geometryCountBasis": "exact",
+      "visibility": {
+        "mode": "cpu-batched",
+        "batches": 1,
+        "candidates": 10000,
+        "currentVisible": 5413,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 10000,
+          "visibleInstances": 5413,
+          "triangles": 64956,
+          "samples": 119,
+          "pending": 0,
+          "droppedSamples": 1,
+          "readbackErrors": 0
+        }
+      }
+    },
+    {
+      "count": 10000,
+      "scenario": "camera-motion",
+      "mode": "gpu",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "sourceHash": "959bde207614b18002d5f10abfb40807b57cc21b4fb0785224304b41a7e3c678",
+      "replayHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "afterHash": "f2ecf0b90fb50f75b927f91de3544f9494df15322f5664c317a6b85bad77125f",
+      "cpuMs": {
+        "p50": 37.10000002384186,
+        "p95": 48.39999997615814,
+        "mean": 38.164999999602635
+      },
+      "cpuCullingMs": {
+        "p50": 3.699999988079071,
+        "p95": 6.199999988079071,
+        "mean": 4.324166661997636
+      },
+      "gpuMs": {
+        "meanMs": 24.462068333333338,
+        "p50Ms": 25.15536,
+        "p95Ms": 25.98696,
+        "maxMs": 26.09168
+      },
+      "gpuVisibilityMs": {
+        "meanMs": 0.05163333333333332,
+        "p50Ms": 0.063,
+        "p95Ms": 0.07084,
+        "maxMs": 0.07988
+      },
+      "frameIntervalMs": {
+        "p50": 39.59999999999127,
+        "p95": 49.80000000000291,
+        "mean": 39.64453781512603
+      },
+      "fps": 25.224155838650205,
+      "uploadBytes": {
+        "p50": 3720,
+        "p95": 3720,
+        "mean": 5222.133333333333
+      },
+      "instanceUploadBytes": {
+        "p50": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "visibilityUploadBytes": {
+        "p50": 132,
+        "p95": 132,
+        "mean": 132
+      },
+      "geometryCountBasis": "candidate-upper-bound",
+      "visibility": {
+        "mode": "gpu",
+        "batches": 1,
+        "candidates": 10000,
+        "currentVisible": null,
+        "diagnostics": {
+          "frame": 120,
+          "sourceInstances": 10000,
+          "visibleInstances": 5413,
+          "triangles": 64956,
+          "samples": 117,
+          "pending": 0,
+          "droppedSamples": 3,
+          "readbackErrors": 0
+        }
+      }
+    }
+  ]
+}

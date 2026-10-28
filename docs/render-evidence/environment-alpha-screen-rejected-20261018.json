@@ -1,0 +1,200 @@
+{
+  "date": "2026-10-18",
+  "productionChanged": false,
+  "status": "rejected_no_reliable_browser_benefit",
+  "candidate": "Replace private per-texel float16(1) alpha conversion by exact half-float literal0x3c00; no input/quality/lighting changes.",
+  "motivation": "A1 showed repeated CPU-heavy environment-map worker tasks. This scoped candidate was screened, not assumed beneficial.",
+  "nodeScreen": {
+    "path": "artifacts/render-stability/environment-alpha-screen-20261018.json",
+    "node": "v24.21.0",
+    "records": [
+      {
+        "proxyCount": 0,
+        "digest": "b2b5976fdfd8c46618055fbab5a5d8ff545ac609a65f40169552430cb5d9eca3",
+        "pairs": [
+          {
+            "beforeMs": 52.991100000000074,
+            "afterMs": 44.87080000000003
+          },
+          {
+            "beforeMs": 40.63700000000006,
+            "afterMs": 34.84159999999997
+          },
+          {
+            "beforeMs": 38.342700000000036,
+            "afterMs": 37.109800000000064
+          },
+          {
+            "beforeMs": 49.1386,
+            "afterMs": 37.787199999999984
+          },
+          {
+            "beforeMs": 39.795900000000074,
+            "afterMs": 38.19589999999994
+          },
+          {
+            "beforeMs": 44.871900000000096,
+            "afterMs": 39.53279999999995
+          },
+          {
+            "beforeMs": 42.05470000000014,
+            "afterMs": 55.76870000000008
+          }
+        ],
+        "beforeMedianMs": 42.05470000000014,
+        "afterMedianMs": 38.19589999999994,
+        "ratio": 1.1010265499700285
+      },
+      {
+        "proxyCount": 28,
+        "digest": "3f67c52f7361be5348b6aabd70b647233c1636a7e9a5e7af199206421d48a66e",
+        "pairs": [
+          {
+            "beforeMs": 49.60120000000006,
+            "afterMs": 49.400699999999915
+          },
+          {
+            "beforeMs": 72.09899999999993,
+            "afterMs": 45.352499999999964
+          },
+          {
+            "beforeMs": 76.50840000000017,
+            "afterMs": 43.83849999999984
+          },
+          {
+            "beforeMs": 88.68309999999974,
+            "afterMs": 44.469800000000305
+          },
+          {
+            "beforeMs": 61.829099999999926,
+            "afterMs": 57.408100000000104
+          },
+          {
+            "beforeMs": 47.32389999999987,
+            "afterMs": 44.9396999999999
+          },
+          {
+            "beforeMs": 46.94670000000042,
+            "afterMs": 44.61610000000019
+          }
+        ],
+        "beforeMedianMs": 61.829099999999926,
+        "afterMedianMs": 44.9396999999999,
+        "ratio": 1.375823603628864
+      }
+    ]
+  },
+  "actualChromeWorker": {
+    "path": "artifacts/render-stability/environment-alpha-worker-browser-20261018.json",
+    "browser": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/155.0.8059.80",
+      "revision": "@43a195105613ac83c21d3f14de279f4a045c7da0",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+      "jsVersion": "15.5.35.23"
+    },
+    "records": [
+      {
+        "proxyCount": 0,
+        "digest": "b2b5976fdfd8c46618055fbab5a5d8ff545ac609a65f40169552430cb5d9eca3",
+        "pairs": [
+          {
+            "beforeMs": 35.5,
+            "afterMs": 41.60000002384186
+          },
+          {
+            "beforeMs": 57.60000002384186,
+            "afterMs": 31.69999998807907
+          },
+          {
+            "beforeMs": 86.90000003576279,
+            "afterMs": 35.59999996423721
+          },
+          {
+            "beforeMs": 39.5,
+            "afterMs": 36.39999997615814
+          },
+          {
+            "beforeMs": 29.399999976158142,
+            "afterMs": 36.80000001192093
+          },
+          {
+            "beforeMs": 28.30000001192093,
+            "afterMs": 26
+          },
+          {
+            "beforeMs": 26.600000023841858,
+            "afterMs": 27.19999998807907
+          },
+          {
+            "beforeMs": 27.69999998807907,
+            "afterMs": 26.100000023841858
+          },
+          {
+            "beforeMs": 29.100000023841858,
+            "afterMs": 27.30000001192093
+          }
+        ],
+        "beforeMedianMs": 29.399999976158142,
+        "afterMedianMs": 31.69999998807907,
+        "ratio": 0.9274447945493421
+      },
+      {
+        "proxyCount": 28,
+        "digest": "3f67c52f7361be5348b6aabd70b647233c1636a7e9a5e7af199206421d48a66e",
+        "pairs": [
+          {
+            "beforeMs": 34.60000002384186,
+            "afterMs": 33.09999996423721
+          },
+          {
+            "beforeMs": 53.10000002384186,
+            "afterMs": 52.10000002384186
+          },
+          {
+            "beforeMs": 50.69999998807907,
+            "afterMs": 74.40000003576279
+          },
+          {
+            "beforeMs": 50.80000001192093,
+            "afterMs": 59.59999996423721
+          },
+          {
+            "beforeMs": 66.80000001192093,
+            "afterMs": 33.40000003576279
+          },
+          {
+            "beforeMs": 34.60000002384186,
+            "afterMs": 33.799999952316284
+          },
+          {
+            "beforeMs": 33.39999997615814,
+            "afterMs": 32.69999998807907
+          },
+          {
+            "beforeMs": 33.19999998807907,
+            "afterMs": 34.5
+          },
+          {
+            "beforeMs": 34.40000003576279,
+            "afterMs": 32.80000001192093
+          }
+        ],
+        "beforeMedianMs": 34.60000002384186,
+        "afterMedianMs": 33.799999952316284,
+        "ratio": 1.0236686412027864
+      }
+    ],
+    "runtimeErrors": []
+  },
+  "scope": "Both candidates retained full irradiance/mip SHA256 digests for initial and timed outputs in two fixtures. Chrome medians do not establish repeatable benefit, so no product edit was adopted. CPU-only static worker fixtures do not establish native FPS or actual-world bake performance.",
+  "commands": [
+    "node artifacts/render-stability/environment-alpha-screen-20261018.mjs",
+    "bun artifacts/render-stability/environment-alpha-worker-browser-20261018.ts"
+  ],
+  "exitCodes": [
+    0,
+    0
+  ],
+  "harnessRepair": "Initial Chrome helper attempted Worker creation before navigation finished; explicit Page.navigate/readiness fixed that harness failure. Successful run cleaned only its owned Chrome/profile/static asset server."
+}

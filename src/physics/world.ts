@@ -107,7 +107,7 @@ export interface ContactCandidate {
 }
 export interface ContactDecision {
   readonly mode:'resolve'|'penetrate';
-  /** Energy consumed by fracture/plastic work while bodies continue through each other. */
+  /** Energy consumed by material work; resolving contacts retain positional separation. */
   readonly energyLoss?:number;
 }
 export type ContactModel=((contact:ContactCandidate)=>ContactDecision)&{
@@ -390,7 +390,7 @@ export class PhysicsWorld {
         if(!hit)continue;
         const candidate=this.contactCandidate(a,b,hit),decision=contactModel?.(candidate)??{mode:'resolve' as const};
         if(decision.mode==='penetrate')this.resolvePenetration(candidate,Math.max(0,decision.energyLoss??0));
-        else this.resolvePair(candidate);
+        else this.resolvePair(candidate,Math.max(0,decision.energyLoss??0));
       }
     }
     for(const body of this.bodies.values())if(body.invMass&&!body.sleeping&&!body.supportedThisStep)body.sleepTimer=Math.max(0,body.sleepTimer-dt*.35);
@@ -540,14 +540,14 @@ export class PhysicsWorld {
     this.pushContact(contact,impulse,'penetrate');
   }
 
-  private resolvePair(contact:ContactCandidate):void{
+  private resolvePair(contact:ContactCandidate,energyLoss=0):void{
     const {a,b,normal,point,penetration,approachSpeed,effectiveMass}=contact,inv=a.invMass+b.invMass;if(inv<=0)return;
     const slop=.0005,correction=Math.max(0,penetration-slop)*.8/inv;
     if(a.invMass){const d:Vec3=[-normal[0]*correction*a.invMass,-normal[1]*correction*a.invMass,-normal[2]*correction*a.invMass];this.tracePositionCorrection(a,d,point,'body',b.id);a.position[0]+=d[0];a.position[1]+=d[1];a.position[2]+=d[2];}
     if(b.invMass){const d:Vec3=[normal[0]*correction*b.invMass,normal[1]*correction*b.invMass,normal[2]*correction*b.invMass];this.tracePositionCorrection(b,d,point,'body',a.id);b.position[0]+=d[0];b.position[1]+=d[1];b.position[2]+=d[2];}
     let impulse=0;
     if(approachSpeed>0&&effectiveMass>0){
-      const restitution=Math.min(a.restitution,b.restitution),j=(1+restitution)*approachSpeed*effectiveMass;impulse=j;
+      const restitution=Math.min(a.restitution,b.restitution),bounceSpeed=energyLoss>0?Math.sqrt(2*Math.max(0,contact.normalEnergy-energyLoss)/effectiveMass):approachSpeed,j=(approachSpeed+restitution*bounceSpeed)*effectiveMass;impulse=j;
       this.applyPairImpulseAtPoint(a,b,normal,j,point);
       const ra=V3.sub(point,a.position),rb=V3.sub(point,b.position);
       const va=V3.add(a.velocity,V3.cross(a.angularVelocity,ra)),vb=V3.add(b.velocity,V3.cross(b.angularVelocity,rb)),post=V3.sub(vb,va),normalSpeed=V3.dot(post,normal);

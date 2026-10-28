@@ -1,0 +1,244 @@
+{
+  "status": "opaque-producer-localized-cause-unresolved",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "experiments": 2,
+    "freshDevices": 12,
+    "canonicalFramesPerDevice": 32,
+    "observedFrames": 384,
+    "unmodifiedRenderShaders": true,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "physicalReplay": true,
+    "archivesVerified": true,
+    "productionSourceUnchanged": true,
+    "readbackAgreement": true,
+    "opaqueBoundaryAgreement": true,
+    "repeatability": false,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "readback": {
+    "report": "artifacts/engine-compare/surface-presence-readback-agreement/report.json",
+    "checkedStages": [
+      "opaque",
+      "normal"
+    ],
+    "checkedFrames": 192,
+    "checks": 384,
+    "channelsPerMethod": 3185049600,
+    "methods": [
+      "native copyTextureToBuffer binary16 bytes",
+      "compute textureLoad binary32 bitcast matched to exact host binary16 conversion",
+      "repeated native copy without a new render"
+    ],
+    "gates": {
+      "completed": true,
+      "coverage": true,
+      "allComparisonsExact": false,
+      "sameOrderingRepeatable": false,
+      "readbackAgreement": true,
+      "repeatability": false
+    }
+  },
+  "boundary": {
+    "report": "artifacts/engine-compare/surface-presence-opaque-boundary/report.json",
+    "checkedStages": [
+      "opaque",
+      "normal",
+      "specular",
+      "velocity"
+    ],
+    "checkedFrames": 192,
+    "gates": {
+      "completed": true,
+      "coverage": true,
+      "allComparisonsExact": false,
+      "sameOrderingRepeatable": false,
+      "opaqueBoundaryAgreement": true,
+      "repeatability": false
+    },
+    "upstream": [
+      {
+        "mode": "shuffled",
+        "repetition": 1,
+        "frame": 31,
+        "stage": "opaque",
+        "comparison": {
+          "changedChannels": 3,
+          "maxEncodedError": 1408,
+          "coordinates": [
+            {
+              "x": 772,
+              "y": 665,
+              "channel": 0,
+              "before": 11697,
+              "after": 10720
+            },
+            {
+              "x": 772,
+              "y": 665,
+              "channel": 1,
+              "before": 12274,
+              "after": 10866
+            },
+            {
+              "x": 772,
+              "y": 665,
+              "channel": 2,
+              "before": 11880,
+              "after": 11162
+            }
+          ]
+        },
+        "linearCoordinates": [
+          {
+            "x": 772,
+            "y": 665,
+            "channel": 0,
+            "before": 11697,
+            "after": 10720,
+            "linearBefore": 0.08892822265625,
+            "linearAfter": 0.0458984375
+          },
+          {
+            "x": 772,
+            "y": 665,
+            "channel": 1,
+            "before": 12274,
+            "after": 10866,
+            "linearBefore": 0.1241455078125,
+            "linearAfter": 0.05035400390625
+          },
+          {
+            "x": 772,
+            "y": 665,
+            "channel": 2,
+            "before": 11880,
+            "after": 11162,
+            "linearBefore": 0.10009765625,
+            "linearAfter": 0.05938720703125
+          }
+        ]
+      },
+      {
+        "mode": "shuffled",
+        "repetition": 2,
+        "frame": 4,
+        "stage": "velocity",
+        "comparison": {
+          "changedChannels": 2,
+          "maxEncodedError": 916,
+          "coordinates": [
+            {
+              "x": 684,
+              "y": 350,
+              "channel": 0,
+              "before": 3140,
+              "after": 2224
+            },
+            {
+              "x": 684,
+              "y": 350,
+              "channel": 1,
+              "before": 3342,
+              "after": 2447
+            }
+          ]
+        },
+        "linearCoordinates": [
+          {
+            "x": 684,
+            "y": 350,
+            "channel": 0,
+            "before": 3140,
+            "after": 2224,
+            "linearBefore": 0.00026035308837890625,
+            "linearAfter": 0.0001430511474609375
+          },
+          {
+            "x": 684,
+            "y": 350,
+            "channel": 1,
+            "before": 3342,
+            "after": 2447,
+            "linearBefore": 0.0003085136413574219,
+            "linearAfter": 0.00016963481903076172
+          }
+        ]
+      },
+      {
+        "mode": "shuffled",
+        "repetition": 2,
+        "frame": 18,
+        "stage": "velocity",
+        "comparison": {
+          "changedChannels": 2,
+          "maxEncodedError": 3744,
+          "coordinates": [
+            {
+              "x": 300,
+              "y": 426,
+              "channel": 0,
+              "before": 3140,
+              "after": 193
+            },
+            {
+              "x": 300,
+              "y": 426,
+              "channel": 1,
+              "before": 36918,
+              "after": 33174
+            }
+          ]
+        },
+        "linearCoordinates": [
+          {
+            "x": 300,
+            "y": 426,
+            "channel": 0,
+            "before": 3140,
+            "after": 193,
+            "linearBefore": 0.00026035308837890625,
+            "linearAfter": 0.00001150369644165039
+          },
+          {
+            "x": 300,
+            "y": 426,
+            "channel": 1,
+            "before": 36918,
+            "after": 33174,
+            "linearBefore": -0.0005140304565429688,
+            "linearAfter": -0.000024199485778808594
+          }
+        ]
+      }
+    ]
+  },
+  "tests": {
+    "command": "npm run check",
+    "passed": 292,
+    "failed": 0,
+    "log": "artifacts/opaque-boundary-check.log"
+  },
+  "interpretation": [
+    "Native copy, independent compute textureLoad/f32-bitcast and repeated copy agree for every opaque/normal channel in all 192 readback frames, including the frame where opaque differed between repetitions. This validates these observed target contents; it does not independently validate every packed specular/velocity observation.",
+    "The boundary experiment observes the MRT textures immediately after opaque pass end, before the transparent/load-store pass and postprocessing. All four MRT snapshots agree exactly with their contents after the full frame in every observed frame.",
+    "Opaque divergence already appears in the immediate boundary copy at shuffled repetition 1 frame 31; velocity divergences also appear in immediate compute observations. Later TAA propagates upstream variation. The captured differences were not introduced by later render passes.",
+    "Inline copies/compute and external readback waits alter GPU scheduling. Shader sources, original resource usage and physical state remain unchanged. Passing boundary agreement cannot certify overall temporal stability or identify whether vertex inputs, interpolation, material execution or export caused the earlier discrepancy.",
+    "Next diagnostic should compare fragment input values with duplicate MRT exports, preserving source provenance and strict failure gates. No production lighting workaround, additional production readback or performance gain has been introduced."
+  ]
+}

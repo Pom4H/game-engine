@@ -1,0 +1,1 @@
+{"extends":"../../tsconfig.json","compilerOptions":{"noEmit":true,"allowImportingTsExtensions":true},"include":["shared.ts","building.ts","office-layout.ts","office-navigation.ts","game/**/*.ts","client/**/*.ts"],"exclude":["public","test"]}

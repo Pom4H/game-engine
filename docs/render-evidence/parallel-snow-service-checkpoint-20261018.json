@@ -1,0 +1,180 @@
+{
+  "recordedAt": "2026-10-18T09:52:50.400Z",
+  "status": "awaiting-parallel-snow-service-completion",
+  "goalComplete": false,
+  "userWaitDecisionPreserved": true,
+  "parallel": {
+    "threadId": "01a14e30-936c-7a10-adf9-25fa100e5bcd",
+    "title": "Найти способ запустить игру",
+    "firstSummerTurn": {
+      "id": "01a14e51-f8b3-70c1-8a2b-3b46e1feca71",
+      "status": "completed",
+      "completedAt": 1792316151
+    },
+    "newTurn": {
+      "id": "01a14e5f-5d86-7f23-b9a8-be922008609f",
+      "status": "inProgress",
+      "startedAt": 1792316235,
+      "requestScope": "Flowing meltwater/puddles through Engine physics, collision snow clumps, existing snowplow model in main Game"
+    },
+    "crossThreadMessagesSent": false
+  },
+  "combinedAttempt": {
+    "reference": {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\combined-summer-verification-20261018.json",
+      "sha256": "99ab79214625f348bb49fe3a36c637ce4c1d467fbf75c205d222d96478de5d13"
+    },
+    "sourceUnchanged": false,
+    "changed": [
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\physics\\shallow-water-basin.ts",
+        "before": "01ac7976bebb9ec514b76786d823201afaaa43d8419ec6c44221969d0ce81cd1",
+        "after": "15f3a86333eca8f568dedc2810c7c8d054005a1bb5b1d4aa9ced857679710d04"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\airport-snow.ts",
+        "before": "2a297fbc8a3398a911cd9c79f9761f8a3bc04ac47abc6a58d8d059edafa699f3",
+        "after": "7c399346a5ed4edcb1d0b60f3405205cc1fbae3e2ad22703e8211e14fc8e231b"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\authority.ts",
+        "before": "258e534d9777b437630881dd354eab36422a39b2e3e42072ef533550c1da24e4",
+        "after": "3827468619851fe253825e53b09fadaf4b389b471894b3c8caf848e364cde6be"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\client.ts",
+        "before": "36e6be22500b78ae35124d990b4285f34cc5be5ddcda7c53b0eb98d7b0ffcd8f",
+        "after": "e015bfb86f42e21259f0a5705158957dad83c7eb234f5b792c3846e536134493"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\fleet.ts",
+        "before": "90dbd39fe63fc599325cf1d84f4734ee7652ff96647cf90cbe6cd1ff49ab77f4",
+        "after": "3880cc334c8de44d1cfd531bdceced4a2633a7c12ab80cc20a57849dc39f467c"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\presentation.ts",
+        "before": "2c6b8f5dcac8a64782f42dac66ee42e562852ce63d1715905adb9bb06ab07144",
+        "after": "da16ddb47f58d6d5f6078a9f22792658caf111786a704db0ae3bef2d73c64cbf"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\quick-actions.ts",
+        "before": "0b7ef559f0dac9289ee5c811cda232d2445a59dc491676c43fc6ef6724b0b108",
+        "after": "bd361b002f51288fca7c8b848be3e10c8891657477199f7052fdcd47e3594105"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\snow-volume.ts",
+        "before": "a95c07546b342b4e89c576b65029cbbda835ce7bdb1e9bb7f2422d6f68d1e3e1",
+        "after": "731c26cd11fb470ab6e3c9dd67977ef6382ed722c1e267a0d0b3b8bed4c8c991"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\render\\the-engine-projection.ts",
+        "before": "0f203cbd22ecf50cb7247a356c18b51d4a2247db3e16e322fd98efadfdd89bb8",
+        "after": "b926bdd9e675c7ca30b142c5035b900cb516ae32512f72d846e8ccb6e518d77a"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\runtime\\scene.js",
+        "before": "77b0d90ab20dc57ede199a9327b6a1eb0dcce1b07003bfc59b29beca58891217",
+        "after": "0b61ef46376800be871bbcb9dc629705916a5afe1c98eda5a1a1de3b4579ffb1"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\snow-physics.ts",
+        "before": "b77b39f27a0ad65103bc51c3e740f731afddef70161a21218e3c6b0a110656ed",
+        "after": "28acb256d853a1d0030d8831978bf8c5e638a377f059ce85ba2f9ded8d1af8a7"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\transport\\rig.ts",
+        "before": "06471d7c51bcf4ee4f7ce94f3fa008b4e413d9cbfede3b118d1a01daa60a969c",
+        "after": "b5927b9efbeb4646f85366a36be73c0e2f53a023003ddde60f73a1953662f81b"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\vehicle-powertrain.ts",
+        "before": "4dd774ea9e91036b618a5c86e28ea0ca953c4ca28bcdf1fee519d9d0db471560",
+        "after": "4483e7c541fae114c10a328e0dcfb44340411988bdd65bf13d9ddf5e57052d41"
+      }
+    ],
+    "added": [
+      "C:\\Users\\Roman\\Documents\\game-engine\\src\\procedural\\snow-service.ts",
+      "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\transport\\snowplow.ts"
+    ],
+    "buildAndGlobalTypecheckExits": [
+      {
+        "label": "engine-build",
+        "exit": 0,
+        "log": {
+          "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\combined-summer-engine-build-20261018.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "label": "engine-typecheck",
+        "exit": 0,
+        "log": {
+          "path": "C:\\Users\\Roman\\Documents\\game-engine\\artifacts\\combined-summer-engine-typecheck-20261018.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "label": "game-typecheck",
+        "exit": 0,
+        "log": {
+          "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\combined-summer-game-typecheck-20261018.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "label": "game-build",
+        "exit": 0,
+        "log": {
+          "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\combined-summer-game-build-20261018.log",
+          "sha256": "18560c97b253eef9ea44c691cd9ba2908937269dcf5fb88f1ff53178548cfa19"
+        }
+      }
+    ],
+    "engine": {
+      "tests": 795,
+      "pass": 776,
+      "skip": 19,
+      "fail": 0,
+      "exit": 0,
+      "scope": "Runtime/dist present during this attempt; later water/service additions invalidate final combined-source claim"
+    },
+    "game": {
+      "exit": 1,
+      "reached": 440,
+      "files": 74,
+      "firstFailure": "engine-workers.test.ts:97 expected worker error but250ms host deadline produced timeout",
+      "isolatedFollowup": {
+        "command": "C:/Users/Roman/.bun/bin/bun.exe test --timeout 60000 ./test/engine-workers.test.ts",
+        "pass": 9,
+        "fail": 0,
+        "expect": 57,
+        "elapsedMs": 562,
+        "scope": "Actual isolated command tool output; not a saved raw log and not a full-suite success"
+      }
+    },
+    "publicSnapshotLimit": "This first helper used rg without --no-ignore for public; report.publicAfter contains only2 nonignored files. It is NOT a full public-tree fence. The separate native R7/oracle guards use recursive filesystem traversal and were not executed for this epoch."
+  },
+  "newFunctionalReproductions": {
+    "airportCausal": {
+      "reference": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\network-stability-20261018\\airport-snow-causal-readiness\\result.json",
+        "sha256": "2f432f1d8031de1e77e0e58ea17d0a7a6ba268ccf77ba88dc645da33130d3179"
+      },
+      "scope": "Actual causal Publisher/Receiver/blocked ReliableOutbox/fragmented frames/client readiness callback/shared motor. Previously installed ordinary snow leaves enabledtrue while airport data is absent.30idle rows incorrectly fall2.066608m; same delivered published support matchesexactly. Controller/AOI order is constructed, not native."
+    },
+    "airportTileStarvation": {
+      "reference": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\network-stability-20261018\\airport-snow-starvation-proof-20261018.json",
+        "sha256": "17873f7c56f3cb4d8d08267220e2d6c90e9774c5c85cc7848ac36fa08b14fef2"
+      },
+      "scope": "Actual finite pile/realcontacts/180volume updates:4–13nonempty outer tiles never refreshed under revision churn; shared-edge error≤2mm disappears after30quiet updates. Not a pixel-visible/native/FPS proof."
+    }
+  },
+  "next": [
+    "Finish ignored candidates without editing shared runtime while the parallel turn changes it.",
+    "After completion, review final water/clump/snowplow source and integrate proven readiness/tile fixes with regression tests.",
+    "Use prepared v2 combined runner: full filesystem hashes including ignored public assets; sequential complete test suites because real-worker fixture uses250ms host deadline.",
+    "Freeze new current-production native manifest only after final build; preserve oldR7 and all failed reports.",
+    "Run v3 actual public Worker oracle plus native input/lifecycle/movement, temporal screenshots and live-frame checks."
+  ]
+}

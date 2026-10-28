@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-16T04:58:45.973Z",
+  "browser": "native-gpu",
+  "scope": "isolated saved landing, actual Game voice button, actual CanonicalOfficeConnection, real RTC/decoded waveform/Engine spatial graph; synthetic source only, no physical microphone or native Office backend",
+  "source": "440 Hz WebAudio MediaStream, no physical microphone",
+  "gameBundleSha256": "c0838445914c15cf4d57a9832b8b8b8d014875fca52344264cc519439f1b1c6e",
+  "accountControl": "same saved Game actor; observer never loads a controller or creates a gameplay peer",
+  "observerPublishRejected": true,
+  "gameplayPlayers": 1,
+  "stages": [
+    {
+      "stage": "publishing-upper",
+      "floor": 2,
+      "publishing": true,
+      "sourceCalls": 1,
+      "sourceState": "live",
+      "emitters": 0,
+      "peakDecodedRms": 0,
+      "controllerLoads": 0,
+      "decodedSamples": []
+    },
+    {
+      "stage": "decoded-upper",
+      "floor": 3,
+      "publishing": true,
+      "sourceCalls": 1,
+      "sourceState": "live",
+      "emitters": 1,
+      "peakDecodedRms": 0.028236003954144467,
+      "controllerLoads": 0,
+      "decodedSamples": [
+        4800
+      ]
+    },
+    {
+      "stage": "other-floor-silent",
+      "floor": 2,
+      "publishing": true,
+      "sourceCalls": 1,
+      "sourceState": "live",
+      "emitters": 0,
+      "peakDecodedRms": 0.02857891952691356,
+      "controllerLoads": 0,
+      "decodedSamples": []
+    },
+    {
+      "stage": "returned-upper",
+      "floor": 3,
+      "publishing": true,
+      "sourceCalls": 1,
+      "sourceState": "live",
+      "emitters": 1,
+      "peakDecodedRms": 0.028636029762354014,
+      "controllerLoads": 0,
+      "decodedSamples": [
+        9120
+      ]
+    },
+    {
+      "stage": "disabled",
+      "floor": 3,
+      "publishing": false,
+      "sourceCalls": 1,
+      "sourceState": "ended",
+      "emitters": 0,
+      "peakDecodedRms": 0.028636029762354014,
+      "controllerLoads": 0,
+      "decodedSamples": []
+    }
+  ],
+  "checks": {
+    "engineSpatialAudio": "9 passed",
+    "typechecks": "Game, Engine, canonical adapter and Office passed",
+    "canonicalAndVoiceTransport": "33 passed",
+    "builds": "Game, Engine and Office passed",
+    "gameOfficeBusiness": "42 passed / 9454 assertions"
+  },
+  "deployment": {
+    "players": 0,
+    "characterMotor": "the-engine",
+    "seed": 29,
+    "pid": 3040,
+    "port": 3007,
+    "rigidBodySolver": "the-engine-compound",
+    "revision": 13,
+    "vehicleStepHz": 120
+  },
+  "limits": [
+    "Isolated disposable saved Office landing, not a runtime teleport",
+    "Actual Game button and actual CanonicalOfficeConnection in a non-playable browser probe",
+    "No physical microphone, native Office backend, C920 AEC, remote NAT/TURN or audible quality acceptance",
+    "No FPS or visual parity gate"
+  ]
+}

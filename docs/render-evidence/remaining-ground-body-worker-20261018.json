@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-18",
+  "scope": "Six additional canonical ground-body families accepted into the existing bounded Worker. Correctness only; no native GPU/FPS or public game build was performed for this patch.",
+  "supportedOrder": [
+    "sedan",
+    "taxi",
+    "police",
+    "v6",
+    "m3",
+    "hatch",
+    "bicycle",
+    "van",
+    "pickup",
+    "classic",
+    "cruiser",
+    "scooter",
+    "cargoBike"
+  ],
+  "added": [
+    "van",
+    "pickup",
+    "classic",
+    "cruiser",
+    "scooter",
+    "cargoBike"
+  ],
+  "change": {
+    "production": "Only the WORKER_BODY_TYPES list in body-worker-protocol.ts appends six types. Reversing that exact list edit reproduces the pre-extension file SHA256 byte-for-byte.",
+    "unchanged": "Original seven order; isPanelType and usesPanelBody five-family classification; generator/DTO/schema keys; builder, service and controller algorithms; all budgets, fences and publication fairness.",
+    "runtimeSourceParity": "All fourteen other checked preparation sources/independent fixture hashes remain unchanged."
+  },
+  "sourceAndArtifactSha256": {
+    "src/game/render/body-worker-protocol.ts": "3871cd2d13123183ac7f6aee879b48485d484b0df515c3ec5f0651a00c98a3ec",
+    "src/game/render/body-worker-builder.ts": "222d935f2e260352d51b42297053c8d3408bf5a40055e6b46f476ccdb61cd4fb",
+    "src/game/render/body-worker-control.ts": "900dbceebf29c8f79537e3c200f32f57586be2323bab0ef9884ad9e63f9bb1c5",
+    "src/game/render/body-worker-service.ts": "1ba28be96bceb24f9807c06b14bba0b2ce9606b01b09ef0506983b55f1cae6d4",
+    "src/game/render/body-worker.worker.ts": "dc6588da171faae6ce7a15309815b7a228e56e95376e9a1264e75cec4a196f4b",
+    "src/game/presentation.ts": "2c6b8f5dcac8a64782f42dac66ee42e562852ce63d1715905adb9bb06ab07144",
+    "src/game/runtime/scene.js": "77b0d90ab20dc57ede199a9327b6a1eb0dcce1b07003bfc59b29beca58891217",
+    "src/game/transport/body-panels.ts": "d5008b35547e0af05cce576ca5ede467bdd807fac2449c14b984a284580ba4cb",
+    "test/body-worker-ground-families.test.ts": "2d3e54754ff958d77d3e0358d291bdbfc48e1254736a3df3d0b7318eae63f1a9",
+    "test/body-worker-remaining-families.test.ts": "6045870eae1dbf7900fd5f975f4c533f72f2da20a4510590c0527e979102ce9c",
+    "test/body-worker-presentation.test.ts": "21552ad3ff624747c0fc8010300c08e5619d41248beab3330ca0b239a67c7266",
+    "test/fixtures/body-worker-before-ground-extension.ts": "62a085862a3f8a7122521191607f3cc616993593d247fa8142d292af3fdcbbe0",
+    "artifacts/body-worker-remaining-prototype/production-test.log": "57ac7e74d02f3bac9d561934d0fa1fd935ce7ead5a744bb38ab811d6e45f76b0",
+    "artifacts/body-worker-remaining-prototype/oracle-report.json": "0224d36c3d957ace8d8ed0546fc699a0bad20733b82941050b0c53d9031ab746",
+    "artifacts/body-worker-prototype/production/browser-report.json": "a124c651bac15b2492f9439e1c94553b68081dc741d5a0f35b940f2ecd0acbc2",
+    "artifacts/body-worker-prototype/production/hatch-bicycle-54-browser-report.json": "feec14294f3776903271e71d689a6ca1fa790beed52c60bee1df0ab7d6fcde16",
+    "artifacts/body-worker-prototype/production/remaining-six-browser-run.log": "664b85519253a8544bd805d4edb689222c6b5ee384a8b6b88dd1c71573ea9ef8"
+  },
+  "cpuCorrectness": {
+    "proposal": {
+      "command": "bun test ./artifacts/body-worker-remaining-prototype/oracle.test.ts",
+      "passed": 5,
+      "failed": 0,
+      "assertions": 1461,
+      "completeOutputCases": 162,
+      "maxOutputBytes": 511680,
+      "maxDtoBytes": 5936,
+      "scope": "Ignored guard-only candidate; preserves pre-adoption evidence."
+    },
+    "production": {
+      "command": "bun test ./test/body-worker-control.test.ts ./test/body-worker-presentation.test.ts ./test/body-worker-ground-families.test.ts ./test/body-worker-remaining-families.test.ts",
+      "passed": 66,
+      "failed": 0,
+      "assertions": 2722,
+      "files": 4,
+      "typecheckCommand": "bun run typecheck",
+      "typecheckExit": 0
+    },
+    "matrix": "Six added families x [six power/doors/damage/resolved-spec/roof-load states x three actual wireframe modes + three structural/rest transitions x three modes] = 162 complete Float32 byte comparisons against the independent frozen main build/key/rest branch.",
+    "additional": [
+      "54 complete output transfers preserve later private rest reuse and earlier published buffers.",
+      "Six explicit resolved-spec output comparisons and18 deep-frozen DTO/read/write probes; all emitted Float32 values finite.",
+      "Presentation first-sight residency, cached replacement/priority sync adoption and type/source fencing cover all six added types plus the prior hatch/bicycle.",
+      "Maximum observed proposal output511680 bytes and DTO5936 bytes; existing limits were not enlarged."
+    ]
+  },
+  "realModuleWorker": {
+    "command": "bun artifacts/body-worker-prototype/qa-production-browser.ts",
+    "ok": true,
+    "browser": "Chrome/155.0.8059.80",
+    "records": 222,
+    "completeFloat32Cases": 213,
+    "newCompleteCases": 162,
+    "actualFirstSightFlows": 9,
+    "actualController": true,
+    "errors": [],
+    "report": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\body-worker-prototype\\production\\browser-report.json",
+    "old54Report": "artifacts/body-worker-prototype/production/hatch-bicycle-54-browser-report.json",
+    "cleanup": "Owned CPU-only headless Chrome, CDP, helper server and unique temp profile cleaned up; confirmed by owner.",
+    "scope": "Dedicated real module Worker on CPU, exact complete output/clone ownership/catalog handshake/rest/mode and actual proxy-to-body publication. No native GPU/rendering or timing claim."
+  },
+  "fieldAudit": {
+    "common": "Full resolved spec; type/id/paintColor/w/l/panels; worker identity-local x/y/z/yaw/roll/pitch/q; roofLoad and engineRunning.",
+    "passenger": "van/pickup/classic also use steeringSide/bodyParameters/glass/cutaway/detached/doorAngles/plate/attachmentAngles and existing rail/deformation/frame handling.",
+    "twoWheeler": "cruiser/scooter/cargoBike use spec.twoWheeler/pedal/wheelbase. Actual global wireframe mode remains separate from effective ghostShell.",
+    "catalog": "transportRig still consumes registered global catalog even with per-body resolved spec; existing registerFleet and manifest handshake remain required.",
+    "negative": "No body-only wheels/driver/occupant/steer/odometer/physics-body/dynamics/flight reads or public DTO writes observed. No additional DTO fields required."
+  },
+  "limitations": [
+    "No FPS, GC-tail, input-window, authority cadence or freeze-free result follows from these correctness checks.",
+    "Unit fake-port tests preserve separate geometry and scheduling oracles; real Worker exact-output and actual first-sight integration are independently verified.",
+    "Impurity probes cover actual serialized plain data and detached-set mutators, not arbitrary custom JavaScript getters/proxies.",
+    "Public production game bundle and native fixed-quality/performance capture remain root-coordinated follow-up work after this source freeze."
+  ]
+}

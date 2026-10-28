@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-18",
+  "status": "Production source frozen; no native performance or visual claim from these tests",
+  "protocol": "cached-panel-body-v1",
+  "problem": "Light CPU trace identified roughly35ms body-generation work in several80ms callbacks; this change moves eligible cached replacement generation to a client-owned worker. It does not attribute/remove the full172ms task whose largest sampled owner was GC.",
+  "scope": {
+    "eligible": [
+      "sedan",
+      "taxi",
+      "police",
+      "v6",
+      "m3"
+    ],
+    "firstSight": "Existing synchronous priority/build-budget/proxy path preserved; only already-published cached replacement can be asynchronous.",
+    "mainOwned": [
+      "physics/motor/network/ACK",
+      "vehicle world pose",
+      "wheels",
+      "attachment integration",
+      "compileGameGeometry",
+      "primitiveMesh packing",
+      "GPU upload"
+    ],
+    "ownership": "Pure imports do not registerFleet or create Worker. Dedicated worker entry registers once; explicit main service creation occurs after normal fleet registration. Only a fresh result Float32 buffer is transferred; retained worker rest/binding and main geometry are never transferred.",
+    "publication": "Current key observed on every eligible cached draw before targeted publication immediately before that body emits. One shared ordinary publication lane alternates ready results against bounded FIFO of waiting first-sight/sync fallback bodies; no second view/motion sample. All main/shadow/planar geometry uses that emitted source. Existing cubemap complete-sweep temporal policy remains."
+  },
+  "limits": {
+    "workerResidents": 64,
+    "activeJobs": 1,
+    "latestPerResident": 1,
+    "readyPerResident": 1,
+    "queuedIncludingActivePayloadBytes": 16777216,
+    "readyBytes": 33554432,
+    "activeOutputReservationBytes": 16777216,
+    "workerRestSpecAndBindingAccountedBytes": 67108864,
+    "deferredSyncIds": 180,
+    "existingLiveEntityAdmission": 180,
+    "startupTimeoutMs": 5000,
+    "activeJobTimeoutMs": 5000,
+    "parameterVariantsPerWorkerLifetime": 64,
+    "parameterKeyTextBytesPerWorkerLifetime": 1048576
+  },
+  "correctness": {
+    "fences": [
+      "source epoch",
+      "style/config",
+      "world ID",
+      "panel family",
+      "numeric render ID",
+      "body incarnation",
+      "monotonic sequence",
+      "render key",
+      "catalog/protocol handshake"
+    ],
+    "progress": "Valid completed active work may publish while newer desired input waits; exact desired ready work is preserved against a different completion. Returning A→B→A or B→C→B cancels obsolete pending/ready work. Every sync publication advances incarnation and fences late worker replies.",
+    "cleanup": "Offscreen/incompatible residents release active/pending/ready ownership at frame boundary without deleting main cached geometry; active reservation remains until reply/timeout. Freeing ready budget immediately wakes other visible pending work. Same-ID live type replacement removes incompatible main/controller body/rest ownership first.",
+    "failure": "Unavailable/failed/mismatched/malformed/timed-out worker returns to exact caller-owned sync path. Error/watchdog callback never executes a generator. Source/config/staged/page lifecycle fences outstanding results."
+  },
+  "verification": {
+    "newFocused": {
+      "command": "bun test --timeout30000 test/body-worker-control.test.ts test/body-worker-presentation.test.ts",
+      "pass": 37,
+      "fail": 0,
+      "assertions": 555,
+      "log": "../thegame/artifacts/body-worker-prototype/production/focused-tests.log"
+    },
+    "typecheck": {
+      "command": "bun node_modules/typescript/bin/tsc --noEmit",
+      "exit": 0
+    },
+    "build": {
+      "command": "bun tools/build.ts",
+      "exit": 0,
+      "log": "../thegame/artifacts/body-worker-prototype/production/build.log"
+    },
+    "frozenSyncOracle": {
+      "sourceMap": "../thegame/artifacts/render-stability-body-pass-final-game.js.map",
+      "source": "src/game/presentation.ts",
+      "originalSourceSha256": "f54ff07909cb0fadea0c5d6696b62f98501fb8b3babf7569189bd73688c4ff96",
+      "fixture": "../thegame/test/fixtures/presentation-before-body-worker.ts",
+      "coverage": "Full active output Float64 body stream and Float32 primitive geometry/matrix bytes for absent/unavailable service, priority/first sight/motion/doors. Focused live flow checks pending geometry identity, current pose/wheels, targeted output, cyclic keys, source/staged/type boundaries, sustained ready cap-denied taxi/unsupported bike fairness, hidden residency and180-ID FIFO."
+    },
+    "browser": {
+      "command": "bun artifacts/body-worker-prototype/qa-production-browser.ts",
+      "exit": 0,
+      "product": "Chrome/155.0.8059.80",
+      "cases": 21,
+      "comparison": "Every Float32 output bit via Uint32 arrays against frozen current body branch; includes all five families × three wireframe modes, distinct resolved spec, large sculpt/damaged/open body, rest/current deformation transitions, style boundary and signed zero/ordinary-array inputs.",
+      "productionControllerIntegration": true,
+      "errors": [],
+      "largestOutputBytes": 8809476,
+      "report": "../thegame/artifacts/body-worker-prototype/production/browser-report.json",
+      "cleanup": "Browser,CDP,dedicated temporary profile and local server closed. CPU-only headless Chrome with GPU disabled; no rendered-frame/native capture."
+    }
+  },
+  "limitations": [
+    "No FPS/long-task/GC improvement claimed before root-owned fixed-quality native capture and actual activity/geometry guard.",
+    "Synchronous first sight, priority and worker failure paths can still tessellate on main; compile/pack/GPU publication remains main-thread work.",
+    "Immediate legacy priority rebuild may exceed the ordinary lane and can delay ordinary work during continuously changing priority frames. This existing exception is not advertised as an absolute one-publication/frame or unconditional fairness guarantee.",
+    "Payload/rest/spec/binding accounting does not equal JS heap usage; procedural temporary number arrays and module caches still allocate. Output cap is checked after exact generation.",
+    "Worker parameter-cache lifetime budget fails closed to sync after64variants/1MiB key text; automatic worker rotation is not implemented.",
+    "The180-ID deferred FIFO covers the existing live admission budget, which is unchanged; no absolute fairness promise for out-of-contract fixtures exceeding that cap.",
+    "Browser buildMs fields are individual diagnostic job durations, not warmed timing/FPS results.",
+    "The first production-browser harness attempt timed out because main catalog was computed before fixture registration. Only the ignored harness boot order changed; final run matches actual boot and succeeded."
+  ],
+  "sourceHashes": {
+    "src/game/render/body-worker-protocol.ts": "73324aef3301ac82a8293e59ca519abe1d01eaf868287502fcdf26085d1f9868",
+    "src/game/render/body-worker-control.ts": "d278f2b3db134d2fbfc623db21d0c9a43e10f01f95e9eb751f67102180e9b1c7",
+    "src/game/render/body-worker-builder.ts": "09919208912f65f228e9cd61337b1a997d411ef0cd39ab2a46f976adeca62c49",
+    "src/game/render/body-worker.worker.ts": "dc6588da171faae6ce7a15309815b7a228e56e95376e9a1264e75cec4a196f4b",
+    "src/game/render/body-worker-service.ts": "0791189a6876964117123c41351ba2ac217a4092726258bc0df1f2d534ee2d67",
+    "src/game/presentation.ts": "160ead54e7f7ec11a95c29609fbe94b1d1185511b45b7d1f01e3bd27f43dcbe8",
+    "src/game/client.ts": "ad72833fca3e637f2f7fa29820923222cb7f24c4d21fe15c6fbd0a5f19948e21",
+    "tools/build.ts": "626d08abc5b775c95c8b53ea7a28027aa6fa9417595be9795edc40d38e6acca0",
+    "src/server/index.ts": "a63804a49e8e2370b85abdaa0228d20b4d88ac29f525c53db2c59dac288ae0dc",
+    "test/body-worker-control.test.ts": "d0d17bd283c1bbc12bd0b620ac5136054e08e48eccdfb769ec79bfb00462a73c",
+    "test/body-worker-presentation.test.ts": "efdc296b2a93375ce69ed2c695c073fa0e1d794cc1d1ec7b9312f30a79aea3c2",
+    "test/fixtures/presentation-before-body-worker.ts": "162bb7577d9a9d2d11c4499ffbd102fedfb6806177f429743761912a4eb85cfe"
+  },
+  "bundles": {
+    "public/build/game.js": {
+      "sha256": "cc8c7a506feed3ed8db8d464d9a1608bdc7ff47d8568c05bddcde124318d6632",
+      "bytes": 2606223
+    },
+    "public/build/body-worker.js": {
+      "sha256": "26e7884dc2d4b12a81f7c1c3d7cf89a1c7c5edb986ac474bc098cad76d999057",
+      "bytes": 524431
+    }
+  },
+  "nativeEvidence": "Pending root-owned native capture; append actual activity/frame/CPU/screenshot outcomes here or in aggregate without interpreting these CPU-only oracles as native performance evidence."
+}

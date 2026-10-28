@@ -1,0 +1,700 @@
+{
+  "date": "2026-10-16T18:28:48.899Z",
+  "goalAchieved": false,
+  "phase": "Bounded input recovery and complete native Game-to-Office vehicle/NPC session",
+  "changes": [
+    "Unacknowledged motion repair ranges rotate only when actual packets leave the replaceable outbox, with revision/generation guards; newest intent remains in every packet and MTU reduction retains repair head.",
+    "Transport readiness precedes outbox selection; expired or replaced records never advance repair. SDK write completion diagnostics do not assert delivery.",
+    "150 decoded input datagrams per second retained; burst excess is shed before decoding; 601/window or three consecutive overloaded windows still disconnect. Authority input history stays bounded at 120 and physics stays 60/120 Hz.",
+    "Native SDK ingress has eight outstanding reads with sixteen total reserved slots, MTU 1200, bounded backpressure, one consumer, cleanup and no additional simulation.",
+    "Exit camera keeps only the just-used vehicle excluded until near-plane clearance plus one metre of subject space is free; other cars and walls still obstruct it.",
+    "QA approaches the persisted wagon in its actual rig coordinates and accounts for authoritative body movement during orbit."
+  ],
+  "native": {
+    "command": "CAPTURE_EXISTING=1 CAPTURE_PORT=3007 CAPTURE_DEBUG_PORT=3203 CAPTURE_GPU=1 PERF_LABEL=office-input-take-camera-20261016 OFFICE_WALKING_QA=1 OFFICE_URBAN_QA=1 OFFICE_SCENERY_QA=1 OFFICE_CAMERA_QA=1 OFFICE_TRANSPORT_QA=1 OFFICE_RESIDENTS_QA=1 OFFICE_PACKET_TRACE=1 OFFICE_EXIT_TRACE=1 OFFICE_EXIT_ASSERT=1 OFFICE_CONTROL_SOAK_MS=180000 bun tools/capture.ts --office",
+    "exitCode": 0,
+    "report": {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/report.json",
+      "bytes": 857464,
+      "sha256": "5f875875b541a21f8970ec9597adc509a8a24dec5e3a6bf72bbe217691354c11"
+    },
+    "transport": {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-report.json",
+      "bytes": 447974,
+      "sha256": "54e1e496f32b7e34900d5a113bc3853bdda4ee876712055fd2adbe73d6ccef13"
+    },
+    "residents": {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-report.json",
+      "bytes": 11598,
+      "sha256": "80d9f0397526c2ae7f48cea6f3eb4758cb5343de0547747c15ed5a4e00fa63c2"
+    },
+    "trace": {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/packet-trace.json",
+      "bytes": 24642502,
+      "sha256": "5aa0ee0c3c4819e6be4d92af69dbdf6475dee524338223eb6205a1c322579953"
+    },
+    "traceKeys": [
+      "date",
+      "scope",
+      "maxObservedPacketsPerSecond",
+      "client",
+      "server",
+      "serverDropped"
+    ],
+    "soak": {
+      "milliseconds": 180000,
+      "samples": 179,
+      "before": 16811,
+      "after": 27582,
+      "minPending": 8,
+      "maxPending": 48
+    },
+    "resident": {
+      "actor": "resident:22089:1",
+      "body": "resident:22089:1",
+      "moved": 0.3402820816149503,
+      "inputToMovementMs": 237,
+      "takeoverDistance": 0.0005465442840889229,
+      "stopped": {
+        "ack": 16738,
+        "releaseSeq": 16736,
+        "speed": 0.03445103690642701
+      }
+    },
+    "exitCamera": {
+      "frames": 160,
+      "min": 8.000000000000014,
+      "max": 8.000000000000014
+    },
+    "drive": [
+      {
+        "name": "drive",
+        "metres": 1.419163486001498
+      },
+      {
+        "name": "passenger",
+        "metres": 0
+      }
+    ],
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "checks": [
+    {
+      "name": "Game network, MTU/loss/ACK, budget/flood, adapters/authority and native read prefetch",
+      "log": {
+        "path": "../thegame/artifacts/motion-repair-tests.log",
+        "bytes": 9285,
+        "sha256": "9eb5da479d912dc02e45aa92300876fa99256439e913ac725c942cfea535bf29"
+      },
+      "command": "bun test test/game-network-motion-history.test.ts test/input-datagram-budget.test.ts test/prefetched-datagrams.test.ts test/causal-network",
+      "pass": 96,
+      "exitCode": 0
+    },
+    {
+      "name": "Engine Office app",
+      "log": {
+        "path": "artifacts/office-input-recovery-final-app-tests.log",
+        "bytes": 14069,
+        "sha256": "e0cd98c35a197b04b9905a38c02bbe0a443d72636c5cb530b744079ac1410a54"
+      },
+      "command": "bun test apps/thegame/test",
+      "pass": 125,
+      "exitCode": 0
+    }
+  ],
+  "otherChecks": [
+    {
+      "name": "Game TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/office-input-recovery-final-game-typecheck.log",
+        "bytes": 22,
+        "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+      }
+    },
+    {
+      "name": "Engine app TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-input-recovery-final-app-typecheck.log",
+        "bytes": 33,
+        "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+      }
+    },
+    {
+      "name": "Office UI TypeScript",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-input-recovery-final-ui-typecheck.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "Game production build",
+      "exitCode": 0,
+      "log": {
+        "path": "../thegame/artifacts/motion-repair-build-game.log",
+        "bytes": 585,
+        "sha256": "6058c2c9d08503f0d403018f9ea77bb5a9d81cc8fcefc228aacc2ed0aadda132"
+      }
+    },
+    {
+      "name": "Office UI production build",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/office-input-recovery-final-ui-build.log",
+        "bytes": 889,
+        "sha256": "79da089c75202323abd32ef70801d4c2599275ad8842a83176c9e9da3f50f425"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "../thegame/src/game/net/client.ts",
+      "bytes": 12876,
+      "sha256": "f6b212d640b0a103da8c3684ea7dbcb0c1ae0a4d197ee65fc1b6de1e5460dbe2"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/browser.ts",
+      "bytes": 18189,
+      "sha256": "3f96954b0158aa3e595b797ec76c4c37a578224d57a795a78628851fabc814f4"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/queues.ts",
+      "bytes": 7159,
+      "sha256": "72733bb0ec3d7ffca31e3d43cf0d2692c3c1c1a6a285d32acb9b868ea75fa914"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/wire.ts",
+      "bytes": 14805,
+      "sha256": "b1e6f0e1d0f1f12e4846507081ea615215eaa3c6179a636443c06d557163c2fd"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/input-budget.ts",
+      "bytes": 1295,
+      "sha256": "8d2023b9d4acf9a31600e4cbaedb2812cd7fad97edf3cd9d511232acce14bafb"
+    },
+    {
+      "path": "../thegame/src/game/net/causal/native.ts",
+      "bytes": 13348,
+      "sha256": "d5804ea94b5f059a61e8127a2b67452d671a5f4dfc4ea5699ebced5b04380116"
+    },
+    {
+      "path": "../thegame/src/game/authority.ts",
+      "bytes": 65218,
+      "sha256": "22de0c0f6982a3e440170d600111b8348f96a2f5b716324ebdc79246b6fede32"
+    },
+    {
+      "path": "../thegame/src/shared/input-reorder.ts",
+      "bytes": 1626,
+      "sha256": "1af2126a37b30c657c6cef7a53af36872f57765a0698195b15b535a2e8a01044"
+    },
+    {
+      "path": "../thegame/src/server/causal-realtime.ts",
+      "bytes": 2194,
+      "sha256": "fff7940bd4b9adfdc473f3a2d7ab25dbf94869e39ee37cc427f8835acdf211c0"
+    },
+    {
+      "path": "../thegame/src/server/webtransport-realtime.ts",
+      "bytes": 858,
+      "sha256": "eb45df78e198c582050f104f6cce4bdd54d69fa7f1d3e87098725f9dde48c93e"
+    },
+    {
+      "path": "../thegame/src/server/prefetched-datagrams.ts",
+      "bytes": 3110,
+      "sha256": "0069b28b670e06f50601617300aa68a0f4607217bd34ab4b2cb13df813512383"
+    },
+    {
+      "path": "../thegame/test/game-network-motion-history.test.ts",
+      "bytes": 6073,
+      "sha256": "15cd278d8a53a87b27e174c74cc5b2de3caeb8bd124c973b95ef097e67dd357a"
+    },
+    {
+      "path": "../thegame/test/input-datagram-budget.test.ts",
+      "bytes": 1618,
+      "sha256": "f54c0da141a9d9fbd99b38d58716c12967cb23caa2d85b2bdba304b87e981870"
+    },
+    {
+      "path": "../thegame/test/prefetched-datagrams.test.ts",
+      "bytes": 2621,
+      "sha256": "689b81e0a104ebe774e0f2dd013a3cf8e9ec21501bc1b2e27115af1712776647"
+    },
+    {
+      "path": "../thegame/test/causal-network/queues-commands.test.ts",
+      "bytes": 11337,
+      "sha256": "aaf11d18faf7f9704ca8d6c7d18c0a2a128aefd80b6a29a8eb66c78fbdfd1b40"
+    },
+    {
+      "path": "../thegame/test/causal-network/adapters.test.ts",
+      "bytes": 10425,
+      "sha256": "b7c8b9e6196c4de94669a368f375975544c3a10deb161ae95196b21e40615625"
+    },
+    {
+      "path": "../thegame/test/causal-network/authority.test.ts",
+      "bytes": 3709,
+      "sha256": "776fc2dbe91093c773f43a4ded4960b72dbd70a089c0eed0a4be8686b28cfd07"
+    },
+    {
+      "path": "../thegame/tools/qa-office-packets.ts",
+      "bytes": 3040,
+      "sha256": "aa72a498f7179e33273fe975cfa8b37f4b9c50b2bc6b63a8c175378a8cc157d4"
+    },
+    {
+      "path": "../thegame/tools/qa-office-walking.ts",
+      "bytes": 12658,
+      "sha256": "08d455585631787ed9897f9229ca2066346adb1ab36586157d14d503aa59448e"
+    },
+    {
+      "path": "../thegame/tools/qa-office-transport.ts",
+      "bytes": 9861,
+      "sha256": "15ef0773e7c5cbd9b45df2e4529e7cbbe486668a5f419559e46467b9c269abfb"
+    },
+    {
+      "path": "../thegame/tools/qa-office-residents.ts",
+      "bytes": 10854,
+      "sha256": "266610e514020f5a524cbec925ca0d49b2ef831731a5c97607d5c3d4f36a4ab6"
+    },
+    {
+      "path": "../thegame/tools/capture.ts",
+      "bytes": 33107,
+      "sha256": "229a71a7b0b427f3896af18fa2ddcbacee1ab22c645e0e4c28aff9cfc244e1d3"
+    },
+    {
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 30249,
+      "sha256": "a13c79f8e200de9043dfba828389e929f65fb87456e7d06f8cb717a8d01c2565"
+    },
+    {
+      "path": "apps/thegame/client/canonical-world-view.ts",
+      "bytes": 28425,
+      "sha256": "b0a13b24f0ca83b12cb052be7de28552ec1589cc3ce3a5ddbb3e0112439e7e1f"
+    },
+    {
+      "path": "apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 25161,
+      "sha256": "e33392f5431d8000a7404f878f639b12b779e9cecb73ec60567ea6017b29f64e"
+    },
+    {
+      "path": "../../voice-agent/ui/src/office/scene.ts",
+      "bytes": 61793,
+      "sha256": "a555d343f30a1920e1f03e8fbc06e2cf0292bb70d7049feccc0bf7ac46962eec"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "../thegame/public/build/game.js",
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4",
+      "servedMatches": true
+    },
+    {
+      "path": "../thegame/public/build/office-controller.js",
+      "bytes": 1253347,
+      "sha256": "5fff416f59d7b040752681e7fa800dabf1968ff89207aa0f5aefa8f8b3463389",
+      "servedMatches": true
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "servedMatches": null,
+      "scope": "production build; native Office uses Vite source"
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "servedMatches": null,
+      "scope": "production build; native Office uses Vite source"
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/index-DIneBPLZ.js",
+      "bytes": 1772651,
+      "sha256": "4f84d1586f0125b1ca07b60c0287e3593a4a458e21d57a93e5676cbca836ef4a",
+      "servedMatches": null,
+      "scope": "production build; native Office uses Vite source"
+    },
+    {
+      "path": "../../voice-agent/ui/dist/assets/gesture/vision_wasm_module_internal.js",
+      "bytes": 335431,
+      "sha256": "70eff3956521b7de058d7173a4935c95e4a223c26ea624b9f5a936d3a043dcb0",
+      "servedMatches": null,
+      "scope": "production build; native Office uses Vite source"
+    }
+  ],
+  "pngs": [
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/controller-idle-after.png",
+      "bytes": 693350,
+      "sha256": "d45d658cea302cde6b6d7c43b4f4c0dc17746eb756b067bb1e2e70ab24fd7544"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/entered.png",
+      "bytes": 317108,
+      "sha256": "f1327f1fd499b583d569dd73488023726ee4d8cf6a1c358c79ec241e312df1c5"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/observer.png",
+      "bytes": 723539,
+      "sha256": "64790eb5e7d0282ceaf18f1031f60da3fa0787148730d238bd2cc40abe27483a"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/orbit-1.png",
+      "bytes": 393908,
+      "sha256": "bdb99041fb564d34a86b38b515753aee050d6efcd8875c09c05e8428c30ea488"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/orbit-2.png",
+      "bytes": 340824,
+      "sha256": "3b466c766a93e1a3bc1c299a0f4575adb03bcd7780c2f9ad004dfd8b4708cee7"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/orbit-3.png",
+      "bytes": 289244,
+      "sha256": "cebc69825520f3cf88afca8e5abef15f98a6d4782913407fe422c22a5c0bf0b8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/orbit-4.png",
+      "bytes": 312947,
+      "sha256": "ee7420370767051b093c2369ee679f5575770c0ebd54bf62b637ef0ca81af601"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-moved.png",
+      "bytes": 314557,
+      "sha256": "61ec5c2acc095854bb0dd23dd4b42e9585b8eb96694926d89effb5bd4d1baad2"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-observed-scope.png",
+      "bytes": 321613,
+      "sha256": "01a1e06b7150e657e0ddfa3883cacef2c8067b35c10d149de92badbbb39eb1f8"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-observing.png",
+      "bytes": 228303,
+      "sha256": "cb8efb9ab6bf71a2592be23d93b450fea3d770fa1c4134999634e5e40338df15"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-panel.png",
+      "bytes": 134214,
+      "sha256": "f4db1f77d0b9c3ee639dd707dc91e6545752f05b040e9b83e79c49e029350900"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-possessed.png",
+      "bytes": 372669,
+      "sha256": "b7836962034e779fbf8c11b0f535b4b9912fbf43665a4d5c94482e0bff305296"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-return-start.png",
+      "bytes": 361637,
+      "sha256": "fa91432511c1b73708353887f1bef8f90b0d9a37d20d85ac8331cdee789b5855"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-returned.png",
+      "bytes": 356117,
+      "sha256": "74562a2ee9d4555ed430c0a46ba5ec41d064917b11b96d8dacd5d512f30e0662"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-stopped.png",
+      "bytes": 304628,
+      "sha256": "61fe5a103211554a4341f982a203de3a3bf86038ca9a0fa63944964a27f52d6b"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/returned-observer.png",
+      "bytes": 845514,
+      "sha256": "cbfb7f6e1c4e0d24a3bd20cacd129e5bcf4563bc0be6ace9b852a8a1f3c3ff75"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-clearance-restored.png",
+      "bytes": 318755,
+      "sha256": "534963509919cb5eb3ac0d1c14f3030c7c0853e334f91df33e63cf4634e45c87"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-driver.png",
+      "bytes": 288328,
+      "sha256": "03439e35636d809aa6082914a6af719fc25ec39c0322c09e7926c51c8ad85aa2"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-driving.png",
+      "bytes": 293124,
+      "sha256": "8cbd782cd8dc1361f079aae2e11aa5f0ef9cbd63006a510a6e386395b084c169"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-engine-off.png",
+      "bytes": 374934,
+      "sha256": "9b26cec34bb4240da597cb4c84b9f266bc0f2c2ed600342681df285649d60faa"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-1.png",
+      "bytes": 394885,
+      "sha256": "23a7c81afd55eb6f49d4f24ce280afea983de9a6c9338864abd4aa66b9aca188"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-2.png",
+      "bytes": 407021,
+      "sha256": "fd2fa870c23f1603e77c558498a2432eb7e919a2c160d6fc286c8f74a0dc4c90"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-3.png",
+      "bytes": 412420,
+      "sha256": "90c133b54d3b160c2c48cf18d8e7290519305b57bb9a40023ed8f2d54784bb30"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-4.png",
+      "bytes": 414543,
+      "sha256": "e37c3ac4bc39ea0ec1a620f765d7015cb6be878438c0fa9a4f56771bc6233d19"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-5.png",
+      "bytes": 415424,
+      "sha256": "86dac69bd275cd8b6fe96c0856c2bb6c42f6245c41a2f775f7eb665a6e7cc8c1"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-6.png",
+      "bytes": 417275,
+      "sha256": "2731e832ecb745ce4bb6964ea4afc03883e685bb3fea1c142ced21ac3e31cf36"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-7.png",
+      "bytes": 415907,
+      "sha256": "cd4aa03273eb35c340bf306b08928c2746ca75da194cfa10eae23b40624c85a3"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-8.png",
+      "bytes": 417460,
+      "sha256": "9bdfa76d0521423176efcaf50825f6c51a8284efb945a8f6ba48e6d2d43a9cea"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited.png",
+      "bytes": 377326,
+      "sha256": "c89352f56741ede2c7e726c4429c18b338a01d4126ba0872520f30a62416e988"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-passenger.png",
+      "bytes": 347433,
+      "sha256": "201ee74a655275224f0f3c7e45ff410d143aa111c2d6e608aed5f0643b9c7a99"
+    },
+    {
+      "path": "../thegame/artifacts/office-walking/office-input-take-camera-20261016/walk-KeyW.png",
+      "bytes": 309384,
+      "sha256": "b63fc3ef0e3a48ca68a6879a5aea19d6853a7f6ea26e4b25b9a42145cd27b697"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/canonical-lobby.png",
+      "bytes": 388922,
+      "sha256": "bbacb2e0fb0807c71b1bb5e6e0a65b88faf78ca01ac23680192a900e32f64608"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/entrance.png",
+      "bytes": 467509,
+      "sha256": "6e757929adf465d8def2b674bea3abaa8d58ab76ff21ee392a524a10d79d0b81"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/office-entry.png",
+      "bytes": 837705,
+      "sha256": "ca05ddb1add047b77b1e69528b268bceb9bce7ebb06eb51e94afb7584eddb378"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/upper-office.png",
+      "bytes": 362353,
+      "sha256": "eaf1409f2986f850a14260cfd05118fcc48163f271b7595bb288be43013d2cb3"
+    },
+    {
+      "path": "../thegame/artifacts/office-in-game/workplaces.png",
+      "bytes": 532719,
+      "sha256": "deb640be34e48dfaedec146f805ee5225d3d7ce650b1947c5165465e996962dc"
+    }
+  ],
+  "reviewedPngs": [
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-exited-8.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/transport-clearance-restored.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-observing.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-possessed.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-moved.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-return-start.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/residents-returned.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/controller-idle-after.png",
+    "../thegame/artifacts/office-walking/office-input-take-camera-20261016/returned-observer.png",
+    "../thegame/artifacts/office-in-game/upper-office.png",
+    "../thegame/artifacts/office-in-game/workplaces.png"
+  ],
+  "restarts": [
+    {
+      "date": "2026-10-16T16:44:17.071Z",
+      "oldPid": 23712,
+      "newPid": 2668,
+      "method": "Windows process stop after fresh checkpoint and consistent VACUUM INTO backup; diagnostic-only authority/native changes; Office/backend/microphone untouched",
+      "beforeRows": 2310,
+      "afterRows": 2322,
+      "missingRows": 0,
+      "protectedRows": 111,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 14,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-input-rate/restart-audit.json",
+        "bytes": 593,
+        "sha256": "262a2b1b0c25212916f10d6e8ccaca98261f283d99db03d9a84ec8cfabacfb31"
+      }
+    },
+    {
+      "date": "2026-10-16T17:10:46.904Z",
+      "oldPid": 2668,
+      "newPid": 6588,
+      "method": "Windows process stop after checkpoint / consistent SQLite backup; bounded datagram pump update; Office/backend/microphone untouched",
+      "beforeRows": 2364,
+      "afterRows": 2376,
+      "missingRows": 0,
+      "protectedRows": 111,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 14,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-input-recovery/restart-audit.json",
+        "bytes": 567,
+        "sha256": "4c940c0f0eb189b631867b446ef8fc1387c66f0ef99d8cdf6ec5c5abb4858803"
+      }
+    },
+    {
+      "date": "2026-10-16T17:23:31.195Z",
+      "oldPid": 6588,
+      "newPid": 11472,
+      "method": "Windows process stop after fresh checkpoint / consistent SQLite backup; input burst shedding, unchanged 150/s parsing limit with bounded hard/sustained flood closure; Office/backend/microphone untouched",
+      "beforeRows": 2402,
+      "afterRows": 2426,
+      "missingRows": 0,
+      "protectedRows": 111,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 14,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-input-ingress/restart-audit.json",
+        "bytes": 639,
+        "sha256": "91d19fb571e85040e89c1e278f824e711d9e0e1030bb37c9bcf13659ffea368f"
+      }
+    },
+    {
+      "date": "2026-10-16T17:32:12.584Z",
+      "oldPid": 11472,
+      "newPid": 7416,
+      "method": "Windows process stop after checkpoint / consistent SQLite backup; read-only authority input diagnostics; Office/backend/microphone untouched",
+      "beforeRows": 2462,
+      "afterRows": 2484,
+      "missingRows": 0,
+      "protectedRows": 111,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 14,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-input-ack/restart-audit.json",
+        "bytes": 577,
+        "sha256": "db0978b392815287ca161102f2adaed9c4d6afceea73842af887a0e5cf2a7267"
+      }
+    },
+    {
+      "date": "2026-10-16T17:59:55.416Z",
+      "oldPid": 7416,
+      "newPid": 10712,
+      "method": "Windows process stop after checkpoint / consistent SQLite backup; bounded SDK datagram read prefetch; Office/backend/microphone untouched",
+      "beforeRows": 2536,
+      "afterRows": 2558,
+      "missingRows": 0,
+      "protectedRows": 111,
+      "changedProtectedRows": 0,
+      "ownerDifferences": 0,
+      "accounts": 14,
+      "accountDifferences": 0,
+      "integrity": "ok",
+      "health": {
+        "ok": true,
+        "players": 0,
+        "seed": 29,
+        "revision": 13
+      },
+      "editorRevision": 53,
+      "geometryRevision": 1,
+      "file": {
+        "path": "artifacts/office-input-prefetch/restart-audit.json",
+        "bytes": 574,
+        "sha256": "80deb0c97fac91576e1d3561ac95a430e846e0f0c935c3edd8b6d9e697256805"
+      }
+    }
+  ],
+  "earlierFailures": [
+    "Original oldest + newest-tail repair starved middle input ranges; pre-fix history tests failed at MTU 1200/512/256.",
+    "Enqueue-based rotation skipped ranges on replaceable queue coalescing; deterministic pre-fix take regression failed.",
+    "Native prefetch run passed 376 acknowledged input actions but fixed world-Z QA approach crossed the rotated wagon; full run failed.",
+    "First take-aware full run drove 1.1696 m and passed passenger controls but failed the exit camera assertion: 54/93 submitted frames at <=1 m, minimum 0.2431 m, hit the just-exited vehicle after exclusion released."
+  ],
+  "limits": [
+    "One native Windows Chrome WebGPU route and healthy NPC session. This is not all vehicle, combat, aircraft, audio, gamepad or cross-browser verification.",
+    "No new average FPS measured; prior 55.8 Game FPS is a historical short stationary measurement.",
+    "Guest native account has no funded company. Funded company/lease/worker/harness rights remain separately covered by prior authority/API tests, not this native run.",
+    "Single SDK-read and prefetch Bun probes are diagnostics on different live world states; do not infer a paired speedup.",
+    "Restart audits are immediate post-restart snapshots from before subsequent QA activity, with consistent SQLite backups. Windows process-stop restarts were not graceful shutdowns.",
+    "Exact original vector roads, outer terrain/water/climate materials, Office lighting/material parity, first-frame transitions and broad audio/gameplay fidelity remain unfinished.",
+    "Office UI build keeps its preexisting large-chunk warning; build output and Vite-served source are identified separately.",
+    "Pending input debt remains observable; a connected three-minute session does not prove a low-latency bound or that prediction matches the original Game entry."
+  ],
+  "references": [
+    "https://w3c.github.io/webtransport/",
+    "https://github.com/vmeansdev/webtransport-bun"
+  ],
+  "visualObservations": [
+    "Original NPC and restored owner are visible in the reviewed settled control frames. The Office cutaway and Game workplace furniture are present.",
+    "The first observing frame has a large unfilled terrain region; return-start has a smaller missing terrain wedge that is filled in the next captured return frame. First-frame streaming continuity remains unfinished despite semantic pass.",
+    "During exit the own car can briefly occlude the subject even though the camera boom no longer collapses. This test proves boom clearance, not continuous body visibility.",
+    "Ground and road appearance still differ from the original source; lighting changes naturally during the soak and is not a controlled visual comparison.",
+    "Game HUD values in staged screenshots are not a live FPS benchmark. The native log includes unavailable Office audio-reference WebSocket 503 responses and the C920 echo-cancellation warning; audio fidelity was not verified."
+  ],
+  "traceSummary": {
+    "maxObservedPacketsPerSecond": 57,
+    "serverSamples": 931,
+    "serverDropped": 0
+  },
+  "renderRecords": 31
+}

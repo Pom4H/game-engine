@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-25",
+  "issue": "4 m horizontal hydrology planes intersected sloping bridge asphalt; wet/dry bands and camera-jitter-sensitive intersections",
+  "scope": "Presentation geometry only. No new aquaplaning law, tyre forces, weather evolution, or vehicle spray integration.",
+  "change": {
+    "engine": "src/procedural/water-surface.ts",
+    "game": [
+      "src/game/render/hydrology-view.ts",
+      "src/game/client.ts",
+      "src/game/render/engine-source.ts"
+    ],
+    "behavior": "Thin films follow real static support; deep standing water remains horizontal; corrected face normals; missing/discontinuous supports do not bridge.",
+    "bounds": {
+      "engineSegments": [
+        1,
+        16
+      ],
+      "maximumFaces": "4*segments^2 including clipped shoreline",
+      "gameRaisedSegments": 2,
+      "gameFilmFacesPerCell": 8,
+      "gameShorelineFacesPerCell": 16,
+      "newSupportSamplesPerRaisedCell": 9,
+      "cachedSupportSamplesPerTile": 2304,
+      "validHydrologyTiles": 9,
+      "cacheInvalidation": "streaming geometry revision; unload removes cache"
+    }
+  },
+  "validation": {
+    "engineTypecheck": "passed",
+    "engineBuild": "passed",
+    "gameTypecheck": "passed",
+    "gameBuild": "passed, 7 bundles plus source map and 24 documentation stands",
+    "focusedEngineTests": 17,
+    "focusedGameTests": 16,
+    "failedTests": 0,
+    "gpu": {
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "viewport": [
+        1468,
+        1226
+      ],
+      "internalResolution": [
+        807,
+        674
+      ],
+      "taa": true,
+      "renderScale": 0.55,
+      "waterDepthM": 0.002,
+      "fixedCamera": {
+        "eye": [
+          184,
+          10,
+          -118
+        ],
+        "target": [
+          204,
+          6.2,
+          -118
+        ]
+      },
+      "sameFixture": true,
+      "fixtureSHA256": "ff7efe942d32483d7fe07232e7c9cf6297152383b0c9a8f22cca5c369c3d9509",
+      "beforeControl": "Only HydrologyView replaced by its saved pre-fix class; all other current bundle code retained",
+      "after": "Production HydrologyView and Engine reconstruction",
+      "visualReview": "Wet/dry bridge bands reproduced before and absent after",
+      "errors": [],
+      "temporal": {
+        "before": {
+          "frames": 24,
+          "probePoints": 32,
+          "lastEightFrameMaxLuminanceRange": 0.0014038818359374955
+        },
+        "after": {
+          "frames": 24,
+          "probePoints": 32,
+          "lastEightFrameMaxLuminanceRange": 0.0010049133300781277
+        },
+        "interpretation": "Finite 24-frame captures; not a zero-shimmer or global temporal quality claim. Narrow point samples do not establish an FPS gain."
+      }
+    }
+  },
+  "artifacts": {
+    "before": "artifacts/road-artifact/paired-before/ramp-night.png",
+    "beforeSHA256": "6bd649a787d192ebe89c695018eddf118da43354036df6c405f7b949d0dff4fa",
+    "after": "artifacts/road-artifact/final-after/ramp-night.png",
+    "afterSHA256": "69ead28316875a3f459e10e8eff937efca5419c713634d5b893d9d68ec4a4001",
+    "repro": "artifacts/road-artifact/diagnose.mjs",
+    "waterFixture": "artifacts/road-artifact/water-frame.json"
+  },
+  "offroadAudit": "docs/OFFROAD.md",
+  "limitations": [
+    "Exact original user camera and full live state were not replayed; controlled bridge-ramp fixture reproduced the same failure class.",
+    "Full offroad coating/spray/aquaplaning integration is not complete.",
+    "No comparative FPS improvement is claimed."
+  ]
+}

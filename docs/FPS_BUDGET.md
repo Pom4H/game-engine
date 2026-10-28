@@ -111,3 +111,22 @@ This avoids re-recording lengthy videos solely because a shader
 performance optimization was changed, while retaining GPU validation for
 shader modifications. Historical pending runs created before this policy
 are not silently reported as passing.
+
+## Exact mesh colour packing (October 24, 2026)
+
+The mesh converter fills unauthored colours with 255 and detects neutral RGBA
+runs in bounded 64-channel blocks. Coloured blocks retain the original clamp
+and half-up byte quantization. The position, normal, index and UV paths are
+unchanged; all buffers matched byte for byte against the saved implementation.
+
+A same-browser Chrome 156 AB/BA benchmark on frozen input arrays measured
+24k authored-white conversion at 1.147 -> 0.980 ms and 70k at 3.133 -> 2.680 ms.
+70k with implicit colours measured 3.627 -> 2.307 ms. These are mesh-conversion
+costs, not frame times or an established FPS improvement. Mixed and late-colour
+controls remain in the benchmark. The native renderer correctness image matches
+the earlier PNG SHA-256 exactly; physical laws and shaders were not changed.
+
+The local-light zero-contribution shader prototype was not adopted: 128 paired
+GPU observations did not show a consistent benefit, and final temporal pixel
+equality did not pass. Preserve that failed gate. Detailed evidence is in
+[mesh packing iteration](render-evidence/mesh-packing-optimization-20261024.json).

@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-16T05:26:57.364Z",
+  "referenceDate": "2026-10-16T05:22:32.107Z",
+  "browser": "native-gpu",
+  "scope": "sole Game entry, original vehicle and paintSurface geometry, actual Engine HDR; fixed presentation only, no authority pose change; not a performance/full parity gate",
+  "fixtureSha256": "cad2b898002bd56d9f9a535696f1ac8c66f815d5dd9aca1d7ee9338db3df3ff0",
+  "hdrDiff": {
+    "samples": 4096,
+    "max": 0.21575927734375,
+    "mean": 0.0003418419510126114,
+    "changed": 17
+  },
+  "engineStages": [
+    {
+      "name": "clean",
+      "coatingOverlays": 0,
+      "gpuErrors": [],
+      "physicalBodies": 0,
+      "resolution": [
+        960,
+        540
+      ],
+      "gpuBatches": 13,
+      "gpuCandidates": 443
+    },
+    {
+      "name": "scrape",
+      "coatingOverlays": 1,
+      "gpuErrors": [],
+      "physicalBodies": 0,
+      "resolution": [
+        960,
+        540
+      ],
+      "gpuBatches": 13,
+      "gpuCandidates": 443
+    },
+    {
+      "name": "scrape-open",
+      "coatingOverlays": 1,
+      "gpuErrors": [],
+      "physicalBodies": 0,
+      "resolution": [
+        960,
+        540
+      ],
+      "gpuBatches": 13,
+      "gpuCandidates": 443
+    }
+  ],
+  "referenceStages": [
+    {
+      "name": "clean",
+      "backend": "webgpu",
+      "gpuErrors": []
+    },
+    {
+      "name": "scrape",
+      "backend": "webgpu",
+      "gpuErrors": []
+    },
+    {
+      "name": "scrape-open",
+      "backend": "webgpu",
+      "gpuErrors": []
+    }
+  ],
+  "checks": {
+    "builds": "Engine, Game and Office passed",
+    "officeAssertions": 4137,
+    "typechecks": "Engine, Game, canonical adapter and Office passed",
+    "game": 13,
+    "engine": 49,
+    "gameAssertions": 4631,
+    "officeCanonicalView": 11
+  },
+  "visualReview": {
+    "images": 6,
+    "observed": "Scar shape/placement and attachment to opened near-side door visually agree; lighting, terrain/roads and reflections remain different"
+  },
+  "limits": [
+    "Presentation-only original Game fixture; no authority teleport",
+    "Local native Windows Chromium, not browser/device coverage",
+    "No whole-renderer pixel parity, crash simulation, sustained FPS or actual Office GUI acceptance",
+    "CPU fallback triangle batching exclusion is not the native GPU bottleneck; native already has 13 batches and 443 candidates"
+  ]
+}

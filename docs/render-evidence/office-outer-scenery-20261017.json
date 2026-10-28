@@ -1,0 +1,1290 @@
+{
+  "date": "2026-10-17T03:22:44.331Z",
+  "scope": "Complete original outer static scenery through a bounded read-only worker; installed production Office observer, existing NPC/lift/owner-return regression and a separate current Game FPS sample",
+  "capability": "original-residents-19",
+  "bounds": {
+    "staticRadius": 420,
+    "maxViewCells": 64,
+    "workerRawChunks": 128,
+    "workerCompiledChunks": 128,
+    "workerViewCache": 3,
+    "maxPending": 4,
+    "terrainCachedVertices": 32768,
+    "outerExteriorPlans": 256,
+    "dynamicRadiusUnchanged": 192,
+    "entityCapUnchanged": 150,
+    "legacyPhysicalChunkCap": 9
+  },
+  "tests": {
+    "pass": 199,
+    "assertions": 18499,
+    "files": 20,
+    "seconds": 68.67,
+    "log": "artifacts/office-outer-scenery-integration-tests-r1-20261017.log",
+    "sourceOracles": {
+      "buildings": 6,
+      "buildingVertices": 15330,
+      "renderCells": 3,
+      "renderVertices": 48054
+    },
+    "separateRendererRun": {
+      "pass": 4,
+      "assertions": 33,
+      "log": "artifacts/office-outer-scenery-renderer-tests-r1-20261017.log"
+    }
+  },
+  "liveStatic": {
+    "date": "2026-10-17T03:17:41.456Z",
+    "ok": true,
+    "elapsedMs": 209.4025,
+    "seed": 29,
+    "revision": 13,
+    "sourceKey": "thegame:29:13:2881606794:1",
+    "geometryKey": "office:thegame:29:13:2881606794:36117:-298:370:1:thegame:29:13:2881606794:1:-298:370:420:-3:3,-2:3,-4:2,-4:3,-3:4,-2:4,-4:1,-1:3,-4:4",
+    "center": [
+      -298,
+      370
+    ],
+    "radius": 420,
+    "cells": 40,
+    "buildings": 13,
+    "props": 495,
+    "airportParts": 23,
+    "outerBytes": 88506,
+    "geometryBytes": 785126,
+    "responseBytes": 805807,
+    "entities": 22,
+    "legacyPhysicalChunks": 9,
+    "cachedGeometryOmitted": true,
+    "unauthenticatedControllerStatus": 403,
+    "before": {
+      "players": 0,
+      "residents": 47,
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 1640,
+        "vehicleStepHz": 120,
+        "bodies": 47,
+        "sleeping": 32,
+        "awake": 7,
+        "maxSpeed": 10.16860511293435,
+        "substeps": 1640,
+        "bodySubsteps": 20902,
+        "islands": 28,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 0
+      }
+    },
+    "after": {
+      "players": 0,
+      "residents": 47,
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 1646,
+        "vehicleStepHz": 120,
+        "bodies": 47,
+        "sleeping": 32,
+        "awake": 7,
+        "maxSpeed": 10.171283962624743,
+        "substeps": 1646,
+        "bodySubsteps": 20944,
+        "islands": 28,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 0
+      }
+    },
+    "limits": [
+      "Live authority continues to advance independently; before/after NPC and physics counts are observations, not a paused-simulation equivalence test.",
+      "No controller or actor input is created by this audit."
+    ]
+  },
+  "restart": {
+    "date": "2026-10-17T03:17:14.009Z",
+    "oldPid": 11664,
+    "newPid": 6872,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; complete original 420 m static scenery in a bounded read-only worker; no change to physics or actor interest; Office/backend/microphone untouched",
+    "beforeRows": 3973,
+    "afterRows": 3973,
+    "missingRows": 0,
+    "protectedRows": 135,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 38,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "native": {
+    "label": "office-outer-scenery-native-20261017-r1",
+    "entry": "http://127.0.0.1:8765/?ui=static",
+    "observerStates": 4,
+    "expected": {
+      "outerCells": 40,
+      "outerBuildings": 13,
+      "props": 495,
+      "airportBoxes": 23
+    },
+    "actor": "resident:25961:0",
+    "building": "25961",
+    "floor": 4,
+    "target": 5,
+    "rideSamples": 40,
+    "firstPersonSamples": 14,
+    "walkingPulses": 28,
+    "states": 16,
+    "takeoverDistance": 4.283718472840683e-9,
+    "maxPresentedAlignment": 0.0003333333333248589,
+    "cameraReturn": {
+      "before": {
+        "body": "resident:25961:0",
+        "mode": "first-person",
+        "suppressed": 50
+      },
+      "after": {
+        "body": "player:9a742a39-79d3-49b4-ace2-ab2b009ce918",
+        "mode": "third-person",
+        "suppressed": 0
+      }
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "rightsBefore": {
+      "accountId": "9a742a39-79d3-49b4-ace2-ab2b009ce918",
+      "companies": [],
+      "leases": []
+    },
+    "rightsAfter": {
+      "accountId": "9a742a39-79d3-49b4-ace2-ab2b009ce918",
+      "companies": [],
+      "leases": []
+    }
+  },
+  "fps": {
+    "manifest": "fps-live-20261017-outer-scenery.json",
+    "averageFPS": 71.8671894339261,
+    "p50Ms": 10,
+    "p95Ms": 20.400000000001455,
+    "frames": 900,
+    "warmupFrames": 180,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "actualLiveEnvironment": {
+      "worldMinute": 266986.86664758745,
+      "projectionHour": 9.78494412645814,
+      "facadeNight": 0,
+      "rain": 0,
+      "wetness": [
+        0,
+        0
+      ]
+    },
+    "scope": [
+      "Short stationary original Game measurement; not walking, vehicles, sustained-60 or Office UI performance.",
+      "1280x720 viewport, 704x396 internal rendering, TAA, 420 m, adaptive resolution disabled.",
+      "900 requestAnimationFrame intervals after 180 warmup frames; each benchmark discards 30 initial intervals. Not isolated GPU execution time. Interval sum derived from count/throughput.",
+      "Fixed requested visual settings do not freeze the live authority environment. Actual authority lighting and weather are recorded separately.",
+      "Independent live-world sample, not a paired benchmark of the static-scenery change. These measurements do not establish a performance improvement or regression."
+    ]
+  },
+  "archivedSources": [
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-types.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-scenery.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "archive": "artifacts/office-outer-scenery/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-map-sampling.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/world-map-sampling.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/business-sites.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/business-sites.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-records.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-records.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-source.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-source.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-view.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-view.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-scenery-worker.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/server/office-scenery-worker.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-scenery.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/server/office-scenery.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-world.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/server/office-world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/office-world.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/office-scenery-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-urban-assets.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/office-urban-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-interior-assets.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/office-interior-assets.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lift-view.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/src/game/office-lift-view.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/outer-scenery-source.test.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/test/outer-scenery-source.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-outer-scenery-assets.test.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/test/office-outer-scenery-assets.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/test/office-world.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/test/account-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/world-runtime.test.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/test/world-runtime.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-outer-scenery.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-outer-scenery.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-interiors.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-terrain.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "archive": "artifacts/office-outer-scenery/final-sources/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "archive": "artifacts/office-outer-scenery/final-sources/office/VERIFICATION.md"
+    }
+  ],
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "archive": "artifacts/office-outer-scenery/final-bundles/game.js",
+      "bytes": 2492537,
+      "sha256": "29c02e739da0c5304c3233650a9581292c42a204c5d88373298f175c40e775ca"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js?capability=original-residents-19",
+      "archive": "artifacts/office-outer-scenery/final-bundles/office-controller.js",
+      "bytes": 1367751,
+      "sha256": "8750f407cc78d8d66f279e883c4bdff7b94bdd2742e81bdf2a2ef124ab3b39aa"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-npjxiyWJ.js",
+      "archive": "artifacts/office-outer-scenery/final-bundles/index-npjxiyWJ.js",
+      "bytes": 1790779,
+      "sha256": "c1d75e367210ac702a2024ce4824e2848d6f4610d9e74388846fb138352050c8"
+    },
+    {
+      "url": "http://127.0.0.1:8765/assets/index-DyZZt9W9.css",
+      "archive": "artifacts/office-outer-scenery/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    }
+  ],
+  "reviewed": [
+    "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/initial.png",
+    "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/overview.png",
+    "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/overview-rotated.png",
+    "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/restored.png",
+    "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-first-person.png",
+    "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-exited.png",
+    "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-returned.png"
+  ],
+  "health": {
+    "ok": true,
+    "players": 0,
+    "seed": 29,
+    "revision": 13
+  },
+  "debug": [
+    {
+      "port": 3251,
+      "live": false
+    },
+    {
+      "port": 3252,
+      "live": false
+    }
+  ],
+  "limits": [
+    "The source Game authority, physical interest, dynamic entity caps and shared presentation clock are unchanged. Legacy nine-chunk fields remain for old clients; the current static renderer prefers the complete outer scene.",
+    "Native GPU verification covers the actual installed Office view and source lift route. Far town/airport/natural cells are compared on CPU, not claimed as a native tour of all biomes.",
+    "Guest business lists are empty; native equality is supplemented by account regression tests, not presented as new nonempty live business evidence.",
+    "The initial FPS report helper checked health before disconnect grace completed. The benchmark exited 0; the existing raw sample/bundle were preserved and only postprocessing was rerun after actual cleanup. No benchmark rerun.",
+    "FPS is a short stationary Game sample at 704x396 internal resolution, with actual daytime/dry conditions. It is unpaired with the previous night/rain sample and proves neither a causal performance gain nor sustained 60 FPS/movement/Office performance.",
+    "Other selected-Office floors, long routes/cold far NPC support, light/temporal/water/audio parity and first-person own shadows/reflections remain incomplete or unverified. No physical microphone capture/playback; existing C920/audio-reference/autoplay warnings remain."
+  ],
+  "files": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/initial.png",
+      "bytes": 705686,
+      "sha256": "34a7dcf2d519f3ec5d8de30af3e5ea679b096c5df13618659fd19ad0b04a1ef2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/overview-rotated.png",
+      "bytes": 427592,
+      "sha256": "8cc614990c753c5c7b37820329ce60454f8ca106f5fb568a10a840658a7271ac"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/overview.png",
+      "bytes": 495392,
+      "sha256": "a41e8b71a12225c68405706456a42b70485553b278828e375b3afcd4ce7d4d42"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/report.json",
+      "bytes": 14333,
+      "sha256": "cc11b3d0ecf8c82a5cd5e096a24143c576f62d7f6a539b52b14a777de413c68a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/restored.png",
+      "bytes": 810281,
+      "sha256": "d6f003ae466e5cea4cda4397e2c80eed93371b676d0195af13ed54ebd1e08cc0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery/office-outer-scenery-native-20261017-r1/source.json",
+      "bytes": 811565,
+      "sha256": "98ae1885e993cdd1a436b0f0177f677b1d80cdcbb9503e50f1b9362dc965a746"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/canonical-controller-source.json",
+      "bytes": 938505,
+      "sha256": "99b8b0aa28ba8b79e858ffa5d35418eb447fcc87fb3bdd570d7e54530fb8883c"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/entered.png",
+      "bytes": 360275,
+      "sha256": "47bf94e54ce6d83b2f53f077aa76b4557a263e8766772581966afdf426f92452"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-arrived.png",
+      "bytes": 323693,
+      "sha256": "cf99ff85a418fa6b3004bafb12f177609caa6141ef1387b177c0396726b24c21"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-at-door.png",
+      "bytes": 261548,
+      "sha256": "ab22711a663da5ad2dc1cc950b4af7d4449365d7a2a383afd7bb0517247eec9b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-call-panel.png",
+      "bytes": 140558,
+      "sha256": "e201a45cee7cccb3b62ec45ff8f16481df2e9a137b071c8885ecba778e151d3e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-candidates.json",
+      "bytes": 27160,
+      "sha256": "8f890b406325d67fcadba61bed127975c82f437e65c227068fe5724e1abfd762"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-controlled.png",
+      "bytes": 151361,
+      "sha256": "67377300ff47a92fb5de39b47e6545f9fa04dcb0487865879acf10a0434e19e1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-directory.png",
+      "bytes": 207222,
+      "sha256": "1b0a980e598d0eed8aa9c79b3d313089ef68124c2e4ec7b9ffe3372cb5fc77c1"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-exited.png",
+      "bytes": 254158,
+      "sha256": "e3226b340a8a354bd17fbce52877d474ecf79e5c7dd415c7f34ab57fd135180e"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-first-person-before-return.png",
+      "bytes": 187613,
+      "sha256": "50e8ae422c8cce0e365bfbb3e5f6dc231fdd912ecc4da44f14638d3677598f7b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-first-person.png",
+      "bytes": 220488,
+      "sha256": "077e2e229767aac504a4a1e74ba5a8bc735ae4aa26af3bd7a15554b295cb2feb"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-floor-panel.png",
+      "bytes": 128579,
+      "sha256": "a39fbc4e141d601053c6209c3a553c0bc59d0c0af20dcac5fe7aef3d3f144911"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-hall-source.json",
+      "bytes": 977938,
+      "sha256": "f3fb8f1c5a17787207758ca03ca995ff26303f063ad857e536a372b1a8fea9ae"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-in-cabin.png",
+      "bytes": 289996,
+      "sha256": "0e070ce037303383a5afdb212f9244cb4861cf4423bd44cf651b684d0730d0ff"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-moving.png",
+      "bytes": 258895,
+      "sha256": "8f74a6af9189fa46f288b566813550bca76483f3d7bb4327627f4242e4b18b5b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-report.json",
+      "bytes": 87642,
+      "sha256": "2d5babacaee9b8c668552b2626009593a617ea39478884d9b2ea7ce122b99bc2"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-returned.png",
+      "bytes": 504040,
+      "sha256": "42c4a12ee9b01e664f106ee5689f1888064ba4690b8c82f65a0f04894df3b60a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/lifts-source.json",
+      "bytes": 1978861,
+      "sha256": "110f339f57d386d8d37f7db6a5f821088f4896b25f817b8ce360502641d82c0a"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/observer.png",
+      "bytes": 844598,
+      "sha256": "1788589cfeca794ecf7d7f8991afbd87dcf0c9fa1a7541c235e6b3c075ea19a9"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/report.json",
+      "bytes": 286841,
+      "sha256": "6d6a2f219e836ddfafd455283ce548ce326c190489ef1b32c86bbda627df6b29"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/returned-observer.png",
+      "bytes": 734951,
+      "sha256": "773b108040c246c29ede4e4ff7e1f27aa99c0e2077e7792bcbedac6b3f6cffea"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/office-outer-scenery-native-20261017-r1/walk-KeyW.png",
+      "bytes": 376464,
+      "sha256": "25d7eab5a9bdda6ca7c1d7fcad9ceaa7b47288b00609ced64487a402d8de5620"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-outer-scenery-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 15907,
+      "sha256": "1e2df406df27009ae2bda7b34f1222aade2165029d316b3dd48ee7fbd268be0b"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-outer-scenery-native-20261017-r1/office-entry.json",
+      "bytes": 16078,
+      "sha256": "1dc5d303b1d2e1db08145914843bdde8ad20817d23395a1077faa4c1639064a6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/office-outer-scenery-native-20261017-r1/office-entry.png",
+      "bytes": 698357,
+      "sha256": "dd078332b449380e9351c182e35d5d3e3d218e99a66ab77119d095114a62d705"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-native-20261017-r1.log",
+      "bytes": 402,
+      "sha256": "8bb425d5ed84c6dc4533cd490b7e62707e762d764f32329f39ad6b1636c965b2"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-types.ts",
+      "bytes": 5653,
+      "sha256": "26e80d3127c160549cdb22fccc712683e425c932a98f109db453a7f401ab3c12"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-types.ts",
+      "bytes": 5653,
+      "sha256": "26e80d3127c160549cdb22fccc712683e425c932a98f109db453a7f401ab3c12"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1378,
+      "sha256": "215bd7608dd276760b9a081a27423def4ac83cb3681518c8574ff97c35b691fe"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-scenery.ts",
+      "bytes": 1378,
+      "sha256": "215bd7608dd276760b9a081a27423def4ac83cb3681518c8574ff97c35b691fe"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "5950fecf581e8202c7792c0c0a78bc736748e1710771fcf70e16c957321853b3"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/engine/apps/thegame/client/canonical-connection.ts",
+      "bytes": 35748,
+      "sha256": "5950fecf581e8202c7792c0c0a78bc736748e1710771fcf70e16c957321853b3"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 189100,
+      "sha256": "a9b3e8f91856e04b4e412b1893e16ea77db61fdb8c5062eee9f3d4e480050804"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/engine/docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 189100,
+      "sha256": "a9b3e8f91856e04b4e412b1893e16ea77db61fdb8c5062eee9f3d4e480050804"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-map-sampling.ts",
+      "bytes": 1313,
+      "sha256": "d6c22a5e8182005bb0593f3360ae8a14a966aa83f7608e47dcc753486e5d598e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/world-map-sampling.ts",
+      "bytes": 1313,
+      "sha256": "d6c22a5e8182005bb0593f3360ae8a14a966aa83f7608e47dcc753486e5d598e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world.ts",
+      "bytes": 25711,
+      "sha256": "ead4b85b7553fa52bf4dcb9eab3fd2a9a94141300356c6da6b309e99f44db2ae"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/world.ts",
+      "bytes": 25711,
+      "sha256": "ead4b85b7553fa52bf4dcb9eab3fd2a9a94141300356c6da6b309e99f44db2ae"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/business-sites.ts",
+      "bytes": 6667,
+      "sha256": "0779d3ad2a993538fe51e0360ee8f388425ffb94fd65034068233424d949abfc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/business-sites.ts",
+      "bytes": 6667,
+      "sha256": "0779d3ad2a993538fe51e0360ee8f388425ffb94fd65034068233424d949abfc"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-records.ts",
+      "bytes": 1596,
+      "sha256": "a358c6b24ac54658630afeceea316bc23f3ae7d0a4bded81df9622c8142c3886"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-records.ts",
+      "bytes": 1596,
+      "sha256": "a358c6b24ac54658630afeceea316bc23f3ae7d0a4bded81df9622c8142c3886"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-source.ts",
+      "bytes": 4848,
+      "sha256": "5df7027d2556d2efd571867e0e4ea84335a5d6c20a810d3ddd085865ee47c114"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-source.ts",
+      "bytes": 4848,
+      "sha256": "5df7027d2556d2efd571867e0e4ea84335a5d6c20a810d3ddd085865ee47c114"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/outer-scenery-view.ts",
+      "bytes": 4610,
+      "sha256": "f6e1df4b70b2cd0e8ea5d53cf03f913d07606da7e237ff6989d9904871c6d535"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/outer-scenery-view.ts",
+      "bytes": 4610,
+      "sha256": "f6e1df4b70b2cd0e8ea5d53cf03f913d07606da7e237ff6989d9904871c6d535"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "bytes": 14282,
+      "sha256": "ed5c140a4da8a0cb9527b6098745d5661b23cb4ae638fbe68fad9353f9326f8d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/world-runtime.ts",
+      "bytes": 14282,
+      "sha256": "ed5c140a4da8a0cb9527b6098745d5661b23cb4ae638fbe68fad9353f9326f8d"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-scenery-worker.ts",
+      "bytes": 789,
+      "sha256": "cb0da782d139038c91174991be6c6cb5a1763576f9e81e6e1420c8b9d931006a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/server/office-scenery-worker.ts",
+      "bytes": 789,
+      "sha256": "cb0da782d139038c91174991be6c6cb5a1763576f9e81e6e1420c8b9d931006a"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-scenery.ts",
+      "bytes": 4734,
+      "sha256": "c6bd4476013752d6e2f93a47a74295481245ab1e431f2d7d336042c782a9d4b7"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/server/office-scenery.ts",
+      "bytes": 4734,
+      "sha256": "c6bd4476013752d6e2f93a47a74295481245ab1e431f2d7d336042c782a9d4b7"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/office-world.ts",
+      "bytes": 3426,
+      "sha256": "6ce366b11d8b86a94e3cc906e24472ee360bf0c1e81174a360f23769d4630b99"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/server/office-world.ts",
+      "bytes": 3426,
+      "sha256": "6ce366b11d8b86a94e3cc906e24472ee360bf0c1e81174a360f23769d4630b99"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-world.ts",
+      "bytes": 10863,
+      "sha256": "eb086006933743a7365f8f341f29e08e51b7a8c4bf4e8e5b1e069987596aae1e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/office-world.ts",
+      "bytes": 10863,
+      "sha256": "eb086006933743a7365f8f341f29e08e51b7a8c4bf4e8e5b1e069987596aae1e"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-scenery-assets.ts",
+      "bytes": 7939,
+      "sha256": "50d572a03d3cbd14ad677fbf8536619b1ad51c1f4a83296a80168d75fe05bedc"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/office-scenery-assets.ts",
+      "bytes": 7939,
+      "sha256": "50d572a03d3cbd14ad677fbf8536619b1ad51c1f4a83296a80168d75fe05bedc"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-urban-assets.ts",
+      "bytes": 5179,
+      "sha256": "c91fd4f8bed75a077f43ccf9602de679828f4a899cbdc5ac1621c4bcd231328d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/office-urban-assets.ts",
+      "bytes": 5179,
+      "sha256": "c91fd4f8bed75a077f43ccf9602de679828f4a899cbdc5ac1621c4bcd231328d"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-interior-assets.ts",
+      "bytes": 8161,
+      "sha256": "4df6cd2d7050e744a6fb753e3f685c5d2f028ccd6aac74d087b5b49daeb9bb98"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/office-interior-assets.ts",
+      "bytes": 8161,
+      "sha256": "4df6cd2d7050e744a6fb753e3f685c5d2f028ccd6aac74d087b5b49daeb9bb98"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/office-lift-view.ts",
+      "bytes": 3474,
+      "sha256": "db3f4cc0ee953670f1fde22493cc0fd65d98af54b7e51c264b3791c9380164b0"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/src/game/office-lift-view.ts",
+      "bytes": 3474,
+      "sha256": "db3f4cc0ee953670f1fde22493cc0fd65d98af54b7e51c264b3791c9380164b0"
+    },
+    {
+      "repo": "game",
+      "path": "test/outer-scenery-source.test.ts",
+      "bytes": 7636,
+      "sha256": "34f01a4cf716065147c23fa59ec3e50db64d8b989ebc68c1bd065cb3b6a2b474"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/test/outer-scenery-source.test.ts",
+      "bytes": 7636,
+      "sha256": "34f01a4cf716065147c23fa59ec3e50db64d8b989ebc68c1bd065cb3b6a2b474"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-outer-scenery-assets.test.ts",
+      "bytes": 7701,
+      "sha256": "8411fb53881bb9a97fce8cd300f949d4ad6646de03605444f43b3916568fc62c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/test/office-outer-scenery-assets.test.ts",
+      "bytes": 7701,
+      "sha256": "8411fb53881bb9a97fce8cd300f949d4ad6646de03605444f43b3916568fc62c"
+    },
+    {
+      "repo": "game",
+      "path": "test/office-world.test.ts",
+      "bytes": 16143,
+      "sha256": "dcc6127d13263ff38008170430cdf4cf8cd3e0388fb172f69d2b20eb386bf57e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/test/office-world.test.ts",
+      "bytes": 16143,
+      "sha256": "dcc6127d13263ff38008170430cdf4cf8cd3e0388fb172f69d2b20eb386bf57e"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1"
+    },
+    {
+      "repo": "game",
+      "path": "test/world-runtime.test.ts",
+      "bytes": 11743,
+      "sha256": "a1589d9440ebc4fb2e94af22c031449828eab43615813785e83b3e3b0adddc0f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/test/world-runtime.test.ts",
+      "bytes": 11743,
+      "sha256": "a1589d9440ebc4fb2e94af22c031449828eab43615813785e83b3e3b0adddc0f"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-outer-scenery.ts",
+      "bytes": 4724,
+      "sha256": "84ea2d5f5cef79768645c279abaaa74f7925cc175a5bd811d89c0d5378f1b41d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-outer-scenery.ts",
+      "bytes": 4724,
+      "sha256": "84ea2d5f5cef79768645c279abaaa74f7925cc175a5bd811d89c0d5378f1b41d"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 7598,
+      "sha256": "ef86edf82c1933661318a2ee2dc55160c95fc6e6415cb7037fce6e324f42aae1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office.ts",
+      "bytes": 7598,
+      "sha256": "ef86edf82c1933661318a2ee2dc55160c95fc6e6415cb7037fce6e324f42aae1"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "05301f3b75e99f87da25c41a0355c028416a68f1bc2df70f6391eadae3950c31"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-interiors.ts",
+      "bytes": 13084,
+      "sha256": "05301f3b75e99f87da25c41a0355c028416a68f1bc2df70f6391eadae3950c31"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "52ecf3e32559e3fcb32042273bb80fb5e8c7fe3937093b2330036d911a9d8423"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/tools/qa-office-terrain.ts",
+      "bytes": 10506,
+      "sha256": "52ecf3e32559e3fcb32042273bb80fb5e8c7fe3937093b2330036d911a9d8423"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 780868,
+      "sha256": "8973475a597325d3ddeea2787b5d4e62c2bfff34de25211f8f224fca267f05d9"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/game/docs/VERIFICATION.md",
+      "bytes": 780868,
+      "sha256": "8973475a597325d3ddeea2787b5d4e62c2bfff34de25211f8f224fca267f05d9"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 126506,
+      "sha256": "64f4867761b6f054c2d9b0fad0c320428f3e7534b1d5d2767e57aef9117f3130"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-sources/office/VERIFICATION.md",
+      "bytes": 126506,
+      "sha256": "64f4867761b6f054c2d9b0fad0c320428f3e7534b1d5d2767e57aef9117f3130"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/game.js",
+      "bytes": 2492537,
+      "sha256": "29c02e739da0c5304c3233650a9581292c42a204c5d88373298f175c40e775ca"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/office-controller.js",
+      "bytes": 1367751,
+      "sha256": "8750f407cc78d8d66f279e883c4bdff7b94bdd2742e81bdf2a2ef124ab3b39aa"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/index-npjxiyWJ.js",
+      "bytes": 1790779,
+      "sha256": "c1d75e367210ac702a2024ce4824e2848d6f4610d9e74388846fb138352050c8"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/final-bundles/index-DyZZt9W9.css",
+      "bytes": 98403,
+      "sha256": "74349e341cc8b25b33540b84316dd069f6319a9e39fb1a443f972bce6ffc8fec"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-outer-scenery.json",
+      "bytes": 3589,
+      "sha256": "8be1a28e7f2513d882ecd79d93525751398d9ed144e9ac59b0258a2b979a3d90"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-outer-scenery.json",
+      "bytes": 240041,
+      "sha256": "a9b7142edc25e678a90f23dbb134762d92198db71db909919dadfbb3a3099f69"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/fps-live-20261017-outer-scenery.log",
+      "bytes": 142834,
+      "sha256": "57e320dd4a997078d061248e6fbbb34b93019ac36e111849173e4e0b3199889e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery-app-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery-integration-tests-r1-20261017.log",
+      "bytes": 24519,
+      "sha256": "422dc4b12bffdb01dec5b6b68bf291ada909c8dc202f958be886fdfb6b53a287"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery-ui-build-20261017.log",
+      "bytes": 889,
+      "sha256": "420669f6b59a03340045770c28fb86945be45f4013ed3098986e98e7388135c5"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery-ui-typecheck-r1-20261017.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-game-build-20261017.log",
+      "bytes": 585,
+      "sha256": "1c50ae58505d9042ef9861d03daef9a49a90275d13cbe4b4b8515b8f053613dc"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-renderer-tests-r1-20261017.log",
+      "bytes": 729,
+      "sha256": "edb639b4365524b51458efd39de0dfdae95dc584f691581d7608cb7d3272e287"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-tests-r1-20261017.log",
+      "bytes": 917,
+      "sha256": "6e1aed2f1e5c61ec10cf23a0b4b0fb0418c8f1794b2d668c3eb361700dea55c0"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-tests-r2-20261017.log",
+      "bytes": 6948,
+      "sha256": "e7145a2f1e3f9c2f1b7a233f0368603a343f64eb1e073ad64deadf5258a59ab6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-tests-r3-20261017.log",
+      "bytes": 7145,
+      "sha256": "349e51d8e3f9ecfdf4b953b6d551544642eae39442cf5928254c879d5c030673"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-tests-r4-20261017.log",
+      "bytes": 5760,
+      "sha256": "c1bb4323c0bad586b8a4115aff8f5e68157b71bb704aab33a254a382193aaa44"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r1-20261017.log",
+      "bytes": 197,
+      "sha256": "342579973fa52dbb835c994ba80b4188b540694481e19a7384c1dabafbe0c7ef"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r2-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r3-20261017.log",
+      "bytes": 164,
+      "sha256": "d67fb27caf276f7d2c89dc1847ae1b13d8c4bebc250b31ca6198e85061cf31a6"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r4-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r5-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r6-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r7-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r8-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-outer-scenery-typecheck-r9-20261017.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/api-tests-before/account-control.test.ts",
+      "bytes": 23131,
+      "sha256": "4bb14ec618d41f3385825ef43b121dd45bf21872a6ff5bbcf879ddd20a86943e"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/api-tests-before/office-world.test.ts",
+      "bytes": 14192,
+      "sha256": "0699ed90b0bc0b76b30f3566953268a8e2e1736a1042e8c300d16f5431b1ca59"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/audit-restart.ts",
+      "bytes": 3049,
+      "sha256": "cde59f66d6c66befd060d193ab3fa87671ef712051c2f5254c5ae76dc122da47"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/audit-static.ts",
+      "bytes": 3246,
+      "sha256": "d8d3a27cd061be7f3b9ac2df25d517f40c2295abe4add11999af28f82d87eb9f"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/backup.ts",
+      "bytes": 2469,
+      "sha256": "a7428977105a08f1ed4ef75a9720c698ef754f17272334d4bdd67a6b7af48a3b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/documentation.ts",
+      "bytes": 12943,
+      "sha256": "66fe2d736a9a3b3d8c5c487ad913a7cbcc83ed5a2e4bf4373c7817d48144f728"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/evidence.ts",
+      "bytes": 10259,
+      "sha256": "10a999fad5003d3af1132c4a9fa0f85bb64f43b52244c4a869bc9d79cee98d85"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/fps-game.js",
+      "bytes": 2492537,
+      "sha256": "29c02e739da0c5304c3233650a9581292c42a204c5d88373298f175c40e775ca"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/fps-operation.json",
+      "bytes": 1002,
+      "sha256": "6f70fb1b715f36cf18fc59e6b543779e9dfa070230b0f501401b041760dd2c43"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/fps-result-before-cleanup-wait.ts",
+      "bytes": 3920,
+      "sha256": "6ff3634afb8ef5f1864331a60de6f94de24cff05f1529d9a5bca53ea62638043"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/fps-result.ts",
+      "bytes": 3997,
+      "sha256": "da825786aa3ab3160aa3cca885ca3732db7a4b1959e66ec07f0d1f1729b0d970"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/live-static-audit.json",
+      "bytes": 1903,
+      "sha256": "0742a52040d66ab7e4949dcdd30cdfb92298c2c926a419d14109e0bcd5a54147"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/live-static-source.json",
+      "bytes": 805807,
+      "sha256": "7df9c7272893d9cab3fc29d0d129aea9cdb0d76d34142156280c3b537f47dec4"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/migrate-response-tests.ts",
+      "bytes": 1384,
+      "sha256": "e3e469d2dcff889c247425a6aef0c1ad72eaf6b2e8fea0ae681cd42fbbde9d8a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/prepare-fps.ts",
+      "bytes": 1160,
+      "sha256": "6e8aeb92743a50529815fee9e0468f95fc0fe8ace54f532fc4f8137a9c82798c"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/prepare-runtime.ts",
+      "bytes": 1079,
+      "sha256": "b66c150500544513d0c75039f36b28bd9e2ae115cbf6df4c991e4b27d3115010"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/repair-fps-result.ts",
+      "bytes": 1166,
+      "sha256": "6562838919b1f27763080d0437b251bd471845e59ee10d74ab9c3a93afeea499"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/restart-audit.json",
+      "bytes": 656,
+      "sha256": "e42b10cebeb9b8227e21d88085cbb4522ae12eb2202d160587f90fd7d8ed566b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/restart-operation.json",
+      "bytes": 338,
+      "sha256": "df62596985cf1302cfd626f3eb22e3f33277d67e7d475a185850e42ffd0633de"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/restart-ready.json",
+      "bytes": 19536,
+      "sha256": "ab470a403f92c5a8aa819aaafb76698ddf9e436321566941acd68fa1af5ef870"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/restart-ready.sqlite",
+      "bytes": 8429568,
+      "sha256": "ab304087b2ee937b54ed9a6145dd8a629f81ef6c6b11d5220384b0550f6c9a22"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/restart.ps1",
+      "bytes": 2801,
+      "sha256": "61c1d5ee5b580e9042d8ad3dd8203b672b8d96d0cc16acd30fb45b236720bca1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/run-fps.ps1",
+      "bytes": 1882,
+      "sha256": "eda3b4d5cccf228f76141294d4248354e15fc40ced57f1b06fe7ee6d13f8fa1a"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/run-native.ps1",
+      "bytes": 1607,
+      "sha256": "7e0e9e6686ac1a2c975e9a0c41e5e68d56f05bb79ae81cf8a115be10ceca0fb1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/server-before.err.log",
+      "bytes": 6630,
+      "sha256": "b4d56682c435b7d75642afae6c4aee8aa025b8ef0d102b145646d5b90223905b"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/server-before.log",
+      "bytes": 723,
+      "sha256": "614372c2d2995c2d2dc4cb5828fe7967cef988b5f1ed206a3e2980df3f13a98d"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-outer-scenery/verify-evidence.ts",
+      "bytes": 1293,
+      "sha256": "43d744d62f42ae811c513ba39267b48e8e7f90c7259fc265b02c38032d26ded6"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "date": "2026-10-18",
+  "status": "focused_checks_passed",
+  "change": "SpatialHash.nearOwned copies into an Engine-owned ordinary array using indexed writes and one final length assignment. SolidWorld.candidates uses this path for its existing private nearScratch. Public near keeps fresh-result and caller-array push/iterator behavior; the filtering copy into candidateScratch is unchanged.",
+  "sources": [
+    "src/core/spatial-hash.ts",
+    "src/physics/compound.ts"
+  ],
+  "cause": {
+    "profile": "../thegame/artifacts/network-stability-20261018/population-surface-scalars-summary.json",
+    "scope": "Raw timeDelta-weighted entire Bun CPU profile, including construction and 120 warm ticks; inclusive rows overlap.",
+    "nearSelfMs": 1386.485,
+    "nearInclusiveMs": 1975.510,
+    "observation": "The old native output fill clears the array and iterates source references through push for every query. The new trusted path overwrites the existing output and trims stale references without borrowing cache or bucket storage."
+  },
+  "microbenchmark": {
+    "scope": "Frozen complete pre-change SpatialHash versus actual production source nearOwned, using Bun 1.4.2. No prototype-only timings are used here.",
+    "artifact": "artifacts/spatial-owned-fill-production.json",
+    "reproductionScript": "artifacts/spatial-owned-fill-prototype.ts",
+    "rounds": 7,
+    "queriesPerRound": 12000,
+    "ordering": "Three alternating warmup pairs, followed by seven alternating before/after pairs; identical candidate reference order, checksums and cache diagnostics required.",
+    "scenarios": [
+      {
+        "name": "single-cell-64",
+        "candidates": 64,
+        "beforeMedianMs": 2.9157,
+        "afterMedianMs": 2.7358,
+        "speedup": 1.0657577308282769,
+        "checksum": 1524000,
+        "cacheQueries": 0
+      },
+      {
+        "name": "enclosing-256",
+        "candidates": 257,
+        "beforeMedianMs": 10.2231,
+        "afterMedianMs": 5.9624,
+        "speedup": 1.7145947940426671,
+        "checksum": 6132000,
+        "cacheQueries": 1,
+        "cacheHitsBeforeAndAfter": 96000,
+        "cacheMissesBeforeAndAfter": 1
+      },
+      {
+        "name": "multicell-1024",
+        "candidates": 1025,
+        "beforeMedianMs": 29.9677,
+        "afterMedianMs": 17.0872,
+        "speedup": 1.7538098693759063,
+        "checksum": 24564000,
+        "cacheQueries": 1,
+        "cacheHitsBeforeAndAfter": 96000,
+        "cacheMissesBeforeAndAfter": 1
+      }
+    ]
+  },
+  "verification": {
+    "frozenOracle": "test/fixtures/spatial-hash-before-owned-fill.mjs",
+    "newTests": "test/spatial-owned-fill.test.mjs",
+    "cases": [
+      "1200 seeded queries preserve exact candidate references/order and cache diagnostics, followed by remove/reinsert/movement, batched removals, cache bounds and clear.",
+      "Public near(out) retains Proxy get/set and custom push traces; invalid queries leave output unchanged, fresh outputs do not alias internal storage.",
+      "140000 candidates remain supported, output mutation cannot corrupt caches, shrinking to zero removes stale references.",
+      "SolidWorld candidates retains instance/subclass/later-prototype near instrumentation, reads an overridden near getter once with the original receiver, and supports a custom index without nearOwned.",
+      "Getter-triggered nested ordering queries preserve independent outputs and frozen callback/cache behavior."
+    ],
+    "engineCommand": "node --test test/spatial-owned-fill.test.mjs test/spatial-broadphase.test.mjs test/compound-physics.test.mjs test/compound-plane-ray.test.mjs test/compound-ray-cache.test.mjs test/core-services.test.mjs",
+    "enginePassed": 27,
+    "engineFailed": 0,
+    "engineDurationMs": 575.8863,
+    "engineLog": "artifacts/spatial-owned-fill-tests.log",
+    "engineTypecheck": "passed",
+    "engineBuild": "passed",
+    "canonicalPhysicsCommand": "bun test --timeout 60000 ./test/the-engine-compound.test.ts ./test/physics.test.js ./test/spatial.test.js ./test/sleeping.test.ts ./test/wheel-contact.test.ts ./test/vehicle-crash-regression.test.ts",
+    "canonicalPhysicsPassed": 63,
+    "canonicalPhysicsFailed": 0,
+    "canonicalPhysicsAssertions": 8826,
+    "canonicalPhysicsDurationSeconds": 12.48,
+    "canonicalPhysicsLog": "../thegame/artifacts/network-stability-20261018/spatial-owned-fill-physics.log",
+    "canonicalPhysicsScope": "Includes the exact frozen former body states, contacts and impulses, plus sleep, wheels and crash regressions. Test counts overlap other reported groups and are not additive."
+  },
+  "apiReview": "Fallback captures the public near function in one read and invokes that exact function with Reflect.apply and the original index receiver. The accessor-count regression and both focused/canonical groups passed again after this final repair. Native guard already performed the same single property read, so no new performance run was required for the capture-only repair.",
+  "limitations": [
+    "64-item production timing benefit is modest (1.07x), with noisy short CPU batches; larger cases show 1.71x and 1.75x.",
+    "No post-change whole-authority, browser GPU, unprofiled FPS or allocation/GC measurement has been performed for this change.",
+    "Public near fresh arrays, candidate filtering copies, cache allocations and other callers remain; historical sampled allocations for all SpatialHash.near contexts are not claimed to disappear.",
+    "No physics math, rates, query/candidate caps, collision acceptance, geometry, quality settings or persistent result-cache capacity changed."
+  ]
+}

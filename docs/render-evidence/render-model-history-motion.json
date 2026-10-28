@@ -1,0 +1,1342 @@
+{
+  "status": "completed",
+  "controls": {
+    "count": 5000,
+    "width": 1920,
+    "height": 1080,
+    "frames": 40,
+    "modes": [
+      "gpu",
+      "cpu-batched"
+    ]
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "runs": [
+    {
+      "mode": "gpu",
+      "sourceHash": "f0b5828678ed84d9e3367051d2d02309eb50be78a943d83edf51cd4d421070ff",
+      "geometryHash": "881f5bd8a6b25857d840a7a6b100b94e4263491a0c3709a62750f67b3a282a0a",
+      "frames": [
+        {
+          "frame": 0,
+          "events": [],
+          "physicsHash": "8bed323a1272cf1c4a31ad2b60eeddda1066ece8a922dbb8421ea537af5efc45",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 1,
+            "allocations": 5010,
+            "commits": 10010,
+            "modelChanges": 0
+          }
+        },
+        {
+          "frame": 1,
+          "events": [],
+          "physicsHash": "13d0ce0ab132a4d03979385fd24c48d53f175e6b310894edb1a5ea105fa7b8b8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 2,
+            "allocations": 5010,
+            "commits": 20020,
+            "modelChanges": 11
+          }
+        },
+        {
+          "frame": 2,
+          "events": [],
+          "physicsHash": "14dcbda5c0446348bd37e7a624a22b6ea0a6c0530871599674f2191dbf0a4f14",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 3,
+            "allocations": 5010,
+            "commits": 30030,
+            "modelChanges": 22
+          }
+        },
+        {
+          "frame": 3,
+          "events": [],
+          "physicsHash": "137c07740a4ba76cd9e74939e33760fd84d2a23190a42446012678bc82e8f388",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 4,
+            "allocations": 5010,
+            "commits": 40040,
+            "modelChanges": 33
+          }
+        },
+        {
+          "frame": 4,
+          "events": [],
+          "physicsHash": "2656895e7a0ce3bcc19affd0a3d6bfcd0473c7cdfcb0a43ae1bcc05407e13991",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 5,
+            "allocations": 5010,
+            "commits": 50050,
+            "modelChanges": 44
+          }
+        },
+        {
+          "frame": 5,
+          "events": [],
+          "physicsHash": "76a7d58bd48e55e6e022ec3cae3f6d522d79f8be65c824c5cb342649e7c200e8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 6,
+            "allocations": 5010,
+            "commits": 60060,
+            "modelChanges": 55
+          }
+        },
+        {
+          "frame": 6,
+          "events": [],
+          "physicsHash": "5c93f62573c898f9484255c9da976aeab7a53ad8360b5056fb6f0665dcbeb347",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 7,
+            "allocations": 5010,
+            "commits": 70070,
+            "modelChanges": 66
+          }
+        },
+        {
+          "frame": 7,
+          "events": [],
+          "physicsHash": "835745a09c12c3043f65af39fee38b036071b24e9a2f6004ff95f0827eab6fef",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 8,
+            "allocations": 5010,
+            "commits": 80080,
+            "modelChanges": 77
+          }
+        },
+        {
+          "frame": 8,
+          "events": [
+            "single hidden"
+          ],
+          "physicsHash": "bd9b120688c17f29ee8822a463d35b8903b6472c85d5c7f6ee34e7e9f208d5ab",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 9,
+            "allocations": 5010,
+            "commits": 90089,
+            "modelChanges": 87
+          }
+        },
+        {
+          "frame": 9,
+          "events": [],
+          "physicsHash": "2c9b4918cff505a1965aac5cd769591ab2d48e7d10899e3e706c5d77031c0978",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 10,
+            "allocations": 5010,
+            "commits": 100098,
+            "modelChanges": 97
+          }
+        },
+        {
+          "frame": 10,
+          "events": [],
+          "physicsHash": "7751467f84a8a762f03e5b2291acfe6e7ca2cbd154d12c6d80cfcd50299bb84f",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 11,
+            "allocations": 5010,
+            "commits": 110107,
+            "modelChanges": 107
+          }
+        },
+        {
+          "frame": 11,
+          "events": [
+            "single reentry"
+          ],
+          "physicsHash": "703ec6a9ce361e9e1969715dd3047c4e3d1727e42a7a53fc0c919c11e6612c03",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 12,
+            "allocations": 5010,
+            "commits": 120117,
+            "modelChanges": 118
+          }
+        },
+        {
+          "frame": 12,
+          "events": [],
+          "physicsHash": "6eb550697c66ebc46d76b7f3ba36f4d8a414f386589db3a727816ba08ac629ff",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 13,
+            "allocations": 5010,
+            "commits": 130127,
+            "modelChanges": 129
+          }
+        },
+        {
+          "frame": 13,
+          "events": [],
+          "physicsHash": "87a44330a43bfa5a06d4e27dfb3c9caaddd32452fe2c1be525362346a14927eb",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 14,
+            "allocations": 5010,
+            "commits": 140137,
+            "modelChanges": 140
+          }
+        },
+        {
+          "frame": 14,
+          "events": [],
+          "physicsHash": "0277bd1f641d5df283d93054c5a2ee4a23236a6bf11a3cebd1d2bc37b9c525a4",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 15,
+            "allocations": 5010,
+            "commits": 150147,
+            "modelChanges": 151
+          }
+        },
+        {
+          "frame": 15,
+          "events": [],
+          "physicsHash": "819713ad593624dbb969a00aa5c573c9b229fe8a152a26eec8aa49811a80d241",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 16,
+            "allocations": 5010,
+            "commits": 160157,
+            "modelChanges": 162
+          }
+        },
+        {
+          "frame": 16,
+          "events": [
+            "same-ID source replacement"
+          ],
+          "physicsHash": "5e05b064e3bedb3a780c693fef98bf67beee3d1757f99f494c3a4d7bc82800a9",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 17,
+            "allocations": 5011,
+            "commits": 170167,
+            "modelChanges": 5171
+          }
+        },
+        {
+          "frame": 17,
+          "events": [],
+          "physicsHash": "9d7508f35011e9ac4663e8d458c1589972eae27ffe67c3691581e104a20fa1b7",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 18,
+            "allocations": 5011,
+            "commits": 180177,
+            "modelChanges": 5182
+          }
+        },
+        {
+          "frame": 18,
+          "events": [],
+          "physicsHash": "b0e0f269f70670288dae3375013f2134ee7e2e3ceafd376c800cb07f8bdcc228",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 19,
+            "allocations": 5011,
+            "commits": 190187,
+            "modelChanges": 5193
+          }
+        },
+        {
+          "frame": 19,
+          "events": [],
+          "physicsHash": "cec9858dcfb27d7eb48c488452bcfe68a0ccf505346f9c526e60a971c836f8b8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 20,
+            "allocations": 5011,
+            "commits": 200197,
+            "modelChanges": 5204
+          }
+        },
+        {
+          "frame": 20,
+          "events": [
+            "source removal"
+          ],
+          "physicsHash": "db47d4ae2933e002ea8bba3b624b1d2bb4d1f44f6b230f20849876851cc61184",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 21,
+            "allocations": 5011,
+            "commits": 210205,
+            "modelChanges": 10213
+          }
+        },
+        {
+          "frame": 21,
+          "events": [],
+          "physicsHash": "f555d393b5f7046bc7f635d0dfbf41325a3baab3b2a5ed7c9db770fcf8bd5c57",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 22,
+            "allocations": 5011,
+            "commits": 220213,
+            "modelChanges": 10224
+          }
+        },
+        {
+          "frame": 22,
+          "events": [],
+          "physicsHash": "bd2aca25498d82771a1fb65ef0d430eca43f39290026c6541b5158e166f4cb27",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 23,
+            "allocations": 5011,
+            "commits": 230221,
+            "modelChanges": 10235
+          }
+        },
+        {
+          "frame": 23,
+          "events": [],
+          "physicsHash": "1a2969394f02e8b81c380dea39389eb2b831404917892849cb515ad13028032f",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 24,
+            "allocations": 5011,
+            "commits": 240229,
+            "modelChanges": 10246
+          }
+        },
+        {
+          "frame": 24,
+          "events": [
+            "temporal reset"
+          ],
+          "physicsHash": "b2852a19af3bf3d6954e6be7ab4e6d1534819f78cc8a39539e53c953d68367dc",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 1,
+            "allocations": 10020,
+            "commits": 250237,
+            "modelChanges": 10246
+          }
+        },
+        {
+          "frame": 25,
+          "events": [],
+          "physicsHash": "006a2720b6a9283716ca2afa7f19f7b72e98470c2635809ef8604aa5a46a14fc",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 2,
+            "allocations": 10020,
+            "commits": 260245,
+            "modelChanges": 10257
+          }
+        },
+        {
+          "frame": 26,
+          "events": [],
+          "physicsHash": "9e30dc4986319680b884da7585110dec00b40747818e7f02e6f3d615830fcd5b",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 3,
+            "allocations": 10020,
+            "commits": 270253,
+            "modelChanges": 10268
+          }
+        },
+        {
+          "frame": 27,
+          "events": [],
+          "physicsHash": "2815b877091da285007a6f0a8314f34e2669451d81dc8dcb9147aded9c7318af",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 4,
+            "allocations": 10020,
+            "commits": 280261,
+            "modelChanges": 10279
+          }
+        },
+        {
+          "frame": 28,
+          "events": [],
+          "physicsHash": "e8b7f36fee153e084498808593ea3b543e2a3a7d35ef352153181e598903f61e",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 5,
+            "allocations": 10020,
+            "commits": 290269,
+            "modelChanges": 10290
+          }
+        },
+        {
+          "frame": 29,
+          "events": [],
+          "physicsHash": "8bd7f4de58329b5545b5c741986425ab07a08156455ad796bcdb1922d22cabda",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 6,
+            "allocations": 10020,
+            "commits": 300277,
+            "modelChanges": 10301
+          }
+        },
+        {
+          "frame": 30,
+          "events": [],
+          "physicsHash": "9c1fbbb55994c186b9c90bfd92ae84c74fef28e9d8d11f75f9c6673cf512cf16",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 7,
+            "allocations": 10020,
+            "commits": 310285,
+            "modelChanges": 10312
+          }
+        },
+        {
+          "frame": 31,
+          "events": [],
+          "physicsHash": "9bf7262d7dfd717354960b33797fd78450fe537160d31d4098a5e31aa1dd28b5",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 8,
+            "allocations": 10020,
+            "commits": 320293,
+            "modelChanges": 10323
+          }
+        },
+        {
+          "frame": 32,
+          "events": [
+            "same-ID scene swap"
+          ],
+          "physicsHash": "dc6f8919de296f8e5afa64a541bd7c48788f31a470765aad29b331093f42048b",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 1,
+            "allocations": 15030,
+            "commits": 330303,
+            "modelChanges": 10323
+          }
+        },
+        {
+          "frame": 33,
+          "events": [],
+          "physicsHash": "8639fc816d60a68713adcd622e78c69c1f6eb2c33aed3331a3d6f4e3e1b25e26",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 2,
+            "allocations": 15030,
+            "commits": 340313,
+            "modelChanges": 10334
+          }
+        },
+        {
+          "frame": 34,
+          "events": [],
+          "physicsHash": "8538a60ec0364c9c6d500e6d657a5c2666f98c58979e94ba550c2a4f04923f49",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 3,
+            "allocations": 15030,
+            "commits": 350323,
+            "modelChanges": 10345
+          }
+        },
+        {
+          "frame": 35,
+          "events": [],
+          "physicsHash": "299ad13768ce04ba184bc00e02cdaf5ffc503fe2c3232afe7e3b174a6a6334dc",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 4,
+            "allocations": 15030,
+            "commits": 360333,
+            "modelChanges": 10356
+          }
+        },
+        {
+          "frame": 36,
+          "events": [],
+          "physicsHash": "63df70fc89ecb1bc0091f00fdcb5a6afd6786f8727e3123949e4b23deed80354",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 5,
+            "allocations": 15030,
+            "commits": 370343,
+            "modelChanges": 10367
+          }
+        },
+        {
+          "frame": 37,
+          "events": [],
+          "physicsHash": "954a9706903feadc8dd5a555531eab8366bf39bdfc8e17fc5c1842b3a9b4387a",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 6,
+            "allocations": 15030,
+            "commits": 380353,
+            "modelChanges": 10378
+          }
+        },
+        {
+          "frame": 38,
+          "events": [],
+          "physicsHash": "2ed45ce4ddbd570b07b89e56b29dc150dbe936b8fda7430d4da11e75d98e7f8e",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 7,
+            "allocations": 15030,
+            "commits": 390363,
+            "modelChanges": 10389
+          }
+        },
+        {
+          "frame": 39,
+          "events": [],
+          "physicsHash": "74134bbe517de9f28595d1b3cb5d3c4138953fa63a76a91536f0fed1d65ec288",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 8,
+            "allocations": 15030,
+            "commits": 400373,
+            "modelChanges": 10400
+          }
+        }
+      ],
+      "modelChannels": 6411040,
+      "uploadChannels": 7999520,
+      "physicalMotionFrames": 30,
+      "errors": []
+    },
+    {
+      "mode": "cpu-batched",
+      "sourceHash": "f0b5828678ed84d9e3367051d2d02309eb50be78a943d83edf51cd4d421070ff",
+      "geometryHash": "881f5bd8a6b25857d840a7a6b100b94e4263491a0c3709a62750f67b3a282a0a",
+      "frames": [
+        {
+          "frame": 0,
+          "events": [],
+          "physicsHash": "8bed323a1272cf1c4a31ad2b60eeddda1066ece8a922dbb8421ea537af5efc45",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 1,
+            "allocations": 5010,
+            "commits": 10010,
+            "modelChanges": 0
+          }
+        },
+        {
+          "frame": 1,
+          "events": [],
+          "physicsHash": "13d0ce0ab132a4d03979385fd24c48d53f175e6b310894edb1a5ea105fa7b8b8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 2,
+            "allocations": 5010,
+            "commits": 20020,
+            "modelChanges": 11
+          }
+        },
+        {
+          "frame": 2,
+          "events": [],
+          "physicsHash": "14dcbda5c0446348bd37e7a624a22b6ea0a6c0530871599674f2191dbf0a4f14",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 3,
+            "allocations": 5010,
+            "commits": 30030,
+            "modelChanges": 22
+          }
+        },
+        {
+          "frame": 3,
+          "events": [],
+          "physicsHash": "137c07740a4ba76cd9e74939e33760fd84d2a23190a42446012678bc82e8f388",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 4,
+            "allocations": 5010,
+            "commits": 40040,
+            "modelChanges": 33
+          }
+        },
+        {
+          "frame": 4,
+          "events": [],
+          "physicsHash": "2656895e7a0ce3bcc19affd0a3d6bfcd0473c7cdfcb0a43ae1bcc05407e13991",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 5,
+            "allocations": 5010,
+            "commits": 50050,
+            "modelChanges": 44
+          }
+        },
+        {
+          "frame": 5,
+          "events": [],
+          "physicsHash": "76a7d58bd48e55e6e022ec3cae3f6d522d79f8be65c824c5cb342649e7c200e8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 6,
+            "allocations": 5010,
+            "commits": 60060,
+            "modelChanges": 55
+          }
+        },
+        {
+          "frame": 6,
+          "events": [],
+          "physicsHash": "5c93f62573c898f9484255c9da976aeab7a53ad8360b5056fb6f0665dcbeb347",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 7,
+            "allocations": 5010,
+            "commits": 70070,
+            "modelChanges": 66
+          }
+        },
+        {
+          "frame": 7,
+          "events": [],
+          "physicsHash": "835745a09c12c3043f65af39fee38b036071b24e9a2f6004ff95f0827eab6fef",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 8,
+            "allocations": 5010,
+            "commits": 80080,
+            "modelChanges": 77
+          }
+        },
+        {
+          "frame": 8,
+          "events": [
+            "single hidden"
+          ],
+          "physicsHash": "bd9b120688c17f29ee8822a463d35b8903b6472c85d5c7f6ee34e7e9f208d5ab",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 9,
+            "allocations": 5010,
+            "commits": 90089,
+            "modelChanges": 87
+          }
+        },
+        {
+          "frame": 9,
+          "events": [],
+          "physicsHash": "2c9b4918cff505a1965aac5cd769591ab2d48e7d10899e3e706c5d77031c0978",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 10,
+            "allocations": 5010,
+            "commits": 100098,
+            "modelChanges": 97
+          }
+        },
+        {
+          "frame": 10,
+          "events": [],
+          "physicsHash": "7751467f84a8a762f03e5b2291acfe6e7ca2cbd154d12c6d80cfcd50299bb84f",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": false,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 11,
+            "allocations": 5010,
+            "commits": 110107,
+            "modelChanges": 107
+          }
+        },
+        {
+          "frame": 11,
+          "events": [
+            "single reentry"
+          ],
+          "physicsHash": "703ec6a9ce361e9e1969715dd3047c4e3d1727e42a7a53fc0c919c11e6612c03",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 12,
+            "allocations": 5010,
+            "commits": 120117,
+            "modelChanges": 118
+          }
+        },
+        {
+          "frame": 12,
+          "events": [],
+          "physicsHash": "6eb550697c66ebc46d76b7f3ba36f4d8a414f386589db3a727816ba08ac629ff",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 13,
+            "allocations": 5010,
+            "commits": 130127,
+            "modelChanges": 129
+          }
+        },
+        {
+          "frame": 13,
+          "events": [],
+          "physicsHash": "87a44330a43bfa5a06d4e27dfb3c9caaddd32452fe2c1be525362346a14927eb",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 14,
+            "allocations": 5010,
+            "commits": 140137,
+            "modelChanges": 140
+          }
+        },
+        {
+          "frame": 14,
+          "events": [],
+          "physicsHash": "0277bd1f641d5df283d93054c5a2ee4a23236a6bf11a3cebd1d2bc37b9c525a4",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 15,
+            "allocations": 5010,
+            "commits": 150147,
+            "modelChanges": 151
+          }
+        },
+        {
+          "frame": 15,
+          "events": [],
+          "physicsHash": "819713ad593624dbb969a00aa5c573c9b229fe8a152a26eec8aa49811a80d241",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 16,
+            "allocations": 5010,
+            "commits": 160157,
+            "modelChanges": 162
+          }
+        },
+        {
+          "frame": 16,
+          "events": [
+            "same-ID source replacement"
+          ],
+          "physicsHash": "5e05b064e3bedb3a780c693fef98bf67beee3d1757f99f494c3a4d7bc82800a9",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 17,
+            "allocations": 5011,
+            "commits": 170167,
+            "modelChanges": 5171
+          }
+        },
+        {
+          "frame": 17,
+          "events": [],
+          "physicsHash": "9d7508f35011e9ac4663e8d458c1589972eae27ffe67c3691581e104a20fa1b7",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 18,
+            "allocations": 5011,
+            "commits": 180177,
+            "modelChanges": 5182
+          }
+        },
+        {
+          "frame": 18,
+          "events": [],
+          "physicsHash": "b0e0f269f70670288dae3375013f2134ee7e2e3ceafd376c800cb07f8bdcc228",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 19,
+            "allocations": 5011,
+            "commits": 190187,
+            "modelChanges": 5193
+          }
+        },
+        {
+          "frame": 19,
+          "events": [],
+          "physicsHash": "cec9858dcfb27d7eb48c488452bcfe68a0ccf505346f9c526e60a971c836f8b8",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 20,
+            "allocations": 5011,
+            "commits": 200197,
+            "modelChanges": 5204
+          }
+        },
+        {
+          "frame": 20,
+          "events": [
+            "source removal"
+          ],
+          "physicsHash": "db47d4ae2933e002ea8bba3b624b1d2bb4d1f44f6b230f20849876851cc61184",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 21,
+            "allocations": 5011,
+            "commits": 210205,
+            "modelChanges": 10213
+          }
+        },
+        {
+          "frame": 21,
+          "events": [],
+          "physicsHash": "f555d393b5f7046bc7f635d0dfbf41325a3baab3b2a5ed7c9db770fcf8bd5c57",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 22,
+            "allocations": 5011,
+            "commits": 220213,
+            "modelChanges": 10224
+          }
+        },
+        {
+          "frame": 22,
+          "events": [],
+          "physicsHash": "bd2aca25498d82771a1fb65ef0d430eca43f39290026c6541b5158e166f4cb27",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 23,
+            "allocations": 5011,
+            "commits": 230221,
+            "modelChanges": 10235
+          }
+        },
+        {
+          "frame": 23,
+          "events": [],
+          "physicsHash": "1a2969394f02e8b81c380dea39389eb2b831404917892849cb515ad13028032f",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 24,
+            "allocations": 5011,
+            "commits": 240229,
+            "modelChanges": 10246
+          }
+        },
+        {
+          "frame": 24,
+          "events": [
+            "temporal reset"
+          ],
+          "physicsHash": "b2852a19af3bf3d6954e6be7ab4e6d1534819f78cc8a39539e53c953d68367dc",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 1,
+            "allocations": 10020,
+            "commits": 250237,
+            "modelChanges": 10246
+          }
+        },
+        {
+          "frame": 25,
+          "events": [],
+          "physicsHash": "006a2720b6a9283716ca2afa7f19f7b72e98470c2635809ef8604aa5a46a14fc",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 2,
+            "allocations": 10020,
+            "commits": 260245,
+            "modelChanges": 10257
+          }
+        },
+        {
+          "frame": 26,
+          "events": [],
+          "physicsHash": "9e30dc4986319680b884da7585110dec00b40747818e7f02e6f3d615830fcd5b",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 3,
+            "allocations": 10020,
+            "commits": 270253,
+            "modelChanges": 10268
+          }
+        },
+        {
+          "frame": 27,
+          "events": [],
+          "physicsHash": "2815b877091da285007a6f0a8314f34e2669451d81dc8dcb9147aded9c7318af",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 4,
+            "allocations": 10020,
+            "commits": 280261,
+            "modelChanges": 10279
+          }
+        },
+        {
+          "frame": 28,
+          "events": [],
+          "physicsHash": "e8b7f36fee153e084498808593ea3b543e2a3a7d35ef352153181e598903f61e",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 5,
+            "allocations": 10020,
+            "commits": 290269,
+            "modelChanges": 10290
+          }
+        },
+        {
+          "frame": 29,
+          "events": [],
+          "physicsHash": "8bd7f4de58329b5545b5c741986425ab07a08156455ad796bcdb1922d22cabda",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 6,
+            "allocations": 10020,
+            "commits": 300277,
+            "modelChanges": 10301
+          }
+        },
+        {
+          "frame": 30,
+          "events": [],
+          "physicsHash": "9c1fbbb55994c186b9c90bfd92ae84c74fef28e9d8d11f75f9c6673cf512cf16",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 7,
+            "allocations": 10020,
+            "commits": 310285,
+            "modelChanges": 10312
+          }
+        },
+        {
+          "frame": 31,
+          "events": [],
+          "physicsHash": "9bf7262d7dfd717354960b33797fd78450fe537160d31d4098a5e31aa1dd28b5",
+          "checkedInstances": 4999,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5009,
+            "frame": 8,
+            "allocations": 10020,
+            "commits": 320293,
+            "modelChanges": 10323
+          }
+        },
+        {
+          "frame": 32,
+          "events": [
+            "same-ID scene swap"
+          ],
+          "physicsHash": "dc6f8919de296f8e5afa64a541bd7c48788f31a470765aad29b331093f42048b",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 1,
+            "allocations": 15030,
+            "commits": 330303,
+            "modelChanges": 10323
+          }
+        },
+        {
+          "frame": 33,
+          "events": [],
+          "physicsHash": "8639fc816d60a68713adcd622e78c69c1f6eb2c33aed3331a3d6f4e3e1b25e26",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 2,
+            "allocations": 15030,
+            "commits": 340313,
+            "modelChanges": 10334
+          }
+        },
+        {
+          "frame": 34,
+          "events": [],
+          "physicsHash": "8538a60ec0364c9c6d500e6d657a5c2666f98c58979e94ba550c2a4f04923f49",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 3,
+            "allocations": 15030,
+            "commits": 350323,
+            "modelChanges": 10345
+          }
+        },
+        {
+          "frame": 35,
+          "events": [],
+          "physicsHash": "299ad13768ce04ba184bc00e02cdaf5ffc503fe2c3232afe7e3b174a6a6334dc",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 4,
+            "allocations": 15030,
+            "commits": 360333,
+            "modelChanges": 10356
+          }
+        },
+        {
+          "frame": 36,
+          "events": [],
+          "physicsHash": "63df70fc89ecb1bc0091f00fdcb5a6afd6786f8727e3123949e4b23deed80354",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 5,
+            "allocations": 15030,
+            "commits": 370343,
+            "modelChanges": 10367
+          }
+        },
+        {
+          "frame": 37,
+          "events": [],
+          "physicsHash": "954a9706903feadc8dd5a555531eab8366bf39bdfc8e17fc5c1842b3a9b4387a",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 6,
+            "allocations": 15030,
+            "commits": 380353,
+            "modelChanges": 10378
+          }
+        },
+        {
+          "frame": 38,
+          "events": [],
+          "physicsHash": "2ed45ce4ddbd570b07b89e56b29dc150dbe936b8fda7430d4da11e75d98e7f8e",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 7,
+            "allocations": 15030,
+            "commits": 390363,
+            "modelChanges": 10389
+          }
+        },
+        {
+          "frame": 39,
+          "events": [],
+          "physicsHash": "74134bbe517de9f28595d1b3cb5d3c4138953fa63a76a91536f0fed1d65ec288",
+          "checkedInstances": 5000,
+          "checkedBodies": 8,
+          "singleVisible": true,
+          "modelHistory": {
+            "entries": 5010,
+            "frame": 8,
+            "allocations": 15030,
+            "commits": 400373,
+            "modelChanges": 10400
+          }
+        }
+      ],
+      "modelChannels": 6411040,
+      "uploadChannels": 7999520,
+      "physicalMotionFrames": 30,
+      "errors": []
+    }
+  ],
+  "captures": [
+    {
+      "mode": "gpu",
+      "frame": 7,
+      "file": "gpu-frame-7.png"
+    },
+    {
+      "mode": "gpu",
+      "frame": 9,
+      "file": "gpu-frame-9.png"
+    },
+    {
+      "mode": "gpu",
+      "frame": 11,
+      "file": "gpu-frame-11.png"
+    },
+    {
+      "mode": "gpu",
+      "frame": 31,
+      "file": "gpu-frame-31.png"
+    },
+    {
+      "mode": "gpu",
+      "frame": 39,
+      "file": "gpu-frame-39.png"
+    },
+    {
+      "mode": "cpu-batched",
+      "frame": 7,
+      "file": "cpu-batched-frame-7.png"
+    },
+    {
+      "mode": "cpu-batched",
+      "frame": 9,
+      "file": "cpu-batched-frame-9.png"
+    },
+    {
+      "mode": "cpu-batched",
+      "frame": 11,
+      "file": "cpu-batched-frame-11.png"
+    },
+    {
+      "mode": "cpu-batched",
+      "frame": 31,
+      "file": "cpu-batched-frame-31.png"
+    },
+    {
+      "mode": "cpu-batched",
+      "frame": 39,
+      "file": "cpu-batched-frame-39.png"
+    }
+  ],
+  "gates": {
+    "productionMatrices": true,
+    "productionUploads": true,
+    "physicalMatrices": true,
+    "physicalReplay": true,
+    "offscreenReentry": true,
+    "replacementRemovalResetSceneSwap": true
+  },
+  "interpretation": "Every actual GPU instance and all eight rigid-body uniforms have their current/previous matrices compared exactly against pure Render IR and independent last-observed snapshots; all 40-float instance uploads are checked against the CPU mirror. The isolated transparent single has no shadow/reflection role; independent clip testing verifies hidden uploads remain unchanged and reentry uses its current pose. Scene stepping and visual edits occur before rendering; physical hashes must remain unchanged across render and match between visibility modes. Read-only diagnostic dispatches, readbacks and queue waits occur after production rendering. This establishes correctness of the exercised cases, not performance, canonical repeatability or competitive quality.",
+  "startedAt": "2026-10-11T22:45:40.927Z",
+  "completedAt": "2026-10-11T22:46:12.156Z",
+  "sourceState": {
+    "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+    "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+    "harnessSha256": "cd3aa17ca7674d09c958442ecf78fec8ee70b6787f6b14ac2c3553478a4ae6de",
+    "diagnosticSha256": "2602d6c2c665b44ca0cdd531e28e326531c9aa25d44553e61030ad2d965a61bd"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

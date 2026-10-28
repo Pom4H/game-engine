@@ -1,0 +1,283 @@
+{
+  "recordedAt": "2026-10-18T09:32:19.777Z",
+  "status": "waiting-for-parallel-hydrology-before-combined-verification",
+  "goalComplete": false,
+  "userDecision": {
+    "text": "Дождаться завершения параллельной правки и проверить общую сборку (рекомендуется)",
+    "parallelThreadId": "01a14e30-936c-7a10-adf9-25fa100e5bcd",
+    "parallelThreadTitle": "Найти способ запустить игру",
+    "lastObservedStatus": "Third hydrology/weather turn in progress; source guard refused before builds/tests/native",
+    "policy": "Preserve parallel changes. No cross-thread messages sent. Wait for completion before combined build/native checks."
+  },
+  "integrated": [
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\physics\\compound.ts",
+      "before": "7479df5dfa0533ef3cb300e19b44ef5c36661a55e3aff66d99a8e004c43e7399",
+      "after": "3f73719bd545c9febeac09b36cf0af5302ebf8429d631452a6d3812a275b7ad9",
+      "currentObservedHash": "3f73719bd545c9febeac09b36cf0af5302ebf8429d631452a6d3812a275b7ad9",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\core\\fixed-clock.ts",
+      "before": "0370108cc51fb2c00068bfdb40bfa281a83eedb2122fce6fa3871abee32aa5a7",
+      "after": "a6588df176f1f583d7bdd1d7c50891a263986e2ae123a3e8b7560fa20a224073",
+      "currentObservedHash": "a6588df176f1f583d7bdd1d7c50891a263986e2ae123a3e8b7560fa20a224073",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\server\\realtime-router.ts",
+      "before": "a6c51153b739781d520fb6f16563b349bc942efb516c386cc744124e038af148",
+      "after": "6199c30fb9404b422a142803a7682952af90615fb5bbbb0c74c149a6ef8bfc5f",
+      "currentObservedHash": "6199c30fb9404b422a142803a7682952af90615fb5bbbb0c74c149a6ef8bfc5f",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\input\\fixed-input-clock.ts",
+      "before": null,
+      "after": "2e81a5223a7b6c3234a6f081aa03feba41162a3b303e634a97e3827f25a14ff7",
+      "currentObservedHash": "2e81a5223a7b6c3234a6f081aa03feba41162a3b303e634a97e3827f25a14ff7",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\frame-owned-prediction.ts",
+      "before": null,
+      "after": "b28a54f291fb8ae2829c7381d9d21606afaf472441a65ae2af884c3d91923cb7",
+      "currentObservedHash": "b28a54f291fb8ae2829c7381d9d21606afaf472441a65ae2af884c3d91923cb7",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\frame-owned-input.ts",
+      "before": null,
+      "after": "a8a2b803e38892d2025d9a805c67bcf840a2019343122d541e9932c75107fff2",
+      "currentObservedHash": "a8a2b803e38892d2025d9a805c67bcf840a2019343122d541e9932c75107fff2",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\frame-owned-replay.ts",
+      "before": null,
+      "after": "a44ceea55cabe3ada8ecc0d81979f36172d26cac0e8c04ce26aefc118dc1036c",
+      "currentObservedHash": "a44ceea55cabe3ada8ecc0d81979f36172d26cac0e8c04ce26aefc118dc1036c",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\frame-owned-visual.ts",
+      "before": null,
+      "after": "9004d6a6d04133d1a9c59a107b642c65c07e06bfae3d039547055925b0529db6",
+      "currentObservedHash": "9004d6a6d04133d1a9c59a107b642c65c07e06bfae3d039547055925b0529db6",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\client.ts",
+      "before": "c67c64be22aa412e52945286d370be6e8d085169f1649d0542cd52aba5c4961b",
+      "after": "36e6be22500b78ae35124d990b4285f34cc5be5ddcda7c53b0eb98d7b0ffcd8f",
+      "currentObservedHash": "36e6be22500b78ae35124d990b4285f34cc5be5ddcda7c53b0eb98d7b0ffcd8f",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\snow-physics.ts",
+      "before": "2b573a44eb7675904ca8cf032d381203bef0ce80ab81dd4e4c929ec180ac5a22",
+      "after": "5e9c8402cdbbdf15da0b516d2395d343d8c77a29c06647195cfe589a832a4c4d",
+      "currentObservedHash": "b77b39f27a0ad65103bc51c3e740f731afddef70161a21218e3c6b0a110656ed",
+      "stillExactAdoption": false
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\test\\compound-query-reentry.test.mjs",
+      "before": null,
+      "after": "be77b420d276ab9c2f373bd6e4000db318f2ff53de416b3710c417615813ff8b",
+      "currentObservedHash": "be77b420d276ab9c2f373bd6e4000db318f2ff53de416b3710c417615813ff8b",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\game-engine\\test\\fixed-clock-budget.test.mjs",
+      "before": null,
+      "after": "cc91ea3c954295df95c04cbea93460366c917e70030a64c2510ab522d5ed5ff9",
+      "currentObservedHash": "cc91ea3c954295df95c04cbea93460366c917e70030a64c2510ab522d5ed5ff9",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\fixed-input-clock.test.ts",
+      "before": null,
+      "after": "d2eed0debe29c64cc076c286ecd2bd407e9df02c66a161ffc5ee7c778e07141b",
+      "currentObservedHash": "d2eed0debe29c64cc076c286ecd2bd407e9df02c66a161ffc5ee7c778e07141b",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\fixed-input-clock-admission.test.ts",
+      "before": null,
+      "after": "557cc8b6d577dd2d9fd08a3fda65dffcd2f92c97d24dfb7fb23eb3d1ab39091c",
+      "currentObservedHash": "557cc8b6d577dd2d9fd08a3fda65dffcd2f92c97d24dfb7fb23eb3d1ab39091c",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\frame-owned-prediction.test.ts",
+      "before": null,
+      "after": "3d756366128027197448d78152ac4504731c356bc501aa9139a3759470ba4dd2",
+      "currentObservedHash": "3d756366128027197448d78152ac4504731c356bc501aa9139a3759470ba4dd2",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\frame-owned-visual.test.ts",
+      "before": null,
+      "after": "9900562fc2fc16d81350d862c44fc7515b57f4de4006ee9465f6e3dcad55c23f",
+      "currentObservedHash": "9900562fc2fc16d81350d862c44fc7515b57f4de4006ee9465f6e3dcad55c23f",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\frame-owned-prediction-boundaries.test.ts",
+      "before": null,
+      "after": "ead76fbc4fadcdbc16edcb51af26d423a4ced1e315e03b69e207947cca748dcc",
+      "currentObservedHash": "ead76fbc4fadcdbc16edcb51af26d423a4ced1e315e03b69e207947cca748dcc",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\frame-owned-pause-handoff.test.ts",
+      "before": null,
+      "after": "4c70e616f074362c28586ebf626ef9b2616ef0d22a9dc94b3da1a49dbcab5647",
+      "currentObservedHash": "4c70e616f074362c28586ebf626ef9b2616ef0d22a9dc94b3da1a49dbcab5647",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\frame-owned-collision-boundary.test.ts",
+      "before": null,
+      "after": "a94e51e85bc80036f0455defcad12aade8ca45cac9b3462bb6da69a7c8550ca6",
+      "currentObservedHash": "a94e51e85bc80036f0455defcad12aade8ca45cac9b3462bb6da69a7c8550ca6",
+      "stillExactAdoption": true
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\snow-tile-mru.test.ts",
+      "before": null,
+      "after": "de9b99fb46228fc8bf9ec79fc27b79553511473d390c9960a12215b5e8b87f38",
+      "currentObservedHash": "6509ffb476deb77cf320f92ea4c7a8e9c9ab2d6291c961076e40cb6b3af5b68d",
+      "stillExactAdoption": false
+    },
+    {
+      "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\fixtures\\snow-physics-before-mru.ts",
+      "before": null,
+      "after": "184a0c165b65b405e5eb28d6977569329f87b972fa4285b5d1db523daa740fd9",
+      "currentObservedHash": "184a0c165b65b405e5eb28d6977569329f87b972fa4285b5d1db523daa740fd9",
+      "stillExactAdoption": true
+    }
+  ],
+  "verifiedBeforeParallel": {
+    "engine": {
+      "buildExit": 0,
+      "typecheckExit": 0,
+      "pass": 774,
+      "skipped": 19,
+      "fail": 0,
+      "scope": "793 tests, before external SnowMatter heat API"
+    },
+    "game": {
+      "buildExit": 0,
+      "globalTypecheckExit": 0,
+      "newCases": "73 input/prediction +14MRU +5QA passed; Router4/26 passed after exact-endpoint fixture correction",
+      "fullDirectory": {
+        "reference": {
+          "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\input-query-budget-game-full-20261018.json",
+          "sha256": "745395a1eef54e4bd4ecbab4dc677f455bfdb3b1015f5198abc597477b04725f"
+        },
+        "outcome": {
+          "code": 1,
+          "signal": null
+        },
+        "scope": "637 cases across101files reached before first tyre-mark fixture failure; this is not a complete passing suite."
+      }
+    },
+    "worker": {
+      "reference": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\body-worker-prototype\\production-scratch-v2-20261018\\browser-report.json",
+        "sha256": "fc7cf3a9fce11e27ac15ff69f48bb4a2b8a71cb5a35eb7d52ca6061cdd2730b2"
+      },
+      "ok": true,
+      "cases": 222,
+      "servedWorker": {
+        "path": "public/build/body-worker.js",
+        "route": "/worker.js",
+        "sha256": "be604d5ad75f038271699f5fb78030a9d1a3963892f0f10ac435788329f850f8",
+        "bytes": 526483,
+        "finalDiskSHA256": "be604d5ad75f038271699f5fb78030a9d1a3963892f0f10ac435788329f850f8",
+        "finalPublicFileUnchanged": true
+      },
+      "scope": "Real Chrome CPU-only public Worker geometry/controller/service; no GPU/FPS claim"
+    }
+  },
+  "fixtureRepairs": {
+    "bodyGroups": {
+      "diagnosis": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\body-worker-presentation-diagnosis-20261018\\diagnosis.json",
+        "sha256": "b1f08bb0358148695990a2d1627a0164f724256e2d62aba86d66e9535da59ac2"
+      },
+      "scope": "Only test clean-helper clears BOTH retained group Maps between cases. Full ordered byte comparator stays unchanged. Exact prefix plus full presentation69pass/2,985,594assertions."
+    },
+    "tyreMarks": {
+      "diagnosis": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\handling-mark-diagnosis-20261018\\diagnosis.json",
+        "sha256": "9725b767cddf75382c086153a10ba106aec38655d65d6bd37a42e981b216c0b5"
+      },
+      "scope": "Original90tick case fails both Bun versions and exact old Compound/Snow control. Selected car contacts snow; rubber emission excludes snow. Explicit dry support only in replication fixture fixes it; whole handling11pass/3370assertions.",
+      "test": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\test\\handling.test.ts",
+        "sha256": "12876c5b68aaee3dbc03b923104a09c677654817e6e976783e069dc6c6572ade"
+      },
+      "log": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\input-query-budget-handling-tests-20261018.log",
+        "sha256": "ed66c35998c97c250ca09c84deb5ef832b27eb547112dd3283178bd72b79218f"
+      }
+    }
+  },
+  "native": {
+    "r6": "No browser: generated docs drift rejected by full-public guard; all9 game assets identical.",
+    "r6b": {
+      "analysis": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\network-stability-20261018\\server-catchup-native\\run-independent-input-stage-catchup-budget-20261018-r6b-1792313698447-16e5808e\\analysis.json",
+        "sha256": "e767be9c245b027c1dc785b92f0c02ebf19de1451da2adf365c0762c6d24a89d"
+      },
+      "scope": "Counterfactual B77/E8+virtual Clock/Router on pinned1.4.2:27new rows/352.8ms/2fresh ACK/motor0;12.239m/0backs/maxpending48. Tail drained1456.7ms later. Capture0, runner1 nullable cleanup; later exact OS absence separate."
+    },
+    "r7": {
+      "manifest": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\network-stability-20261018\\current-production-native\\manifest.json",
+        "sha256": "9c1481c7972979528e31053af18d815d9217b5d7824de1d8f2fb63e6b7ab1283"
+      },
+      "failure": {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\artifacts\\current-production-r7-preflight-source-drift-20261018.json",
+        "sha256": "74868282aa62dea5dc5c36db9fcdb0aeb46e52e82c3fc25e1bca18a74a229599"
+      },
+      "scope": "Current-production source guard rejected before run directory/process/browser; no current integrated native evidence."
+    }
+  },
+  "parallelScope": {
+    "request": "Summer +20 C with a roughly10m melting snow deposit beside planes/hangar; confirmed from read-only parallel chat user message.",
+    "initialDrift": [
+      "Engine SnowMatter exchangeHeat",
+      "Game biomes summer/weather",
+      "new AirportSnow"
+    ],
+    "expandedDrift": [
+      "GameSnowPhysics airport integration",
+      "authority climate scheduling",
+      "snow-volume rendering",
+      "server index/airport endpoint",
+      "snow/weather tests and public bundles"
+    ],
+    "scope": "Historical hashes in audits are observations, not a current readiness claim. Source tree is still evolving."
+  },
+  "remaining": [
+    "Wait for external turn completion while read-only auditing integration risks.",
+    "Re-evaluate exact shared source changes, all affected checks and new complete Engine verification.",
+    "Build and run Game coverage on a stable new common epoch.",
+    "Then release current Worker/native/temporal verification with exact new public hashes."
+  ],
+  "stalePreparedHelpers": [
+    "finalize-input-query-budget-20261018.mjs currently assumes original21-file adoption and a green first full-directory run; adapt/version it before execution.",
+    "Game run-input-query-budget-game-remaining-20261018.mjs pins the pre-parallel GameSnow source and deliberately refuses current drift; do not use it as new-epoch complete coverage."
+  ],
+  "latestCheckpoint": {
+    "path": "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\parallel-snow-service-checkpoint-20261018.json",
+    "sha256": "62122de63b16ca015c698be92781305c3e53ee98c30dac6c4471be9da47fa77b"
+  },
+  "latestAirportIntegration": {
+    "path": "C:\\Users\\Roman\\Documents\\game-engine\\docs\\render-evidence\\airport-render-network-integration-20261018.json",
+    "sha256": "fdadbbfc0e3e305148f85bc772ee80245a8c24690c2f6534f8795b9acc2822e2"
+  }
+}

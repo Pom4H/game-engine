@@ -4,6 +4,17 @@ Generated 2026-10-01 before collapsing all development refs to `main`.
 
 These commits are historical archaeology only. Current behavior lives on `main`.
 
+## The Game recovery
+
+The last inspected snapshot containing the shared-engine The Game application is
+`9c564556275b1a50b366e92034910ade90b68986` (2026-10-01), before gameplay removal.
+It contains `src/games/thegame`, `tools/thegame`, and `examples/thegame/project.ts`.
+The archived branch names below can resolve to later trees without those files;
+use the exact snapshot SHA for recovery. See [The Game and The Office integration](THE_GAME_OFFICE_INTEGRATION.md)
+for the recovered source location, scope, and shared-world architecture.
+
+## Archived references
+
 - `codex/adaptive-core` → `2db7720705c87c70ebc3572e7f7956abdfe0e0b0`
 - `codex/dsl-live-docs` → `1238321e6e04e18f0cc7866d8f847060a4e4cb41`
 - `codex/dsl-live-playground` → `7771cb0b87d440eba7031b6450e1a6f4fc543d85`

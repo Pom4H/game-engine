@@ -1,0 +1,1998 @@
+{
+  "status": "localized-observations-cause-unresolved",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "width": 1920,
+    "height": 1080,
+    "count": 10000,
+    "experiments": 2,
+    "freshDevices": 12,
+    "observedFrames": 384,
+    "canonicalFramesPerDevice": 32,
+    "motionWarmupFramesPerDevice": 288,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "physicalReplay": true,
+    "archivesVerified": true,
+    "completedCoverage": true,
+    "productionSourceUnchanged": true,
+    "repeatability": false,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "facts": {
+    "depthExact": true,
+    "staticShadowInitialCaptureExact": true,
+    "dynamicShadowExact": true,
+    "frameUniformExact": true,
+    "lightSourcesExact": true,
+    "lightCellsExact": true,
+    "scalarProbeExact": true,
+    "sourceBufferComparedAgainstProductionCPUWordsEveryFrame": true,
+    "sourceBufferRepeatable": true
+  },
+  "experiments": [
+    {
+      "report": "artifacts/engine-compare/surface-presence-lighting-probe/report.json",
+      "sourceState": {
+        "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+        "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+        "harnessSha256": "d1e492b2338efd3734952b39b69e81bdd32912f6de658cf1b8a3ac513bd5dfba",
+        "diagnosticSha256": "a24f3f831fc26439faaf88eed483696184e7409b49b8a45278e7630082cb35ec"
+      },
+      "controls": {
+        "count": 10000,
+        "width": 1920,
+        "height": 1080,
+        "repetitions": 3,
+        "flatPayload": false,
+        "continuousShadow": false,
+        "shadowInputs": true,
+        "lightingProbe": true,
+        "warmupMotionFrames": 288,
+        "canonicalFrames": 32
+      },
+      "probe": {
+        "attachment": "normal rgba16float",
+        "channels": [
+          "shadow visibility",
+          "final roughness",
+          "normal derivative variance",
+          "sun normal cosine clamped to zero"
+        ],
+        "productionRadiancePreserved": true,
+        "postprocessUsesProbeNormals": true,
+        "qualityMeasurement": false,
+        "performanceMeasurement": false
+      },
+      "gates": {
+        "completed": true,
+        "coverage": true,
+        "allComparisonsExact": false,
+        "sameOrderingRepeatable": false,
+        "repeatability": false
+      },
+      "runs": [
+        {
+          "mode": "ascending",
+          "repetition": 0,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "ascending",
+          "repetition": 1,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "ascending",
+          "repetition": 2,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 0,
+          "firstDivergentFrame": 30,
+          "stages": {
+            "opaque": {
+              "changedFrames": 1,
+              "changedChannels": 3,
+              "maxEncodedError": 198,
+              "firstDivergentFrame": 30,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 1,
+              "changedChannels": 3,
+              "maxEncodedError": 198,
+              "firstDivergentFrame": 30,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 1,
+              "changedChannels": 9,
+              "maxEncodedError": 178,
+              "firstDivergentFrame": 30,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 2,
+              "changedChannels": 28,
+              "maxEncodedError": 85,
+              "firstDivergentFrame": 30,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": [
+            {
+              "frame": 30,
+              "stage": "opaque",
+              "changedChannels": 3,
+              "maxEncodedError": 198,
+              "coordinates": [
+                {
+                  "x": 169,
+                  "y": 479,
+                  "channel": 0,
+                  "before": 11087,
+                  "after": 11285,
+                  "linearBefore": 0.057098388671875,
+                  "linearAfter": 0.06378173828125
+                },
+                {
+                  "x": 169,
+                  "y": 479,
+                  "channel": 1,
+                  "before": 11277,
+                  "after": 11455,
+                  "linearBefore": 0.06329345703125,
+                  "linearAfter": 0.07415771484375
+                },
+                {
+                  "x": 169,
+                  "y": 479,
+                  "channel": 2,
+                  "before": 11610,
+                  "after": 11755,
+                  "linearBefore": 0.0836181640625,
+                  "linearAfter": 0.09246826171875
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 1,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 1
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 1
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 1
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 2
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 2,
+          "firstDivergentFrame": 21,
+          "stages": {
+            "opaque": {
+              "changedFrames": 1,
+              "changedChannels": 12,
+              "maxEncodedError": 796,
+              "firstDivergentFrame": 21,
+              "repeatMismatchFrames": 2
+            },
+            "hdr": {
+              "changedFrames": 1,
+              "changedChannels": 12,
+              "maxEncodedError": 796,
+              "firstDivergentFrame": 21,
+              "repeatMismatchFrames": 2
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 1,
+              "changedChannels": 27,
+              "maxEncodedError": 778,
+              "firstDivergentFrame": 21,
+              "repeatMismatchFrames": 2
+            },
+            "velocity": {
+              "changedFrames": 1,
+              "changedChannels": 6,
+              "maxEncodedError": 29947,
+              "firstDivergentFrame": 30,
+              "repeatMismatchFrames": 1
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 11,
+              "changedChannels": 384,
+              "maxEncodedError": 221,
+              "firstDivergentFrame": 21,
+              "repeatMismatchFrames": 11
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": [
+            {
+              "frame": 21,
+              "stage": "opaque",
+              "changedChannels": 12,
+              "maxEncodedError": 796,
+              "coordinates": [
+                {
+                  "x": 334,
+                  "y": 426,
+                  "channel": 0,
+                  "before": 11230,
+                  "after": 11710,
+                  "linearBefore": 0.06146240234375,
+                  "linearAfter": 0.0897216796875
+                },
+                {
+                  "x": 334,
+                  "y": 426,
+                  "channel": 1,
+                  "before": 11554,
+                  "after": 11858,
+                  "linearBefore": 0.0802001953125,
+                  "linearAfter": 0.0987548828125
+                },
+                {
+                  "x": 334,
+                  "y": 426,
+                  "channel": 2,
+                  "before": 11631,
+                  "after": 12136,
+                  "linearBefore": 0.08489990234375,
+                  "linearAfter": 0.11572265625
+                },
+                {
+                  "x": 335,
+                  "y": 426,
+                  "channel": 0,
+                  "before": 11231,
+                  "after": 12027,
+                  "linearBefore": 0.061492919921875,
+                  "linearAfter": 0.10906982421875
+                },
+                {
+                  "x": 335,
+                  "y": 426,
+                  "channel": 1,
+                  "before": 11552,
+                  "after": 11379,
+                  "linearBefore": 0.080078125,
+                  "linearAfter": 0.06951904296875
+                },
+                {
+                  "x": 335,
+                  "y": 426,
+                  "channel": 2,
+                  "before": 11630,
+                  "after": 11779,
+                  "linearBefore": 0.0848388671875,
+                  "linearAfter": 0.09393310546875
+                },
+                {
+                  "x": 334,
+                  "y": 427,
+                  "channel": 0,
+                  "before": 11230,
+                  "after": 11410,
+                  "linearBefore": 0.06146240234375,
+                  "linearAfter": 0.0714111328125
+                },
+                {
+                  "x": 334,
+                  "y": 427,
+                  "channel": 1,
+                  "before": 11555,
+                  "after": 11596,
+                  "linearBefore": 0.08026123046875,
+                  "linearAfter": 0.082763671875
+                },
+                {
+                  "x": 334,
+                  "y": 427,
+                  "channel": 2,
+                  "before": 11632,
+                  "after": 11920,
+                  "linearBefore": 0.0849609375,
+                  "linearAfter": 0.1025390625
+                },
+                {
+                  "x": 335,
+                  "y": 427,
+                  "channel": 0,
+                  "before": 11231,
+                  "after": 12026,
+                  "linearBefore": 0.061492919921875,
+                  "linearAfter": 0.1090087890625
+                },
+                {
+                  "x": 335,
+                  "y": 427,
+                  "channel": 1,
+                  "before": 11554,
+                  "after": 11379,
+                  "linearBefore": 0.0802001953125,
+                  "linearAfter": 0.06951904296875
+                },
+                {
+                  "x": 335,
+                  "y": 427,
+                  "channel": 2,
+                  "before": 11631,
+                  "after": 11779,
+                  "linearBefore": 0.08489990234375,
+                  "linearAfter": 0.09393310546875
+                }
+              ]
+            },
+            {
+              "frame": 30,
+              "stage": "velocity",
+              "changedChannels": 6,
+              "maxEncodedError": 29947,
+              "coordinates": [
+                {
+                  "x": 28,
+                  "y": 442,
+                  "channel": 0,
+                  "before": 3140,
+                  "after": 33087
+                },
+                {
+                  "x": 28,
+                  "y": 442,
+                  "channel": 1,
+                  "before": 3342,
+                  "after": 33159
+                },
+                {
+                  "x": 29,
+                  "y": 442,
+                  "channel": 0,
+                  "before": 3140,
+                  "after": 33086
+                },
+                {
+                  "x": 29,
+                  "y": 442,
+                  "channel": 1,
+                  "before": 3342,
+                  "after": 33158
+                },
+                {
+                  "x": 30,
+                  "y": 442,
+                  "channel": 0,
+                  "before": 3140,
+                  "after": 33084
+                },
+                {
+                  "x": 30,
+                  "y": 442,
+                  "channel": 1,
+                  "before": 3342,
+                  "after": 33156
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "report": "artifacts/engine-compare/surface-presence-environment-probe/report.json",
+      "sourceState": {
+        "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+        "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+        "harnessSha256": "d1e492b2338efd3734952b39b69e81bdd32912f6de658cf1b8a3ac513bd5dfba",
+        "diagnosticSha256": "7113fc7c972954d335307be27d5e65cf518c4b7abad0e148113227372aaa091a"
+      },
+      "controls": {
+        "count": 10000,
+        "width": 1920,
+        "height": 1080,
+        "repetitions": 3,
+        "flatPayload": false,
+        "continuousShadow": false,
+        "shadowInputs": true,
+        "instanceInputs": true,
+        "lightingProbe": true,
+        "probeKind": "environment",
+        "warmupMotionFrames": 288,
+        "canonicalFrames": 32
+      },
+      "probe": {
+        "kind": "environment",
+        "attachment": "normal rgba16float",
+        "channels": [
+          "environment radiance red",
+          "environment radiance green",
+          "environment radiance blue",
+          "view normal cosine"
+        ],
+        "productionRadiancePreserved": true,
+        "postprocessUsesProbeNormals": true,
+        "qualityMeasurement": false,
+        "performanceMeasurement": false
+      },
+      "gates": {
+        "completed": true,
+        "coverage": true,
+        "allComparisonsExact": false,
+        "sameOrderingRepeatable": false,
+        "repeatability": false
+      },
+      "runs": [
+        {
+          "mode": "ascending",
+          "repetition": 0,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "ascending",
+          "repetition": 1,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "ascending",
+          "repetition": 2,
+          "firstDivergentFrame": 4,
+          "stages": {
+            "opaque": {
+              "changedFrames": 1,
+              "changedChannels": 3,
+              "maxEncodedError": 917,
+              "firstDivergentFrame": 4,
+              "repeatMismatchFrames": 1
+            },
+            "hdr": {
+              "changedFrames": 1,
+              "changedChannels": 3,
+              "maxEncodedError": 917,
+              "firstDivergentFrame": 4,
+              "repeatMismatchFrames": 1
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 2,
+              "changedChannels": 15,
+              "maxEncodedError": 917,
+              "firstDivergentFrame": 4,
+              "repeatMismatchFrames": 2
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 22,
+              "changedChannels": 689,
+              "maxEncodedError": 179,
+              "firstDivergentFrame": 4,
+              "repeatMismatchFrames": 22
+            },
+            "lightingProbe": {
+              "changedFrames": 1,
+              "changedChannels": 16,
+              "maxEncodedError": 1283,
+              "firstDivergentFrame": 12,
+              "repeatMismatchFrames": 1
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": [
+            {
+              "frame": 4,
+              "stage": "opaque",
+              "changedChannels": 3,
+              "maxEncodedError": 917,
+              "coordinates": [
+                {
+                  "x": 1477,
+                  "y": 373,
+                  "channel": 0,
+                  "before": 11596,
+                  "after": 12513,
+                  "linearBefore": 0.082763671875,
+                  "linearAfter": 0.1524658203125
+                },
+                {
+                  "x": 1477,
+                  "y": 373,
+                  "channel": 1,
+                  "before": 11890,
+                  "after": 11551,
+                  "linearBefore": 0.1007080078125,
+                  "linearAfter": 0.08001708984375
+                },
+                {
+                  "x": 1477,
+                  "y": 373,
+                  "channel": 2,
+                  "before": 12619,
+                  "after": 12196,
+                  "linearBefore": 0.1654052734375,
+                  "linearAfter": 0.119384765625
+                }
+              ]
+            },
+            {
+              "frame": 12,
+              "stage": "lightingProbe",
+              "changedChannels": 16,
+              "maxEncodedError": 1283,
+              "coordinates": [
+                {
+                  "x": 570,
+                  "y": 446,
+                  "channel": 0,
+                  "before": 13676,
+                  "after": 13478,
+                  "linearBefore": 0.3388671875,
+                  "linearAfter": 0.29052734375
+                },
+                {
+                  "x": 570,
+                  "y": 446,
+                  "channel": 1,
+                  "before": 13052,
+                  "after": 13224,
+                  "linearBefore": 0.21826171875,
+                  "linearAfter": 0.2392578125
+                },
+                {
+                  "x": 570,
+                  "y": 446,
+                  "channel": 2,
+                  "before": 13794,
+                  "after": 13845,
+                  "linearBefore": 0.36767578125,
+                  "linearAfter": 0.380126953125
+                },
+                {
+                  "x": 570,
+                  "y": 446,
+                  "channel": 3,
+                  "before": 14401,
+                  "after": 15213,
+                  "linearBefore": 0.53173828125,
+                  "linearAfter": 0.92822265625
+                },
+                {
+                  "x": 571,
+                  "y": 446,
+                  "channel": 0,
+                  "before": 13675,
+                  "after": 12843,
+                  "linearBefore": 0.338623046875,
+                  "linearAfter": 0.1927490234375
+                },
+                {
+                  "x": 571,
+                  "y": 446,
+                  "channel": 1,
+                  "before": 13053,
+                  "after": 13372,
+                  "linearBefore": 0.2183837890625,
+                  "linearAfter": 0.2646484375
+                },
+                {
+                  "x": 571,
+                  "y": 446,
+                  "channel": 2,
+                  "before": 13794,
+                  "after": 13773,
+                  "linearBefore": 0.36767578125,
+                  "linearAfter": 0.362548828125
+                },
+                {
+                  "x": 571,
+                  "y": 446,
+                  "channel": 3,
+                  "before": 14400,
+                  "after": 13117,
+                  "linearBefore": 0.53125,
+                  "linearAfter": 0.2261962890625
+                },
+                {
+                  "x": 570,
+                  "y": 447,
+                  "channel": 0,
+                  "before": 13672,
+                  "after": 12843,
+                  "linearBefore": 0.337890625,
+                  "linearAfter": 0.1927490234375
+                },
+                {
+                  "x": 570,
+                  "y": 447,
+                  "channel": 1,
+                  "before": 13057,
+                  "after": 13371,
+                  "linearBefore": 0.2188720703125,
+                  "linearAfter": 0.264404296875
+                },
+                {
+                  "x": 570,
+                  "y": 447,
+                  "channel": 2,
+                  "before": 13794,
+                  "after": 13773,
+                  "linearBefore": 0.36767578125,
+                  "linearAfter": 0.362548828125
+                },
+                {
+                  "x": 570,
+                  "y": 447,
+                  "channel": 3,
+                  "before": 14401,
+                  "after": 13125,
+                  "linearBefore": 0.53173828125,
+                  "linearAfter": 0.2271728515625
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 0,
+          "firstDivergentFrame": null,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": []
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 1,
+          "firstDivergentFrame": 19,
+          "stages": {
+            "opaque": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "hdr": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "specular": {
+              "changedFrames": 1,
+              "changedChannels": 8,
+              "maxEncodedError": 33,
+              "firstDivergentFrame": 19,
+              "repeatMismatchFrames": 1
+            },
+            "current": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": [
+            {
+              "frame": 19,
+              "stage": "specular",
+              "changedChannels": 8,
+              "maxEncodedError": 33,
+              "coordinates": [
+                {
+                  "x": 1622,
+                  "y": 376,
+                  "channel": 0,
+                  "before": 79,
+                  "after": 46
+                },
+                {
+                  "x": 1622,
+                  "y": 376,
+                  "channel": 2,
+                  "before": 16,
+                  "after": 46
+                },
+                {
+                  "x": 1623,
+                  "y": 376,
+                  "channel": 0,
+                  "before": 79,
+                  "after": 46
+                },
+                {
+                  "x": 1623,
+                  "y": 376,
+                  "channel": 2,
+                  "before": 16,
+                  "after": 46
+                },
+                {
+                  "x": 1622,
+                  "y": 377,
+                  "channel": 0,
+                  "before": 79,
+                  "after": 46
+                },
+                {
+                  "x": 1622,
+                  "y": 377,
+                  "channel": 2,
+                  "before": 16,
+                  "after": 46
+                },
+                {
+                  "x": 1623,
+                  "y": 377,
+                  "channel": 0,
+                  "before": 79,
+                  "after": 46
+                },
+                {
+                  "x": 1623,
+                  "y": 377,
+                  "channel": 2,
+                  "before": 16,
+                  "after": 46
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "mode": "shuffled",
+          "repetition": 2,
+          "firstDivergentFrame": 3,
+          "stages": {
+            "opaque": {
+              "changedFrames": 2,
+              "changedChannels": 21,
+              "maxEncodedError": 881,
+              "firstDivergentFrame": 3,
+              "repeatMismatchFrames": 2
+            },
+            "hdr": {
+              "changedFrames": 2,
+              "changedChannels": 21,
+              "maxEncodedError": 881,
+              "firstDivergentFrame": 3,
+              "repeatMismatchFrames": 2
+            },
+            "specular": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "current": {
+              "changedFrames": 2,
+              "changedChannels": 62,
+              "maxEncodedError": 856,
+              "firstDivergentFrame": 3,
+              "repeatMismatchFrames": 2
+            },
+            "velocity": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "depth": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "taa": {
+              "changedFrames": 29,
+              "changedChannels": 762,
+              "maxEncodedError": 99,
+              "firstDivergentFrame": 3,
+              "repeatMismatchFrames": 29
+            },
+            "lightingProbe": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "instanceSource": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "staticShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "dynamicShadow": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "frameUniform": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightSources": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            },
+            "lightCells": {
+              "changedFrames": 0,
+              "changedChannels": 0,
+              "maxEncodedError": 0,
+              "firstDivergentFrame": null,
+              "repeatMismatchFrames": 0
+            }
+          },
+          "upstreamDifferences": [
+            {
+              "frame": 3,
+              "stage": "opaque",
+              "changedChannels": 9,
+              "maxEncodedError": 881,
+              "coordinates": [
+                {
+                  "x": 1070,
+                  "y": 456,
+                  "channel": 0,
+                  "before": 11211,
+                  "after": 10820,
+                  "linearBefore": 0.060882568359375,
+                  "linearAfter": 0.0489501953125
+                },
+                {
+                  "x": 1070,
+                  "y": 456,
+                  "channel": 1,
+                  "before": 11495,
+                  "after": 11139,
+                  "linearBefore": 0.07659912109375,
+                  "linearAfter": 0.058685302734375
+                },
+                {
+                  "x": 1070,
+                  "y": 456,
+                  "channel": 2,
+                  "before": 12277,
+                  "after": 11475,
+                  "linearBefore": 0.12432861328125,
+                  "linearAfter": 0.07537841796875
+                },
+                {
+                  "x": 1070,
+                  "y": 457,
+                  "channel": 0,
+                  "before": 11202,
+                  "after": 10631,
+                  "linearBefore": 0.06060791015625,
+                  "linearAfter": 0.043182373046875
+                },
+                {
+                  "x": 1070,
+                  "y": 457,
+                  "channel": 1,
+                  "before": 11490,
+                  "after": 10965,
+                  "linearBefore": 0.0762939453125,
+                  "linearAfter": 0.053375244140625
+                },
+                {
+                  "x": 1070,
+                  "y": 457,
+                  "channel": 2,
+                  "before": 12269,
+                  "after": 11399,
+                  "linearBefore": 0.12384033203125,
+                  "linearAfter": 0.07073974609375
+                },
+                {
+                  "x": 1071,
+                  "y": 457,
+                  "channel": 0,
+                  "before": 11202,
+                  "after": 10619,
+                  "linearBefore": 0.06060791015625,
+                  "linearAfter": 0.042816162109375
+                },
+                {
+                  "x": 1071,
+                  "y": 457,
+                  "channel": 1,
+                  "before": 11490,
+                  "after": 10950,
+                  "linearBefore": 0.0762939453125,
+                  "linearAfter": 0.05291748046875
+                },
+                {
+                  "x": 1071,
+                  "y": 457,
+                  "channel": 2,
+                  "before": 12269,
+                  "after": 11388,
+                  "linearBefore": 0.12384033203125,
+                  "linearAfter": 0.070068359375
+                }
+              ]
+            },
+            {
+              "frame": 28,
+              "stage": "opaque",
+              "changedChannels": 12,
+              "maxEncodedError": 646,
+              "coordinates": [
+                {
+                  "x": 98,
+                  "y": 578,
+                  "channel": 0,
+                  "before": 11043,
+                  "after": 11012,
+                  "linearBefore": 0.055755615234375,
+                  "linearAfter": 0.0548095703125
+                },
+                {
+                  "x": 98,
+                  "y": 578,
+                  "channel": 1,
+                  "before": 10739,
+                  "after": 11272,
+                  "linearBefore": 0.046478271484375,
+                  "linearAfter": 0.06298828125
+                },
+                {
+                  "x": 98,
+                  "y": 578,
+                  "channel": 2,
+                  "before": 11446,
+                  "after": 11512,
+                  "linearBefore": 0.0736083984375,
+                  "linearAfter": 0.07763671875
+                },
+                {
+                  "x": 99,
+                  "y": 578,
+                  "channel": 0,
+                  "before": 11042,
+                  "after": 11005,
+                  "linearBefore": 0.05572509765625,
+                  "linearAfter": 0.054595947265625
+                },
+                {
+                  "x": 99,
+                  "y": 578,
+                  "channel": 1,
+                  "before": 10739,
+                  "after": 11272,
+                  "linearBefore": 0.046478271484375,
+                  "linearAfter": 0.06298828125
+                },
+                {
+                  "x": 99,
+                  "y": 578,
+                  "channel": 2,
+                  "before": 11446,
+                  "after": 11515,
+                  "linearBefore": 0.0736083984375,
+                  "linearAfter": 0.07781982421875
+                },
+                {
+                  "x": 98,
+                  "y": 579,
+                  "channel": 0,
+                  "before": 11043,
+                  "after": 10949,
+                  "linearBefore": 0.055755615234375,
+                  "linearAfter": 0.052886962890625
+                },
+                {
+                  "x": 98,
+                  "y": 579,
+                  "channel": 1,
+                  "before": 10739,
+                  "after": 11241,
+                  "linearBefore": 0.046478271484375,
+                  "linearAfter": 0.061798095703125
+                },
+                {
+                  "x": 98,
+                  "y": 579,
+                  "channel": 2,
+                  "before": 11446,
+                  "after": 11509,
+                  "linearBefore": 0.0736083984375,
+                  "linearAfter": 0.07745361328125
+                },
+                {
+                  "x": 99,
+                  "y": 579,
+                  "channel": 0,
+                  "before": 11042,
+                  "after": 11244,
+                  "linearBefore": 0.05572509765625,
+                  "linearAfter": 0.0618896484375
+                },
+                {
+                  "x": 99,
+                  "y": 579,
+                  "channel": 1,
+                  "before": 10739,
+                  "after": 11385,
+                  "linearBefore": 0.046478271484375,
+                  "linearAfter": 0.06988525390625
+                },
+                {
+                  "x": 99,
+                  "y": 579,
+                  "channel": 2,
+                  "before": 11446,
+                  "after": 11624,
+                  "linearBefore": 0.0736083984375,
+                  "linearAfter": 0.08447265625
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "interpretation": [
+    "Scalar shadow/roughness/normal-variance/sun-cosine observations matched in all 192 frames despite two opaque divergences. Values are observed after conversion to rgba16float; this does not certify equality of all f32 intermediate values.",
+    "Environment/view-cosine observation changed at ascending repetition 2 frame 12 (16 channels in a 2x2 quad), while opaque/HDR and specular at that frame remained exact. Opaque divergence also occurred at different frames with an exact environment probe; environment variation alone cannot explain all failures.",
+    "The source instance buffer equals the production CPU 40-float records on every observed frame and is repeatable. Frame uniforms, light grids and shadow captures also matched. Observation does not cover every material uniform or texture resource.",
+    "Diagnostic shaders preserve production color arithmetic, but writing different normal MRT values changes compiler scheduling and downstream effects. Diagnostic images are not render-quality evidence. No production lighting fix or performance gain is claimed.",
+    "Fixed CPU ordering also diverged. Atomic GPU compaction cannot be the sole explanation. Original strict gates and failed captures remain intact."
+  ]
+}

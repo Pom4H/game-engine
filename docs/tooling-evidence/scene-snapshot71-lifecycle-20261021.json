@@ -1,0 +1,12 @@
+{
+  "timestampUtc": "2026-10-21T17:04:00.5858524Z",
+  "action": "Read-only Win32_Process inventory after runner exit; no process was signalled or terminated.",
+  "childPidsCapturedAtLaunch": false,
+  "limitation": "Historical child PIDs were not intercepted. This is an instantaneous process inventory, not a handle/Go heap leak test or a proof covering the elapsed lifetime.",
+  "experimentMatches": [],
+  "nativeTypeScriptApiCandidates": [],
+  "nativeTypeScriptProcessesWithUnavailableCommandLine": 0,
+  "interpretation": "Exact experiment script/executable matches are checked. Any tsc.exe --api candidate is reported without attributing it to this experiment.",
+  "noMatchingExperimentProcessObserved": true,
+  "noNativeTypeScriptApiProcessObserved": true
+}

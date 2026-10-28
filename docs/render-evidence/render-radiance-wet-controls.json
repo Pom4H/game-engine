@@ -1,0 +1,212 @@
+{
+  "status": "completed",
+  "runs": [
+    {
+      "repetition": 0,
+      "runId": "2026-10-12T00-24-54.925Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+        "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 61,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    },
+    {
+      "repetition": 1,
+      "runId": "2026-10-12T00-25-15.625Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+        "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 61,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "runId": "2026-10-12T00-25-35.830Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "3b35d9dee05139a87d221e60f8658db5e63866f4938639536cac51be99784a54",
+        "distSha256": "a0b2176ae358d81e01c899ddcd22dcfe129ce5b69ff92fb04deb61abe2b6b24a",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 37,
+          "changedChannelsVsCandidate": 37,
+          "maxErrorVsOriginalBaseline": 3,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 2,
+          "changedChannelsVsCandidate": 63,
+          "maxErrorVsOriginalBaseline": 1,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    }
+  ],
+  "interpretation": "Three fresh browser/device wet captures per exact historical baseline and candidate source/dist, both with the same archived harness. Eight preparatory cube frames are setup, not a performance sample; wet captures still use the identical 32 frames per view with matched physical/texture inputs. The original baseline also exhibits finite presentation variation. These controls do not establish the cause of the original candidate differences or override its failed full quality gate.",
+  "candidateRuns": [
+    {
+      "repetition": 0,
+      "runId": "2026-10-12T00-26-46.322Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "e6ed82f4f489e994334e793e06eed7570ca58000402aa1764c6a05d80a267ea9",
+        "distSha256": "a680986629f021b4dfecea9348534307343a0b29d5218de7f77badb76347983e",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 61,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    },
+    {
+      "repetition": 1,
+      "runId": "2026-10-12T00-27-07.141Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "e6ed82f4f489e994334e793e06eed7570ca58000402aa1764c6a05d80a267ea9",
+        "distSha256": "a680986629f021b4dfecea9348534307343a0b29d5218de7f77badb76347983e",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 61,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "runId": "2026-10-12T00-27-26.978Z",
+      "sourceState": {
+        "head": "bc1d5f84a57692317aa2869d52d5b4b3bf1943c3",
+        "dirty": true,
+        "srcSha256": "e6ed82f4f489e994334e793e06eed7570ca58000402aa1764c6a05d80a267ea9",
+        "distSha256": "a680986629f021b4dfecea9348534307343a0b29d5218de7f77badb76347983e",
+        "harnessSha256": "a7ab5a9aee4fa5d5d1135391a027b4695ae8076d62e899d8c42ba715795c25af"
+      },
+      "views": [
+        {
+          "name": "wet-front",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-back",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 61,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        },
+        {
+          "name": "wet-low",
+          "changedChannelsVsOriginalBaseline": 0,
+          "changedChannelsVsFirstCandidate": 0,
+          "maxErrorVsOriginalBaseline": 0,
+          "reflectionIdenticalToOriginal": true
+        }
+      ]
+    }
+  ]
+}

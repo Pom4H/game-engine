@@ -1,0 +1,1059 @@
+{
+  "date": "2026-10-16T21:00:31.526Z",
+  "goalAchieved": false,
+  "summary": "Original global 8 m terrain, shore-clipped water, outer road curves, semantic hub albedo and tunnel cut-outs now feed a passive Office surface renderer. Surface and hub road view radius is 420 m; scenery remains separately bounded.",
+  "cpu": {
+    "baseline": "../../artifacts/office-source-terrain/baseline.json",
+    "verification": "../../artifacts/office-source-terrain/baseline-verification.json",
+    "surfaceCases": 12,
+    "preExtractionSurfaceCorners": 22581,
+    "hubCorners": 15879,
+    "byteExactComparisons": 24,
+    "byteExactComparedCorners": 61041,
+    "scope": "Float64 byte identity before and after builder extraction; the repo tests separately check Office coordinate transforms, albedo, shoreline area and tunnel ray holes."
+  },
+  "live": {
+    "label": "office-source-terrain-native-20261016",
+    "command": "bun tools/capture.ts --office",
+    "debugPort": 3211,
+    "exitCode": 0,
+    "ok": true,
+    "recordCount": 16,
+    "walkingMovement": 2.170231184328305,
+    "crossingMovement": 41.53020116017115,
+    "crossingInputPulses": 17,
+    "actor": "resident:14791:1",
+    "takeoverDistance": 0.0005019482303355201,
+    "npcMovement": 0.5978753639280411,
+    "stoppedSpeed": 0.020348575452468123,
+    "accountRightsMatched": true,
+    "nativeCompanies": 0,
+    "maxCachedSurfaceCells": 204,
+    "maxCachedHeightVertices": 20748,
+    "surfaceBuilds": 1,
+    "physicsSteps": 0,
+    "renderErrors": 0,
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "report": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/report.json"
+  },
+  "assets": [
+    {
+      "label": "office-source-terrain-native-20261016",
+      "debugPort": 3211,
+      "exitCode": 0,
+      "scope": "Non-playable passive source terrain/road asset fixture; live entry and possession are separate evidence. Fixed fixture daylight, no gameplay, physics, audio, microphone or FPS measurement.",
+      "views": 7,
+      "texture": {
+        "width": 768,
+        "height": 768,
+        "bytes": 2359296,
+        "mismatches": 0,
+        "checksum": 2121544030
+      },
+      "maxCachedCells": 240,
+      "maxHeightVertices": 32768,
+      "waterTriangles": 2132,
+      "sourceBuilds": [
+        1
+      ],
+      "report": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/report.json",
+      "log": "../../../thegame/artifacts/office-source-terrain-native-20261016.log",
+      "primary": false,
+      "notes": "Initial fixture staged culling before applying its new camera. Retained as diagnostics; final two runs set the camera first."
+    },
+    {
+      "label": "office-source-terrain-depth-probe-20261016",
+      "debugPort": 3212,
+      "exitCode": 0,
+      "scope": "Non-playable passive source terrain/road asset fixture; live entry and possession are separate evidence. Fixed fixture daylight, no gameplay, physics, audio, microphone or FPS measurement.",
+      "views": 4,
+      "texture": {
+        "width": 768,
+        "height": 768,
+        "bytes": 2359296,
+        "mismatches": 0,
+        "checksum": 2121544030
+      },
+      "maxCachedCells": 221,
+      "maxHeightVertices": 25874,
+      "waterTriangles": 1523,
+      "sourceBuilds": [
+        1
+      ],
+      "report": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/report.json",
+      "log": "../../../thegame/artifacts/office-source-terrain-depth-probe-20261016.log",
+      "primary": false,
+      "notes": "Initial fixture staged culling before applying its new camera. Retained as diagnostics; final two runs set the camera first."
+    },
+    {
+      "label": "office-source-terrain-assets-20261016-r2",
+      "debugPort": 3213,
+      "exitCode": 0,
+      "scope": "Non-playable passive source terrain/road asset fixture; live entry and possession are separate evidence. Fixed fixture daylight, no gameplay, physics, audio, microphone or FPS measurement.",
+      "views": 7,
+      "texture": {
+        "width": 768,
+        "height": 768,
+        "bytes": 2359296,
+        "mismatches": 0,
+        "checksum": 2121544030
+      },
+      "maxCachedCells": 240,
+      "maxHeightVertices": 32768,
+      "waterTriangles": 2132,
+      "sourceBuilds": [
+        1
+      ],
+      "report": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/report.json",
+      "log": "../../../thegame/artifacts/office-source-terrain-assets-20261016-r2.log",
+      "primary": true,
+      "notes": "Final fixture applies the camera before source culling."
+    },
+    {
+      "label": "office-source-terrain-depth-probe-20261016-r2",
+      "debugPort": 3214,
+      "exitCode": 0,
+      "scope": "Non-playable passive source terrain/road asset fixture; live entry and possession are separate evidence. Fixed fixture daylight, no gameplay, physics, audio, microphone or FPS measurement.",
+      "views": 4,
+      "texture": {
+        "width": 768,
+        "height": 768,
+        "bytes": 2359296,
+        "mismatches": 0,
+        "checksum": 2121544030
+      },
+      "maxCachedCells": 221,
+      "maxHeightVertices": 25874,
+      "waterTriangles": 1523,
+      "sourceBuilds": [
+        1
+      ],
+      "report": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/report.json",
+      "log": "../../../thegame/artifacts/office-source-terrain-depth-probe-20261016-r2.log",
+      "primary": true,
+      "notes": "Final fixture applies the camera before source culling."
+    }
+  ],
+  "environment": {
+    "CAPTURE_EXISTING": "1",
+    "CAPTURE_PORT": "3007",
+    "CAPTURE_GPU": "1",
+    "PERF_LABEL": "corresponding run label",
+    "OFFICE_CAPTURE_LABEL": "office-source-terrain-native-20261016",
+    "liveFlags": [
+      "OFFICE_WALKING_QA",
+      "OFFICE_URBAN_QA",
+      "OFFICE_SCENERY_QA",
+      "OFFICE_ROADS_QA",
+      "OFFICE_TERRAIN_QA",
+      "OFFICE_CAMERA_QA",
+      "OFFICE_RESIDENTS_QA",
+      "OFFICE_PRESENTATION_QA",
+      "OFFICE_FOCUS_FORCE_CROSSING",
+      "OFFICE_TERRAIN_ASSET_QA"
+    ],
+    "assetOnlyFlags": [
+      "OFFICE_TERRAIN_ASSET_QA",
+      "OFFICE_TERRAIN_ASSET_ONLY"
+    ],
+    "probeAdditionalFlag": "OFFICE_TERRAIN_FLAT_PROBE=1",
+    "assetOnlyCommand": "bun tools/capture.ts --office-entry"
+  },
+  "restart": {
+    "date": "2026-10-16T20:38:53.983Z",
+    "oldPid": 11476,
+    "newPid": 6776,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original terrain raster and surface records; geometry hint and causal priority retained; Office/backend/microphone untouched",
+    "beforeRows": 2953,
+    "afterRows": 2953,
+    "missingRows": 0,
+    "protectedRows": 117,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 20,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "http": {
+    "date": "2026-10-16T21:00:30.577Z",
+    "n": 192,
+    "size": 768,
+    "zones": 36864,
+    "runs": 672,
+    "sourceJsonBytes": 3520,
+    "plainZonesJsonBytes": 73729,
+    "decodedZonesSha256": "9bf985598b4382f3c17521a0c31db93bd562865dd3172b639aec134c2e2683f5",
+    "terrainSceneSha256": "17aab617a8cebe2a86c5452f4808b4afb6e8f931f62a41bb13b41c44e99818d6",
+    "matchesNativeSource": true,
+    "fullJsonBytes": 588630,
+    "hitJsonBytes": 23583,
+    "hitOmitsGeometry": true
+  },
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2471635,
+      "sha256": "dc1d79ed8f99319ef7df515d6737510571a42f68d51652358112ee929a5f3bbc"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1322486,
+      "sha256": "d36cdccf736def7a0dedbe89fb43b515a853ceeb6273df6b50e2710305df1832"
+    }
+  ],
+  "commands": [
+    {
+      "cwd": "thegame",
+      "command": "bun test test/office-terrain-assets.test.ts test/office-world.test.ts test/office-road-assets.test.ts test/office-urban-assets.test.ts test/office-scenery-assets.test.ts test/office-installation.test.ts test/road-markings.test.ts test/road-surface-partition.test.js test/the-engine-renderer.test.ts test/world.test.mjs test/streaming-mode.test.ts test/world-runtime.test.ts test/urban-world.test.ts",
+      "exitCode": 0,
+      "pass": 105,
+      "assertions": 75944,
+      "log": "../../../thegame/artifacts/office-terrain-expanded-20261016.log"
+    },
+    {
+      "cwd": "game-engine",
+      "command": "bun test apps/thegame/test",
+      "exitCode": 0,
+      "pass": 135,
+      "assertions": 5523,
+      "log": "../../artifacts/office-terrain-app-20261016.log"
+    },
+    {
+      "cwd": "thegame",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": "../../../thegame/artifacts/office-terrain-typecheck-proof-20261016.log"
+    },
+    {
+      "cwd": "game-engine/apps/thegame",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": "../../artifacts/office-terrain-app-typecheck-20261016.log"
+    },
+    {
+      "cwd": "voice-agent/ui",
+      "command": "bun x tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../artifacts/office-terrain-ui-typecheck-20261016.log"
+    },
+    {
+      "cwd": "thegame",
+      "command": "bun run build",
+      "exitCode": 0,
+      "log": "../../../thegame/artifacts/office-terrain-build-20261016.log"
+    },
+    {
+      "cwd": "voice-agent/ui",
+      "command": "bun run build",
+      "exitCode": 0,
+      "warning": "Existing large UI chunk warning",
+      "log": "../../artifacts/office-terrain-ui-build-20261016.log"
+    }
+  ],
+  "sources": [
+    {
+      "path": "../../../thegame/src/game/terrain-records.ts",
+      "bytes": 1647,
+      "sha256": "e6a5f92683f661ba3287459268f964e9f15686bb6beb1349020a52167b7d528f"
+    },
+    {
+      "path": "../../../thegame/src/game/terrain-texture.ts",
+      "bytes": 974,
+      "sha256": "3f247661c0530a144fc2b01c41199d712c17c1e44c101ed71e88e33996024cb6"
+    },
+    {
+      "path": "../../../thegame/src/game/office-terrain-assets.ts",
+      "bytes": 8377,
+      "sha256": "635fda03b27bb87e7947fe242909ff5733840bc571a6cb7664f299163dd61bdd"
+    },
+    {
+      "path": "../../../thegame/src/game/terrain-scene.ts",
+      "bytes": 7157,
+      "sha256": "7d8c8fc382280039bcf2aee95499636770d79f1b2f85c2693329facd31ee8017"
+    },
+    {
+      "path": "../../../thegame/src/game/render/the-engine-ground.ts",
+      "bytes": 662,
+      "sha256": "72a38ba561cab6013e80b2bfc3d7e1c90b20d99f18fd3e40246461216bffe71f"
+    },
+    {
+      "path": "../../../thegame/src/game/render/the-engine-projection.ts",
+      "bytes": 14440,
+      "sha256": "8462611f0978aba534fe8ec601187ea215b6e3b4fe1ae355563e4b062813bd48"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/scene.js",
+      "bytes": 16482,
+      "sha256": "95dc9ec6a38335541b2389189f705a60e8e693495d119bde806cc8104cfb645a"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/road-scene.js",
+      "bytes": 16138,
+      "sha256": "c2680932eb89fb0be47a2b5d54e1721685cc20a0336c2b684b4a7122aeb7cbd8"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/road-scene.d.ts",
+      "bytes": 586,
+      "sha256": "b80c2ca10e6878e271685992c9d3bcbe6b260b2b6338b896e6cc07b51de79363"
+    },
+    {
+      "path": "../../../thegame/src/game/biomes.ts",
+      "bytes": 32566,
+      "sha256": "8acdd26de37d4ebdd694e6af28780cfc24896a9fb8b4f0541004a3dd466aa05e"
+    },
+    {
+      "path": "../../../thegame/src/game/office-world.ts",
+      "bytes": 9631,
+      "sha256": "b89cb80fa2c15aebbef76121d4ad3da66cfbf4da04fdf60b4062049f67353cc1"
+    },
+    {
+      "path": "../../../thegame/src/game/office-controller.ts",
+      "bytes": 782,
+      "sha256": "9a71031b37414337d7519d816c43f86a5474289519f66cca7b51f8e9d2c9ca00"
+    },
+    {
+      "path": "../../../thegame/src/game/office-road-assets.ts",
+      "bytes": 4852,
+      "sha256": "e844b996804b12af78a7f0e02408079d4ab517225418b6146b923938712b1971"
+    },
+    {
+      "path": "../../../thegame/test/office-terrain-assets.test.ts",
+      "bytes": 9530,
+      "sha256": "1fde3c98809f82c1078b4dc54222abd4fcbc030fb3c5ac12a9eed754563a068f"
+    },
+    {
+      "path": "../../../thegame/test/office-world.test.ts",
+      "bytes": 12763,
+      "sha256": "3364861812540120a98fe807c688c5b467dcc71cba1e495b38bbb4a18ae480bb"
+    },
+    {
+      "path": "../../../thegame/tools/capture.ts",
+      "bytes": 33634,
+      "sha256": "9a0f73427cfbf8713fa1e9e101dc2bc34bf43e5325cee75ee6c0a9f7ce973ae8"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-terrain.ts",
+      "bytes": 7579,
+      "sha256": "5be27e6da1a1a04dae57c7aeee51f2bc5a74ab66054e60bc0c9c0f96ea4ede8f"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-walking.ts",
+      "bytes": 14029,
+      "sha256": "a78145fb487a219f630e4c1d82f5e3f1f334efad3d78e258598d497a181b74d0"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-focus-setup.ts",
+      "bytes": 4238,
+      "sha256": "d2dd62a6f13679641135ee453dafd39fca52688a955003bdea3d048cca8f0090"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-terrain.ts",
+      "bytes": 699,
+      "sha256": "6dabfa03900820b8889ce36e69edb521daa729ea102aa3791461d49ad01ef1ad"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-types.ts",
+      "bytes": 4727,
+      "sha256": "7a2a65bb7d329a8269e6cc7c6578374ffa7aaa6f75be28d1e863c57cbc5f3f91"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-connection.ts",
+      "bytes": 33463,
+      "sha256": "3a4e06b68b2c7c59e99330fe0893e9c65784523d0e16cb6f790b804f8f99a3d9"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-world-view.ts",
+      "bytes": 30936,
+      "sha256": "df765820dd21808f5909ae5e44459c993cc3ff00a9ac88bf7df495cd23191610"
+    },
+    {
+      "path": "../../apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 29767,
+      "sha256": "32debd7ac2217fb1099b63b3ab2dc1ee24b1649b0d404e9e43749cec8b2d7098"
+    },
+    {
+      "path": "../../apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 43732,
+      "sha256": "43f86f5a81373fb308a4755c5458b882fb945cf7e39a31fed9cf548b742d0c81"
+    },
+    {
+      "path": "../../../../voice-agent/ui/src/office/scene.ts",
+      "bytes": 63692,
+      "sha256": "2ee168d3e4e6174dbfd50479b5cf4bcf4d7e736ca04880453fef522edb5c7eb6"
+    },
+    {
+      "path": "../../src/render/calibrated-camera.ts",
+      "bytes": 1550,
+      "sha256": "4513607d476b168e7fa6d7eb1190fb5b77ae13e450b071a935a61413b136212a"
+    },
+    {
+      "path": "../../src/scene/types.ts",
+      "bytes": 13849,
+      "sha256": "026b4a3f8d71fad0019800e5b48ce83229c4607cdd93bed5bce9252d8591b98c"
+    },
+    {
+      "path": "../../src/render/webgpu.ts",
+      "bytes": 189332,
+      "sha256": "faada70428142d7443cf679d9bce23736b59c86cc06db5f443ae01de07f2cd62"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "../../../thegame/public/build/game.js",
+      "bytes": 2471635,
+      "sha256": "dc1d79ed8f99319ef7df515d6737510571a42f68d51652358112ee929a5f3bbc"
+    },
+    {
+      "path": "../../../thegame/public/build/office-controller.js",
+      "bytes": 1322486,
+      "sha256": "d36cdccf736def7a0dedbe89fb43b515a853ceeb6273df6b50e2710305df1832"
+    },
+    {
+      "path": "../../../../voice-agent/ui/dist/assets/index-CmdiYlhj.css",
+      "bytes": 97764,
+      "sha256": "f616fcf9ea5c97e442d047738d763e61cd5524bf7da04c3e4a32c2702799101a"
+    },
+    {
+      "path": "../../../../voice-agent/ui/dist/assets/index-Iyu5ndxr.js",
+      "bytes": 1777147,
+      "sha256": "9bb94c18d0a4021c0a3c8f09e9e2d06c280edd0c5d96f16c55129f052665ca87"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../../artifacts/office-source-terrain/audit-restart.ts",
+      "bytes": 3051,
+      "sha256": "81e79b72aa0cbedc21cdae07bf2793bb9efeba98cb333279cb3ef498430a1ad0"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/backup.ts",
+      "bytes": 2471,
+      "sha256": "8bed33061f69484969ded054bd3207eb69bc6a480a1935c94bdf945f16d59eae"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-city.f64",
+      "bytes": 254592,
+      "sha256": "7659d62a856bbe3ba546586de5ce151b3b8db59a69f018f5a113e0d0befee4ba"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-coast.f64",
+      "bytes": 179712,
+      "sha256": "677c9b6870cd47f9990db6c2107addc69d1a54dbeb266eb8ad8d84c18022caab"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-curved-road.f64",
+      "bytes": 179712,
+      "sha256": "677c9b6870cd47f9990db6c2107addc69d1a54dbeb266eb8ad8d84c18022caab"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-desert.f64",
+      "bytes": 159744,
+      "sha256": "10a110c4ea967d0f3c952b9c58135033e3fbf1cce4817cde6bd58b7979252c8c"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-forest.f64",
+      "bytes": 179712,
+      "sha256": "dd6577860ea11eb2b86e6c63d99e1d732bf82fee758212e56ce85757134c6c9e"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-grassland.f64",
+      "bytes": 159744,
+      "sha256": "9d875e19261866c983dc6e48c62b31088c88c490dfe2883b2f21abfd4d8a6536"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-hub-ground.f64",
+      "bytes": 1651416,
+      "sha256": "df6fe7f76b3cc2ab368fc7bdde5df76db3643d2bb297f225e306b71d733c31cc"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-mountains.f64",
+      "bytes": 159744,
+      "sha256": "37c89d914c3c02bb23f43ef47867bfbc3421f7a7ea4485c4456e4cf00a4d973a"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-north-hub-edge.f64",
+      "bytes": 159744,
+      "sha256": "c34a3e451c01fabd3854b98cb9fbca868d27bdaef2c99658f8736ad355a82537"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-ocean.f64",
+      "bytes": 198744,
+      "sha256": "633e3b9fbe3cb795de2e42c12ddeeb3bc1cbc0d9b19d0c1bf22e83ce0a7200fd"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-shoreline.f64",
+      "bytes": 243360,
+      "sha256": "9a94c7bf6e1ac68f3f8a592897ca935d96bc084d1a214fa6b479859ce5d450c6"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-suburbs.f64",
+      "bytes": 309504,
+      "sha256": "8eed0f6dbb72a4b71a3ae413e6b451abcec329fcab5a093cc5b5813c992891c5"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-verification.json",
+      "bytes": 4432,
+      "sha256": "26a17f9b7ac94b37e15c33d6b6a03031e8aaaf3a1be6c22bdaa14b977c4152e5"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline-west-hub-edge.f64",
+      "bytes": 164112,
+      "sha256": "60a995d6f7bafce49afaa7344134ed4d498be35dccabd8c1e23dddd03ced1233"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/baseline.json",
+      "bytes": 5032,
+      "sha256": "177f98d5156a7d82b0d918107fa799cd0cb9f6050323e0fd3c49b0c8965c356f"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/capture-baseline.ts",
+      "bytes": 3159,
+      "sha256": "4ff6229a67c59f97d3555aa568ed86d8669292ba779458aa1d60a5cde150076d"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/http-probe.json",
+      "bytes": 454,
+      "sha256": "d5166caa8f04be94c52a3ebf63c9b08351bd66325ee59cb59519885fae0cce16"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/native-fixture-initial.html",
+      "bytes": 2572,
+      "sha256": "6d1b5845dfe35dde898e32166d1a4914d610191de6951e4031e62344e2329f24"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/native-fixture.html",
+      "bytes": 2698,
+      "sha256": "e5c556ff2e8da64071cf82f465e411b78bb5b97f4281033328cdb345f83b253c"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/pre-extraction-game.js",
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/pre-extraction-texture.js",
+      "bytes": 736,
+      "sha256": "713646aeabfb4ad26e249c8627799c3ac00089f184bd9cda105931c804e33fce"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/restart-audit.json",
+      "bytes": 635,
+      "sha256": "3daae12ce6988bf9c14176a041f6b02f6cba683071b9af692402d7b6da1c1f03"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/restart-operation.json",
+      "bytes": 305,
+      "sha256": "530dce231ef61b6cb5fa51a2e9218d3d7a0d39d9fc19c48d131acb158d343bd0"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/restart-ready.json",
+      "bytes": 16654,
+      "sha256": "f9aa081ec0eba97a27e0feaac94f4bd6ebce36b2446907af995e58f7dcf0dd31"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/restart-ready.sqlite",
+      "bytes": 6643712,
+      "sha256": "5dd7b70ea48819cd27d884ba0b8805a0f8e8289f0f76359328d2b31c2ff1f205"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/restart.ps1",
+      "bytes": 2781,
+      "sha256": "f06f994ae566846cc150d419bc577d7dffd8d67f1d16e891d9d933bb88b2b224"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/server-before.err.log",
+      "bytes": 5368,
+      "sha256": "269868bc1672ae107a5d5cdfc48415f150bfbf2a08adcb5c751070773f4ccfed"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/server-before.log",
+      "bytes": 723,
+      "sha256": "2c98d33a801eff4eb53028e40cb78ef86d7e90b4f8df40e5853003be987281f7"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/texture-check-initial.js",
+      "bytes": 1920,
+      "sha256": "cbe6b0beb48452cd1db6d820c16a34c7d0c8a340d6aba118bc3845596960cf5e"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/texture-check.entry.js",
+      "bytes": 1920,
+      "sha256": "cbe6b0beb48452cd1db6d820c16a34c7d0c8a340d6aba118bc3845596960cf5e"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/texture-check.entry.ts",
+      "bytes": 156,
+      "sha256": "24abdc90bd845edc78a051c839b2da353b3ad445d2eb499c690b52c944c9b306"
+    },
+    {
+      "path": "../../artifacts/office-source-terrain/verify-baseline.ts",
+      "bytes": 1747,
+      "sha256": "6babf37349793d675decc365ca37a84d196487ffa09fca4a4bdd55ff6dbcc353"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/report.json",
+      "bytes": 9397,
+      "sha256": "9882974f26ac80dda50add125485e04e3176b0f9e59ec3edf8586dcd09c8f17a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/fixture.html",
+      "bytes": 2698,
+      "sha256": "a21c470b5fef9aca1a46ab36cadd3de9c0b6f0e89b865afbdfd5955a120110f5"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/report.json",
+      "bytes": 5685,
+      "sha256": "7c13085904b5b114788071347fbe0e1d3a63f0fd4accd6ea61e0dd89b59e2afd"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/source-frame.json",
+      "bytes": 582723,
+      "sha256": "ee7a960b543df4db6f001a305a964ec84e0f46c7879085512604a4141d1b90e9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/texture-check.entry.js",
+      "bytes": 1920,
+      "sha256": "cbe6b0beb48452cd1db6d820c16a34c7d0c8a340d6aba118bc3845596960cf5e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/fixture.html",
+      "bytes": 2698,
+      "sha256": "e5c556ff2e8da64071cf82f465e411b78bb5b97f4281033328cdb345f83b253c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/report.json",
+      "bytes": 9397,
+      "sha256": "658b798c0a8c8f77ce87de72efb2ecf8b0e69e22cef1499fcd0432c7511ade1e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/source-frame.json",
+      "bytes": 595810,
+      "sha256": "e0ff338ee80d9d6cc35dee2714f44590529778d420bbebeb0f28ef82dc564d34"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/texture-check.entry.js",
+      "bytes": 1920,
+      "sha256": "cbe6b0beb48452cd1db6d820c16a34c7d0c8a340d6aba118bc3845596960cf5e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/fixture.html",
+      "bytes": 2698,
+      "sha256": "e5c556ff2e8da64071cf82f465e411b78bb5b97f4281033328cdb345f83b253c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/report.json",
+      "bytes": 5685,
+      "sha256": "627764b0f8dee8e425d2a1ccf19f603c726a1674e70497a0a2bde4941d7e67a7"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/source-frame.json",
+      "bytes": 590507,
+      "sha256": "4c1b4a75ef629b3b93330e8275c4b8094c5bc29a795065530978a723007ae4e1"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/texture-check.entry.js",
+      "bytes": 1920,
+      "sha256": "cbe6b0beb48452cd1db6d820c16a34c7d0c8a340d6aba118bc3845596960cf5e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/canonical-controller-source.json",
+      "bytes": 771895,
+      "sha256": "7ef61e46d1e1c0796bd511604bcbe24a5b295c58364075e9b1109abdf6678c93"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/canonical-residents-observed-source.json",
+      "bytes": 765488,
+      "sha256": "cf94a9ca0a607f281f0c2741776eb2e07ee3b5c33d80b54b91f0e88b1e204c10"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/focus-observe.json",
+      "bytes": 60048,
+      "sha256": "84c7d84ff27030f639d8dbc9463975a345cbf2740fa7edb4a68bf85948477c2d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/focus-possess.json",
+      "bytes": 58332,
+      "sha256": "0f39bb14620ea1771ff9eaf0d38fe4c36353ef64a3efe03bc17067a053923b14"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/focus-return.json",
+      "bytes": 71942,
+      "sha256": "1552b985f5cc9aaf34d79db8b74d187c2d3a74ab8d5aa5c8b1337c8c1139bcec"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/focus-setup.json",
+      "bytes": 7114,
+      "sha256": "212d0c689523f8fee351be9418966b27ee30c778703866d2f612c49217f6808f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/report.json",
+      "bytes": 179277,
+      "sha256": "c8054b0141a0ffa6f7c54ec45f00d883084737b0f4ceb6fc96678ce5eb396be5"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-before-movement.json",
+      "bytes": 4624,
+      "sha256": "e3bf1bf0e0a76915c1fdaf7c9f7643c37b67b8fbc6ba0d107dabb6adadddc89c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-movement.json",
+      "bytes": 13103,
+      "sha256": "c4afb4e1e0024e9eecef205a34cc3a328e38fb593c94103bb6d03613deba2210"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-report.json",
+      "bytes": 16332,
+      "sha256": "ab5d20f048f50d23bdb80e2d7c49d0614aabf8e9db06d22ed124771aa5fc37eb"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-selection.json",
+      "bytes": 1114,
+      "sha256": "220cacfe2510d73f4df4d17af4493901ccb978422f6d5c8635222e8a71ed96ae"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/office-entry-diagnostics.json",
+      "bytes": 14614,
+      "sha256": "761c70318705849c44b89850facd46e95b6f696ac2e2f8348465f8f1a8285548"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/office-entry.json",
+      "bytes": 14775,
+      "sha256": "a567ed5d894dd8c23eee2c3b65ee50be325445cc65dd880546bbf7c7fb654b1d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/report.json",
+      "bytes": 78951,
+      "sha256": "c0239a155127d0085608fcedfec8cde565cf96b172b23fc523029e9df52c78f5"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-terrain-native-20261016.log",
+      "bytes": 15781,
+      "sha256": "e85eea292bc4c8c4f32ff5b78d4cfdc32e474660ce4ae677b08dde6ba35a4374"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-terrain-depth-probe-20261016.log",
+      "bytes": 128,
+      "sha256": "2abc97fc58fa23bf44677ec8f54bc1babe84954df1d2ac8e28bad5fea4790e5d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-terrain-assets-20261016-r2.log",
+      "bytes": 128,
+      "sha256": "11e7220ad8c541d5ca647b7fa0def28d526d662f7d58dd822cde254afb379285"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-terrain-depth-probe-20261016-r2.log",
+      "bytes": 128,
+      "sha256": "2abc97fc58fa23bf44677ec8f54bc1babe84954df1d2ac8e28bad5fea4790e5d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-expanded-20261016.log",
+      "bytes": 11447,
+      "sha256": "7433aeebf1258de680873a7cf70cea68081b2041c977b30bc4df34303327dcbb"
+    },
+    {
+      "path": "../../artifacts/office-terrain-app-20261016.log",
+      "bytes": 15195,
+      "sha256": "224a1a3c6a1f6d0b4aa92082c89891423c2fd33a35b7c3eda8782640fbcdbd63"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-typecheck-proof-20261016.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "../../artifacts/office-terrain-app-typecheck-20261016.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "../../artifacts/office-terrain-ui-typecheck-20261016.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-build-20261016.log",
+      "bytes": 585,
+      "sha256": "b3052202e73cf70f0e79353a0b018415c68f348325c391d259b4981a9ad17145"
+    },
+    {
+      "path": "../../artifacts/office-terrain-ui-build-20261016.log",
+      "bytes": 889,
+      "sha256": "8a4f3fa92ca4d8632eb783999dacd21a0ba2ad6b976c8d44fcce201a92f7fe14"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-unit-initial-20261016.log",
+      "bytes": 6589,
+      "sha256": "fa5633360c9e513702ce27287d9b58cd248250ff9320bf42a3f134b19dd08171"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-unit-r2-20261016.log",
+      "bytes": 758,
+      "sha256": "d3c65beee1810ee875363bdce8289869572bef654abdce327456de4f3a7db487"
+    }
+  ],
+  "images": [
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/city-floor-3-rotated.png",
+      "bytes": 266813,
+      "sha256": "891f6b3cae7a88ef151df2e5a5cfb6a1a05c49ab8940cc0ea5057c7a799c922d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/city-tunnel.png",
+      "bytes": 291546,
+      "sha256": "427ff79304748ba63d1ff65253919f4447f30efef5ccafcbf2685959dd4e992a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/coastal-road.png",
+      "bytes": 115414,
+      "sha256": "fa198e1355f2f4999b6b407226e99ce07cee7b71cc63227c8660a923eca5eef9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/desert.png",
+      "bytes": 122292,
+      "sha256": "fcc40b951bc55cb12dea3c8ee2ce8ea6b13655901d484025b8bb81370dc3a9e4"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/forest-surface.png",
+      "bytes": 178506,
+      "sha256": "065ea293b0ec49b02f46bdc0f9670a66feeb352acdc3006da3e09e63d05a42e8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/mountains.png",
+      "bytes": 409358,
+      "sha256": "0f09aeca07bc56e46267033a1c8d1e3857b86cf8bb5ebb39d4135a75820b3622"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/shoreline.png",
+      "bytes": 95992,
+      "sha256": "0d6cd1663e2f27686b0900151c2205ad98572fb662089244f98fee5a4e69040f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/city-ambient.png",
+      "bytes": 238928,
+      "sha256": "fc406fc1f385f0d79859c4e4077e81496e92de0765daad8f62d0acd20645bbc7"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/city-lit.png",
+      "bytes": 291546,
+      "sha256": "030a260b22c535c8ee98eec2f74fe2f506f18bacbb37d85e0cd7513f660735ac"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/coastal-road-ambient.png",
+      "bytes": 128306,
+      "sha256": "48000937f67c80cc9eb2df8bb7df8e02ee62dc09de0e6c773079038d8f20d515"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/coastal-road-lit.png",
+      "bytes": 103656,
+      "sha256": "f2e2cd415315750f3f200d730ce59dc11ce6c577279a208c87c1fd18aa6f90a8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/city-floor-3-rotated.png",
+      "bytes": 236814,
+      "sha256": "c3a5f2d26ad125c57065eb20191a63f5506f257febeae0122078682488061a3b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/city-tunnel.png",
+      "bytes": 238344,
+      "sha256": "5be24746a62557420cd0dd16243963c0d634fb76f4ab95ee7cbd123841cce298"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/coastal-road.png",
+      "bytes": 115161,
+      "sha256": "7fc3b93b589eb039a90a9c1f3c00d11673cacb345f14101b14ca9e733366a8e0"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/desert.png",
+      "bytes": 122153,
+      "sha256": "e59ae7d1f6a1a0221b8a219a508489f6b1ae540d7ab990e8c23e5c96b0a45c5c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/forest-surface.png",
+      "bytes": 178025,
+      "sha256": "6f14d6c9a94ef45dae887cf5f01c7fb076fa063cb7d7267b253dbb5e93a36772"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/mountains.png",
+      "bytes": 410145,
+      "sha256": "fc0c74ad9d188f9f5113904c9fba76090b041bfca99f9877f4a88aba26978438"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/shoreline.png",
+      "bytes": 114170,
+      "sha256": "5da6899c38f7c7624d2f09fdbf0c7a71307c254845b560a79065a0605cbf35b9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/city-ambient.png",
+      "bytes": 233470,
+      "sha256": "3d03cd2e3706e8d2c9f9402aeb23ddf77e88571e3134d0aa358274b206c84135"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/city-lit.png",
+      "bytes": 238343,
+      "sha256": "c98612a9230acbd1ffff6d010fd2dd91df71c8bbf9d8b3ee76a685d4c822109c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/coastal-road-ambient.png",
+      "bytes": 128880,
+      "sha256": "77ff956db21e8bff869a8945996428663fb4332f87af78a2ac2283543b32a3eb"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/coastal-road-lit.png",
+      "bytes": 117461,
+      "sha256": "551f6c411b748898d45930c4a05e346dd5df49892f69640a9b25fd8e6d103f95"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/entered.png",
+      "bytes": 297504,
+      "sha256": "ae6bee440ee02913ce9712f9d0d3775427452df5c3168c2d7b7324d8b46f9e06"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/observer.png",
+      "bytes": 583723,
+      "sha256": "145f391bfd8390411a9e819398b129482414384dc1ab1e39f86792d90de77fc9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/orbit-1.png",
+      "bytes": 349710,
+      "sha256": "9106b682071cb31a8c356281ca271f2f04c1167c60e26cfff3889039ad9e6608"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/orbit-2.png",
+      "bytes": 292851,
+      "sha256": "f96e4ceca79486c1bb516c588b07a498d1000bff1d06df767f97f8b446c5d4a9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/orbit-3.png",
+      "bytes": 205362,
+      "sha256": "a0c212dae53778facb711f8ceb4a0808a65cd525783394b9b961203a069d3dbc"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/orbit-4.png",
+      "bytes": 282560,
+      "sha256": "c21c3ddbfb4ed17ada79a7cfe3dead2fe14be1c409076aca74a6f0f80195994f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-moved.png",
+      "bytes": 169585,
+      "sha256": "5059c99ec2d816e97ea00481336d4cee86934bea460f13f8faa302bd68256f1b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-observed-scope.png",
+      "bytes": 167335,
+      "sha256": "ebb6794a661555341633ec9a7a189f46c85f7a614dc7825d39729368f7415363"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-observing.png",
+      "bytes": 138230,
+      "sha256": "0a06f7f32c7fe18444d0ba39e4a0b143e1a130b09b243d2b2f37ed18fa8be763"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-panel.png",
+      "bytes": 66499,
+      "sha256": "5908b25042a677f6bf6c4f19e2e8c5722f8b1f53a61c68485b7f1315cf61ee19"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-possessed.png",
+      "bytes": 210939,
+      "sha256": "5211ceeb57e3454996d1ed806b5d6f27dcec2a6a8189a05b183bf96eed06dba8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-return-start.png",
+      "bytes": 56642,
+      "sha256": "5c69a03eb6fe7da228f1d2efa3df9283d830726bce96e49859223c2358c40169"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-returned.png",
+      "bytes": 58086,
+      "sha256": "6653f159da05a6ca2d840fa78c276a64ae3686b1a67fae5b2a04c849ef65cbbd"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-stopped.png",
+      "bytes": 151349,
+      "sha256": "faf648cd4107dc44e60df35bb55b38bbe60a69d1c055324166440301a6dc814e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/returned-observer.png",
+      "bytes": 472833,
+      "sha256": "2800f8f87418fd957d7c56646e92a115d7b64862066226ea27c6f83a6a0799de"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/walk-KeyW.png",
+      "bytes": 282440,
+      "sha256": "8167d54d1a02fdd9b1dd9c364b3215503e065f2ea0be7b960f2440a67c247184"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/canonical-lobby.png",
+      "bytes": 392234,
+      "sha256": "4c065621dcebda3a9ed4c150bded34075d3d2efd09a4140a24fec4709beb36a3"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/entrance.png",
+      "bytes": 477515,
+      "sha256": "fc84344e8a850694fb9c8ece750ab88bf4fc3a77e89889171c4b6cdea3f78d83"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/office-entry.png",
+      "bytes": 649653,
+      "sha256": "b327d1bd590f753d9ccb9652747831138a792d76f3bf3fcf490de98ac0678c70"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/upper-office.png",
+      "bytes": 349588,
+      "sha256": "73f56ff93729d55ee2958e9c3e0a8022d99333639d870d5c13e49fcf18b9de5e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-terrain-native-20261016/workplaces.png",
+      "bytes": 527852,
+      "sha256": "c5a2293569cc6131c58dd53f7363ab4783129265739901d5c1836a969b0f4640"
+    }
+  ],
+  "visuallyReviewed": [
+    "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/entered.png",
+    "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/residents-returned.png",
+    "../../../thegame/artifacts/office-walking/office-source-terrain-native-20261016/observer.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/shoreline.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/mountains.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/city-tunnel.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-native-20261016/coastal-road.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/city-ambient.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016/coastal-road-ambient.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/shoreline.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-assets-20261016-r2/city-floor-3-rotated.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/city-ambient.png",
+    "../../../thegame/artifacts/office-terrain-assets/office-source-terrain-depth-probe-20261016-r2/coastal-road-ambient.png"
+  ],
+  "healthAfter": {
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "serverPid": 6776
+  },
+  "remaining": [
+    "Distant roads show torn surface/depth layering in the native asset images. The final sunlight/ambient-only pairs keep that defect, so removing direct sunlight does not resolve it; exact root cause remains unproven.",
+    "The current calibrated-camera projection fixes near .05/far 10000 and does not consume authored clip hints. Investigate depth precision and road/paint layering, including original outer road quads against the 8 m terrain triangles.",
+    "The covered tunnel strip remains white in the asset views: material-1 road chunk surfaces do not yet sample the semantic map as the main ground does. Reconcile this in both Game and Office.",
+    "A visible boundary/outline remains in the live returned-body image, and bounded mesh edges are visible in static asset views. Camera/culling/fog and full visual parity need further work.",
+    "Live surface and roads now extend to 420 m, while source scenery records/props still use the 144 m budget. Farther buildings/vegetation and full world continuity remain incomplete.",
+    "The seven-view asset scene contains only the actual source surface/road factories and fixed fixture daylight. It is non-playable evidence of geometry/material data, not a second game or proof of live traversal through all biomes.",
+    "Water geometry/material transfer is tested, not animated-wave/refraction/fluid/audio parity. Original water material ID 10 also labels seabed triangles; the water-surface counter filters actual flat water faces.",
+    "The initial unit run caught an over-broad water-ID assertion and the large traversal test exceeded the default five-second timeout. The assertion now distinguishes the original flat water faces and the unchanged broad cache traversal has a 20-second test budget; the final expanded suite passes.",
+    "Guest native companies/leases are empty; unchanged guest rights do not replace earlier funded-business/lease/harness tests. Restart audit verifies all prior account/owner rows.",
+    "Audio-reference WS 503 / C920 warnings persist. No microphone capture, audio playback, new average FPS, vehicle/aircraft/combat audit or three-minute idle soak was verified in this phase.",
+    "All sources/builds are recorded at this phase; UI native execution uses the Vite-backed installed Office route and the separate passive fixture. UI production build is a separate successful check."
+  ]
+}

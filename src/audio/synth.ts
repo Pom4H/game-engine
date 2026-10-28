@@ -1,16 +1,17 @@
 import {hashString,mulberry32} from '../core/random.js';
 import {material} from '../materials/catalog.js';
-import type {EngineEvent,FractureEvent,ImpactEvent,MechanismEvent} from '../scene/events.js';
+import type {EngineEvent,FractureEvent,ImpactEvent,MechanismEvent,HornEvent} from '../scene/events.js';
 
 export interface AudioChannels {left:Float32Array;right:Float32Array;sampleRate:number}
 
 export function synthesizeEvent(event:EngineEvent,sampleRate=48_000):AudioChannels{
-  const duration=event.type==='fracture'?Math.min(1.25,.32+event.size*.12):event.type==='mechanism'?Math.min(.9,.12+event.size*.08+Math.log1p(event.energy)*.02):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
+  const duration=event.type==='horn'?event.durationSeconds+.08:event.type==='fracture'?Math.min(1.25,.32+event.size*.12):event.type==='mechanism'?Math.min(.9,.12+event.size*.08+Math.log1p(event.energy)*.02):Math.min(.55,.09+event.size*.045+Math.log1p(event.energy)*.018);
   const count=Math.max(1,Math.ceil(duration*sampleRate)),left=new Float32Array(count),right=new Float32Array(count);
   const rng=mulberry32((event.id^hashString(event.type))>>>0);
   const pan=Math.max(-.65,Math.min(.65,event.point[0]/25)),gainL=Math.sqrt((1-pan)/2),gainR=Math.sqrt((1+pan)/2);
-  const amplitude=event.type==='fracture'?Math.min(.75,.11+Math.log1p(event.energy)*.075):event.type==='mechanism'?Math.min(.5,.03+Math.log1p(event.energy)*.052):Math.min(.55,.035+Math.log1p(event.energy)*.06);
-  if(event.type==='fracture')fractureVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
+  const amplitude=event.type==='horn'?.32:event.type==='fracture'?Math.min(.75,.11+Math.log1p(event.energy)*.075):event.type==='mechanism'?Math.min(.5,.03+Math.log1p(event.energy)*.052):Math.min(.55,.035+Math.log1p(event.energy)*.06);
+  if(event.type==='horn')hornVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
+  else if(event.type==='fracture')fractureVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
   else if(event.type==='mechanism')mechanismVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
   else impactVoice(event,left,right,sampleRate,rng,amplitude,gainL,gainR);
   softLimit(left);softLimit(right);return{left,right,sampleRate};
@@ -28,6 +29,18 @@ export function wavBytes(audio:AudioChannels):Uint8Array{
   text(0,'RIFF');view.setUint32(4,36+frames*4,true);text(8,'WAVE');text(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,2,true);view.setUint32(24,audio.sampleRate,true);view.setUint32(28,audio.sampleRate*4,true);view.setUint16(32,4,true);view.setUint16(34,16,true);text(36,'data');view.setUint32(40,frames*4,true);
   for(let i=0;i<frames;i++){view.setInt16(44+i*4,Math.round(Math.max(-1,Math.min(1,audio.left[i]!))*32767),true);view.setInt16(46+i*4,Math.round(Math.max(-1,Math.min(1,audio.right[i]!))*32767),true);}
   return bytes;
+}
+
+function hornVoice(event:HornEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){
+  const phase=rng()*Math.PI*2,frequency=event.frequencyHz,second=frequency*1.2599;
+  for(let i=0;i<left.length;i++){
+    const t=i/sampleRate,attack=1-Math.exp(-t*160),release=t<event.durationSeconds?1:Math.exp(-(t-event.durationSeconds)*75);
+    const flutter=.035*Math.sin(t*2*Math.PI*19+phase);
+    const fundamental=Math.sin(2*Math.PI*frequency*t+phase+flutter),dual=Math.sin(2*Math.PI*second*t+phase*.7);
+    const brass=.27*Math.sin(2*Math.PI*frequency*2*t)+.12*Math.sin(2*Math.PI*frequency*3*t)+.06*Math.sin(2*Math.PI*second*4*t);
+    const voice=(fundamental*.52+dual*.32+brass)*attack*release*amplitude;
+    left[i]=voice*gainL;right[i]=voice*gainR;
+  }
 }
 
 function impactVoice(event:ImpactEvent,left:Float32Array,right:Float32Array,sampleRate:number,rng:()=>number,amplitude:number,gainL:number,gainR:number){

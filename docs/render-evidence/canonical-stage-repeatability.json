@@ -1,0 +1,1012 @@
+{
+  "status": "completed",
+  "controls": {
+    "count": 5000,
+    "width": 1920,
+    "height": 1080,
+    "repetitions": 6,
+    "warmupMotionFrames": 288,
+    "canonicalFrames": 32
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "sourceHash": "f0b5828678ed84d9e3367051d2d02309eb50be78a943d83edf51cd4d421070ff",
+  "geometryHash": "881f5bd8a6b25857d840a7a6b100b94e4263491a0c3709a62750f67b3a282a0a",
+  "replayHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+  "runs": [
+    {
+      "mode": "gpu",
+      "repetition": 0,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": null
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "7673c66350e252aded67d5ef89d980481e288a13a6c2e629f7edf12b0130f6ab",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        }
+      }
+    },
+    {
+      "mode": "gpu",
+      "repetition": 1,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 6,
+            "maxEncodedError": 1,
+            "coordinates": [
+              {
+                "x": 1610,
+                "y": 506,
+                "channel": 1,
+                "before": 11184,
+                "after": 11185
+              },
+              {
+                "x": 1611,
+                "y": 506,
+                "channel": 2,
+                "before": 11736,
+                "after": 11737
+              },
+              {
+                "x": 1612,
+                "y": 506,
+                "channel": 0,
+                "before": 10769,
+                "after": 10770
+              },
+              {
+                "x": 1611,
+                "y": 507,
+                "channel": 1,
+                "before": 11241,
+                "after": 11242
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 0,
+                "before": 10941,
+                "after": 10942
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 2,
+                "before": 11743,
+                "after": 11744
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mode": "gpu",
+      "repetition": 2,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 6,
+            "maxEncodedError": 1,
+            "coordinates": [
+              {
+                "x": 1610,
+                "y": 506,
+                "channel": 1,
+                "before": 11184,
+                "after": 11185
+              },
+              {
+                "x": 1611,
+                "y": 506,
+                "channel": 2,
+                "before": 11736,
+                "after": 11737
+              },
+              {
+                "x": 1612,
+                "y": 506,
+                "channel": 0,
+                "before": 10769,
+                "after": 10770
+              },
+              {
+                "x": 1611,
+                "y": 507,
+                "channel": 1,
+                "before": 11241,
+                "after": 11242
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 0,
+                "before": 10941,
+                "after": 10942
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 2,
+                "before": 11743,
+                "after": 11744
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mode": "gpu",
+      "repetition": 3,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 6,
+            "maxEncodedError": 1,
+            "coordinates": [
+              {
+                "x": 1610,
+                "y": 506,
+                "channel": 1,
+                "before": 11184,
+                "after": 11185
+              },
+              {
+                "x": 1611,
+                "y": 506,
+                "channel": 2,
+                "before": 11736,
+                "after": 11737
+              },
+              {
+                "x": 1612,
+                "y": 506,
+                "channel": 0,
+                "before": 10769,
+                "after": 10770
+              },
+              {
+                "x": 1611,
+                "y": 507,
+                "channel": 1,
+                "before": 11241,
+                "after": 11242
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 0,
+                "before": 10941,
+                "after": 10942
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 2,
+                "before": 11743,
+                "after": 11744
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mode": "gpu",
+      "repetition": 4,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "4ed9b9a9d55507effa94f92afa6011942f591b22e27179e6b8b72f668e74e7fe",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 8,
+            "maxEncodedError": 1,
+            "coordinates": [
+              {
+                "x": 1610,
+                "y": 506,
+                "channel": 1,
+                "before": 11184,
+                "after": 11185
+              },
+              {
+                "x": 1611,
+                "y": 506,
+                "channel": 2,
+                "before": 11736,
+                "after": 11737
+              },
+              {
+                "x": 1612,
+                "y": 506,
+                "channel": 0,
+                "before": 10769,
+                "after": 10770
+              },
+              {
+                "x": 1611,
+                "y": 507,
+                "channel": 1,
+                "before": 11241,
+                "after": 11242
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 0,
+                "before": 10941,
+                "after": 10942
+              },
+              {
+                "x": 1612,
+                "y": 507,
+                "channel": 2,
+                "before": 11743,
+                "after": 11744
+              },
+              {
+                "x": 1621,
+                "y": 600,
+                "channel": 0,
+                "before": 10908,
+                "after": 10909
+              },
+              {
+                "x": 1622,
+                "y": 600,
+                "channel": 2,
+                "before": 11408,
+                "after": 11407
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mode": "gpu",
+      "repetition": 5,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "4a50aef51643e8a2bab5eb6708ea8824556fe38285ab83a79181e5fbeef17e16",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 34,
+            "maxEncodedError": 2,
+            "coordinates": [
+              {
+                "x": 821,
+                "y": 371,
+                "channel": 0,
+                "before": 11222,
+                "after": 11221
+              },
+              {
+                "x": 822,
+                "y": 371,
+                "channel": 0,
+                "before": 11388,
+                "after": 11387
+              },
+              {
+                "x": 820,
+                "y": 372,
+                "channel": 0,
+                "before": 11462,
+                "after": 11461
+              },
+              {
+                "x": 821,
+                "y": 372,
+                "channel": 2,
+                "before": 12191,
+                "after": 12190
+              },
+              {
+                "x": 822,
+                "y": 372,
+                "channel": 0,
+                "before": 11559,
+                "after": 11558
+              },
+              {
+                "x": 822,
+                "y": 372,
+                "channel": 2,
+                "before": 12000,
+                "after": 11999
+              },
+              {
+                "x": 819,
+                "y": 373,
+                "channel": 0,
+                "before": 12537,
+                "after": 12536
+              },
+              {
+                "x": 821,
+                "y": 373,
+                "channel": 0,
+                "before": 12517,
+                "after": 12516
+              },
+              {
+                "x": 817,
+                "y": 374,
+                "channel": 2,
+                "before": 12514,
+                "after": 12513
+              },
+              {
+                "x": 819,
+                "y": 374,
+                "channel": 0,
+                "before": 12310,
+                "after": 12309
+              },
+              {
+                "x": 820,
+                "y": 374,
+                "channel": 0,
+                "before": 12303,
+                "after": 12302
+              },
+              {
+                "x": 820,
+                "y": 374,
+                "channel": 1,
+                "before": 12167,
+                "after": 12166
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 0,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": null
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": null
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 1,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 2,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 3,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 4,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        }
+      }
+    },
+    {
+      "mode": "cpu-batched",
+      "repetition": 5,
+      "afterHash": "1d1fdaee169f640d215531e1580da6aaaf39ffecd44f0d83cf873f91c0aae557",
+      "stages": {
+        "presentation": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "d0183b282dbe7d9e27cd44b9e8c03fe67be7a0e174b333423c887e3884d179af",
+          "encoding": "rgba8",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "hdr": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "6a9de751f5220375b37616142be7f12cab841f25b944877f36c5ad178e4a875c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "normal": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "c0f3e2423ba70d9d6981a0695ebfac87287fb4249efa39023ee228f673907a3c",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "effects": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "73e5eedcd72ecaf2411dc96e5481a0cfc7e3ca3424adf8099c16dfb099014c2b",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        },
+        "taa": {
+          "width": 1920,
+          "height": 1080,
+          "hash": "08dd7b2e2a555370d5d8ca0f9084656ebb10c99df18bf64c766d0e7ad6435f05",
+          "encoding": "rgba16float raw words",
+          "comparison": {
+            "changedChannels": 0,
+            "maxEncodedError": 0,
+            "coordinates": []
+          }
+        }
+      }
+    }
+  ],
+  "interpretation": "Fresh device per capture; GPU and ordered CPU-batched visibility are compared within their own repeated canonical captures. Full linear target words and presentation channels, zero tolerance. GPU journal hooks are not installed; warmup waits for each submission rather than using the benchmark RAF loop. This is a diagnostic with queue waits and readbacks; it provides no performance result. A stable sample cannot prove that intermittent variation is eliminated.",
+  "startedAt": "2026-10-11T22:00:18.356Z",
+  "completedAt": "2026-10-11T22:03:59.569Z",
+  "sourceState": {
+    "srcSha256": "ba12135f0e1c34c9589cc7a7bbe398527763ba89c72f57171d010e2cd21945ae",
+    "distSha256": "f1b85ea3838aafaa76408e1ed56d1ca3d64528005773f7762fed1768a9cbf918",
+    "harnessSha256": "0e74a23d7b6369e4291990254acc808fe4bf6482febf2085bc150e908103ae1d",
+    "diagnosticSha256": "ea435b0619422247eea6cd9715039b730141e0bcdfb44e5252ae4b7f6fe835fa"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  }
+}

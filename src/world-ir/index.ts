@@ -23,6 +23,7 @@ export const WORLD_INTERACTION_LAWS=Object.freeze({
   impact:'scene.impact',
   fracture:'scene.fracture',
   mechanism:'scene.mechanism',
+  horn:'scene.horn',
   'acoustic-radiation':'acoustic.radiation',
   hearing:'npc.hearing',
 } as const);
@@ -197,8 +198,14 @@ function validateEffect(effect:WorldInteractionEffect):void{
     }else if(effect.kind==='event'){
       finite(effect.event.time,'event time');
       vec3(effect.event.point,'event point');
-      if(effect.event.type!=='mechanism')vec3(effect.event.normal,'event normal');
-      finite(effect.event.energy,'event energy');
+      if(effect.event.type==='impact'||effect.event.type==='fracture')vec3(effect.event.normal,'event normal');
+      if(effect.event.type==='horn'){
+        id(effect.event.entity,'horn source');
+        finite(effect.event.durationSeconds,'horn duration');
+        finite(effect.event.frequencyHz,'horn frequency');
+        if(effect.event.durationSeconds<.06||effect.event.durationSeconds>1.5||
+          effect.event.frequencyHz<120||effect.event.frequencyHz>800)fail('invalid horn signal');
+      }else finite(effect.event.energy,'event energy');
     }
   else fail('unknown interaction effect');
 }
@@ -351,14 +358,17 @@ export class WorldInteractionJournal {
     // never fabricate physical transfers or simulated sensory input.
     const observedTarget=event.type==='impact'?'audio.impact.energy':
       event.type==='fracture'?'material.fracture.energy':undefined;
-    const couplingIds=causeId&&observedTarget
+    const energy=event.type==='horn'?undefined:event.energy;
+    const couplingIds=causeId&&observedTarget&&energy!==undefined
       ?this.couplings.filter(c=>c.from==='physics.contact.energy'&&
-        c.to===observedTarget&&event.energy>=(c.min??0)).map(c=>c.id):[];
+        c.to===observedTarget&&energy>=(c.min??0)).map(c=>c.id):[];
     const source:WorldInteractionRef=event.type==='fracture'
       ?{domain:'entity',id:event.entity}
       :event.type==='impact'
       ?{domain:'body',id:event.a}
-      :{domain:'entity',id:event.mechanism};
+      :event.type==='mechanism'
+      ?{domain:'entity',id:event.mechanism}
+      :{domain:'entity',id:event.entity};
     return this.append({
       tick,timeSeconds:event.time,source,
       ...(event.type==='impact'?{
@@ -448,7 +458,7 @@ export function validateWorldInteractionGraph(graph:WorldInteractionGraph):World
         :effect.kind==='acoustic-radiation'?'acoustic.source.energy'
         :effect.kind==='hearing'?'npc.hearing.pressure':undefined;
       const observedSource=effect.kind==='hearing'?'acoustic.pressure':'physics.contact.energy';
-      const measured=effect.kind==='event'?effect.event.energy:
+      const measured=effect.kind==='event'?(effect.event.type==='horn'?-1:effect.event.energy):
         effect.kind==='acoustic-radiation'?effect.contactEnergyJ:
         effect.kind==='hearing'?effect.rmsPressurePa:-1;
       if(!observedTarget||

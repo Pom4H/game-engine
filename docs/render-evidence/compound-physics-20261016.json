@@ -1,0 +1,177 @@
+{
+  "date": "2026-10-16T04:11:33.116Z",
+  "scope": "existing production boarding, passenger isolation, FWD/AWD/V6 driving, replicated HUD/handbrake/ignition, unchanged bodies; semantic input through network, no placement/reset",
+  "source": {
+    "engine": "src/physics/compound.ts",
+    "bounds": "src/physics/box-overlap.ts",
+    "gameAdapter": "../thegame/src/game/runtime/solid.js",
+    "frozenOriginalSha256": "E82B4281A744C7A0DF2405C79EEF829592F9A20A5E1509E833BBF85956D4836B",
+    "productionBundle": {
+      "compoundModules": 1,
+      "oracleBundled": false
+    }
+  },
+  "checks": {
+    "fidelity": {
+      "tests": 2,
+      "steps": 1200,
+      "assertions": 1209,
+      "exactStatesContactsAndImpulses": true
+    },
+    "gamePhysics": {
+      "tests": 107,
+      "assertions": 122384
+    },
+    "gameOfficeWorld": {
+      "tests": 41,
+      "assertions": 9585
+    },
+    "engine": {
+      "tests": 24
+    },
+    "engineGameOfficeTypechecksAndBuilds": true
+  },
+  "native": {
+    "browserMode": "native-gpu",
+    "save": "isolated, sole production entry",
+    "initial": {
+      "tick": 1578,
+      "players": 1,
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 236,
+        "vehicleStepHz": 120,
+        "bodies": 43,
+        "sleeping": 30,
+        "awake": 8,
+        "maxSpeed": 9.808607675799049,
+        "substeps": 236,
+        "bodySubsteps": 7204,
+        "islands": 31,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 0
+      }
+    },
+    "final": {
+      "tick": 7604,
+      "players": 1,
+      "physics": {
+        "characterMotor": "the-engine",
+        "rigidBodySolver": "the-engine-compound",
+        "integrationSteps": 12288,
+        "vehicleStepHz": 120,
+        "bodies": 44,
+        "sleeping": 29,
+        "awake": 1,
+        "maxSpeed": 9.696979955793012,
+        "substeps": 18416,
+        "bodySubsteps": 136620,
+        "islands": 23,
+        "recoveredVehicles": 0,
+        "quarantinedVehicles": 0,
+        "discardedRagdolls": 0,
+        "discardedDebris": 1
+      }
+    },
+    "projectedPhysicalBodies": 0,
+    "gpuErrors": [],
+    "boarding": {
+      "vehicle": "vehicle:1001",
+      "driver": {
+        "seatId": "driver",
+        "role": "driver"
+      },
+      "passenger": {
+        "seatId": "rear-left",
+        "role": "passenger"
+      },
+      "replicatedSamples": 95,
+      "doors": [
+        "rear-right",
+        "front-left",
+        "rear-left"
+      ],
+      "exited": true,
+      "passengerDisplacement": 0
+    },
+    "fwd": {
+      "vehicle": "vehicle:1015",
+      "driver": "driver",
+      "distance": 3.066010437033771,
+      "exited": true
+    },
+    "awd": {
+      "vehicle": "vehicle:1016",
+      "distance": 1.5370081327045726,
+      "exited": true,
+      "instruments": {
+        "vehicleId": "vehicle:1016",
+        "rpm": 871,
+        "gear": -1,
+        "load": 1,
+        "powered": true,
+        "systems": 5,
+        "fuel": 48,
+        "coolant": 21,
+        "fuelRate": 5.8
+      }
+    },
+    "v6": {
+      "id": "vehicle:1018",
+      "handbrake": {
+        "instruments": {
+          "vehicleId": "vehicle:1018",
+          "rpm": 850,
+          "gear": 1,
+          "load": 0,
+          "powered": true,
+          "systems": 7,
+          "fuel": 54.4,
+          "coolant": 20,
+          "fuelRate": 1
+        },
+        "tick": 6993
+      },
+      "off": {
+        "vehicleId": "vehicle:1018",
+        "rpm": 0,
+        "gear": 1,
+        "load": 0,
+        "powered": true,
+        "systems": 4,
+        "fuel": 54.4,
+        "coolant": 21,
+        "fuelRate": 0
+      },
+      "on": {
+        "vehicleId": "vehicle:1018",
+        "rpm": 1175,
+        "gear": 1,
+        "load": 0,
+        "powered": true,
+        "systems": 5,
+        "fuel": 54.4,
+        "coolant": 21,
+        "fuelRate": 1
+      }
+    },
+    "imagesInspected": [
+      "transport-network-driver.png",
+      "compact-in-city.png",
+      "v6-hud-a.png",
+      "v6-hud-b.png",
+      "v6-hud-c.png",
+      "v6-hud-mobile.png"
+    ]
+  },
+  "limits": [
+    "No installed Office layout in this isolated transport save",
+    "Semantic input via GameNetwork, not trusted native key events",
+    "Not a sustained GPU/FPS gate",
+    "Not fresh Office visual or voice acceptance",
+    "Remaining material/effect and audio/kernel integration audit"
+  ]
+}

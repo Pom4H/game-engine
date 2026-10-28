@@ -7,7 +7,7 @@ import type {Scene} from './scene.js';
 import type {SystemFrame} from './system-runtime.js';
 
 export interface SceneModuleContext extends SceneSnapshot {readonly environment:EnvironmentState;readonly resources:ReadonlyMap<string,unknown>}
-export type SceneCommand={type:'spawn';entity:EntitySpec}|{type:'remove';id:string}|{type:'velocity';id:string;value:Vec3}|{type:'resource';key:string;value:unknown};
+export type SceneCommand={type:'spawn';entity:EntitySpec}|{type:'remove';id:string}|{type:'velocity';id:string;value:Vec3}|{type:'resource';key:string;value:unknown}|{type:'horn';id:string;durationSeconds?:number;frequencyHz?:number};
 export type SystemAction=string;
 export type InternalCommand=SceneCommand|{type:'system';action:SystemAction;deltaSeconds:number};
 export type SceneModule=EngineModule<SceneModuleContext,SceneCommand>;

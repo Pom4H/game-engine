@@ -1,5 +1,8 @@
 import {LIGHT_GRID_WGSL} from './light-grid.js';
 import {FOG_WGSL,FOG_MEDIUM_WGSL} from './fog.js';
+import {CAMERA_DEPTH_WGSL} from './camera-depth.js';
+export const FRAME_UNIFORM_WORDS=200;
+export const FRAME_UNIFORM_BYTES=FRAME_UNIFORM_WORDS*4;
 /** Camera/exposure controls and lighting are independent of simulation cadence. */
 export const FRAME_WGSL=`
 struct Frame {
@@ -9,9 +12,9 @@ struct Frame {
  irradiance0:vec4<f32>, irradiance1:vec4<f32>, irradiance2:vec4<f32>, irradiance3:vec4<f32>, irradiance4:vec4<f32>,
  irradiance5:vec4<f32>, irradiance6:vec4<f32>, irradiance7:vec4<f32>, irradiance8:vec4<f32>,
  localProbePosition:vec4<f32>, localProbeMin:vec4<f32>, localProbeMax:vec4<f32>, fogColor:vec4<f32>, fogMedium:vec4<f32>,
- ambientIrradiance:vec4<f32>, background:vec4<f32>
+ ambientIrradiance:vec4<f32>, background:vec4<f32>, surfaceRain:vec4<f32>, renderOrigin:vec4<f32>, groundLitter:vec4<f32>, cameraDepth:vec4<f32>, dynamicLightVP:mat4x4<f32>
 }
-`;
+`+CAMERA_DEPTH_WGSL;
 export const SKY_SHADER=FRAME_WGSL+FOG_MEDIUM_WGSL+`
 @group(0) @binding(0) var<uniform> f:Frame;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
@@ -28,15 +31,20 @@ fn noise(p:vec2<f32>)->f32{let i=floor(p);let v=fract(p);let q=v*v*(3.0-2.0*v);r
  let zenith=f.sky.rgb*mix(.42,.58,haze);
  var color=mix(horizon,zenith,pow(max(ray.y,0.0),.58));
  let sun=max(dot(ray,f.sun.xyz),0.0);color+=f.sunColor.rgb*f.sun.w*(pow(sun,150.0)*.070+smoothstep(.99980,.99995,sun)*1.55);
+ let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
+ var cloudOpacity=0.0;
+ // Exact zero-opacity clouds cannot change sky or the later fog haze. Keep
+ // every original sample and arithmetic operation whenever they can contribute.
+ if(cloudDrive!=0.0){
  let q=ray.xz/max(.10,ray.y)*.8+vec2<f32>(f.up.w*.001,0);
  let clouds=noise(q)*.52+noise(q*2.1)*.28+noise(q*4.2)*.14+noise(q*9.4)*.06;
- let cloudDrive=smoothstep(.48,.88,humidity)*(1.0-.55*sunlight);
- let cloudOpacity=cloudDrive*smoothstep(.38,.70,clouds)*smoothstep(.0,.18,ray.y)*mix(.82,.48,sunlight);
+ cloudOpacity=cloudDrive*smoothstep(.38,.70,clouds)*smoothstep(.0,.18,ray.y)*mix(.82,.48,sunlight);
  // Cloud radiance follows incident light rather than a fixed white term.
  let edge=smoothstep(.50,.72,clouds)-smoothstep(.72,.88,clouds);
  // Night clouds absorb the sky glow; only their rims scatter moonlight.
  let cloudRadiance=f.sky.rgb*(mix(.16,1.42,sunlight)+.22*haze*sunlight)+f.sunColor.rgb*f.sun.w*mix(.01+.055*edge,.11+.20*edge,sunlight);
  color=mix(color,cloudRadiance,cloudOpacity);
+ }
  color+=f.sky.rgb*(.035+.055*haze)*pow(1.0-max(ray.y,0.0),5.0);
  if(f.fogMedium.y>.5){
   // Overcast regions also reduce the ambient illumination of the sky haze.
@@ -76,33 +84,56 @@ export const TAA_SHADER=`
 @group(0) @binding(2) var velocityTex:texture_2d<f32>;
 @group(0) @binding(3) var depthTex:texture_depth_2d;
 @group(0) @binding(4) var linearSampler:sampler;
-struct TaaParams { history:vec4<f32> }
+struct TaaParams { history:vec4<f32>, jitter:vec4<f32> }
 @group(0) @binding(5) var<uniform> taa:TaaParams;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
+fn finiteRgb(v:vec3<f32>)->bool{return all((bitcast<vec3<u32>>(v)&vec3<u32>(0x7f800000u))!=vec3<u32>(0x7f800000u));}
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
  let dims=vec2<i32>(textureDimensions(currentColor));
  let size=vec2<f32>(dims);
- let pixel=clamp(vec2<i32>(in.uv*size),vec2<i32>(0),dims-1);
- let current=textureLoad(currentColor,pixel,0).rgb;
+ // Rasterized geometry is shifted by jitter.xy, but history and output live
+ // on the stable screen grid. Sample the current frame at that shifted UV.
+ let halfTexel=.5/size;
+ let currentUV=clamp(in.uv+taa.jitter.xy,halfTexel,vec2<f32>(1)-halfTexel);
+ let pixel=clamp(vec2<i32>(currentUV*size),vec2<i32>(0),dims-1);
+ let current=textureSampleLevel(currentColor,linearSampler,currentUV,0).rgb;
  let velocity=textureLoad(velocityTex,pixel,0).xy;
- let historyUV=in.uv-velocity;
- var lo=current;var hi=current;
- for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){let q=clamp(pixel+vec2<i32>(x,y),vec2<i32>(0),dims-1);let v=textureLoad(currentColor,q,0).rgb;lo=min(lo,v);hi=max(hi,v);}}
- let valid=taa.history.x>0.5&&all(historyUV>vec2<f32>(.001))&&all(historyUV<vec2<f32>(.999));
- let previous=clamp(textureSampleLevel(historyColor,linearSampler,clamp(historyUV,vec2<f32>(.001),vec2<f32>(.999)),0).rgb,lo,hi);
- let speed=length(velocity)*size.y;
+ // Velocity contains both current and previous raster jitter. Remove the
+ // previous offset when looking up the already resolved, stable history.
+ let historyUV=in.uv+taa.jitter.xy-velocity-taa.jitter.zw;
+ let motion=velocity-taa.jitter.xy+taa.jitter.zw;
+ let finiteMotion=all((bitcast<vec2<u32>>(velocity)&vec2<u32>(0x7f800000u))!=vec2<u32>(0x7f800000u));
+ let valid=taa.history.x>0.5&&finiteMotion&&all(historyUV>vec2<f32>(.001))&&all(historyUV<vec2<f32>(.999));
+ var oldColor=vec3<f32>(0);var hasHistory=false;
+ if(valid){oldColor=textureSampleLevel(historyColor,linearSampler,historyUV,0).rgb;hasHistory=finiteRgb(oldColor);}
+ // A non-finite lighting texel must never become a black tile or poison the
+ // accumulation buffer. Keep reliable history, or rebuild from finite neighbours
+ // when the scene/camera has invalidated history.
+ if(!finiteRgb(current)){
+  if(hasHistory){return vec4<f32>(oldColor,1);}
+  var sum=vec3<f32>(0);var count=0.0;
+  for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){let q=clamp(pixel+vec2<i32>(x,y),vec2<i32>(0),dims-1);let v=textureLoad(currentColor,q,0).rgb;if(finiteRgb(v)){sum+=v;count+=1.0;}}}
+  return vec4<f32>(sum/max(count,1.0),1);
+ }
  let depth=textureLoad(depthTex,pixel,0);
- var weight=select(0.0,mix(.90,.72,smoothstep(.35,10.0,speed)),valid);
- if(depth>.99999){weight=min(weight,.55);}
+ if(!hasHistory||depth>.99999){return vec4<f32>(current,1);}
+ var lo=current;var hi=current;
+ for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){let q=clamp(pixel+vec2<i32>(x,y),vec2<i32>(0),dims-1);let v=textureLoad(currentColor,q,0).rgb;if(finiteRgb(v)){lo=min(lo,v);hi=max(hi,v);}}}
+ let previous=clamp(oldColor,lo,hi);
+ let speed=length(motion*size);
+ let moving=smoothstep(.05,.5,speed);
+ var weight=mix(.96,.72,smoothstep(.35,10.0,speed));
+ // Sky has no geometry velocity. Its rays use the jittered projection, so
+ // currentUV already reconstructs the stable sky; avoid stale camera history.
  let delta=max(max(abs(previous.r-current.r),abs(previous.g-current.g)),abs(previous.b-current.b));
- weight*=1.0-smoothstep(.12,.55,delta);
- // Preserve sub-pixel decals, trim and material boundaries. Static high-contrast
- // pixels already have strong current-frame evidence; accumulating 90% bilinear
- // history there turns real detail into a stable blur.
+ // Stable history no longer drifts through a bilinear jittered grid. Let static
+ // edges accumulate coverage; rejecting their changing samples causes shimmer.
+ // Moving boundaries still reject stale colors and retain current-frame detail.
+ weight*=1.0-smoothstep(.12,.55,delta)*moving;
  let localRange=max(max(hi.r-lo.r,hi.g-lo.g),hi.b-lo.b);
  let detail=smoothstep(.035,.20,localRange);
- weight*=mix(1.0,.58,detail);
+ weight*=mix(1.0,.58,detail*moving);
  return vec4<f32>(mix(current,previous,weight),1);
 }
 `;
@@ -116,7 +147,7 @@ export const EFFECTS_SHADER=FRAME_WGSL+LIGHT_GRID_WGSL+FOG_WGSL+`
 @group(0) @binding(6) var bloom:texture_2d<f32>;
 struct Out {@builtin(position) position:vec4<f32>,@location(0) uv:vec2<f32>}
 @vertex fn vs(@builtin(vertex_index) i:u32)->Out{let p=vec2<f32>(f32((i<<1u)&2u),f32(i&2u));var o:Out;o.position=vec4<f32>(p*2.0-1.0,0,1);o.uv=vec2<f32>(p.x,1.0-p.y);return o;}
-fn linearDepth(d:f32)->f32{return 500.0/(10000.0-d*9999.95);}
+fn linearDepth(d:f32)->f32{if(f.cameraDepth.x>0.0){return logarithmicCameraDistance(d,f.cameraDepth.x);}return 500.0/(10000.0-d*9999.95);}
 fn viewPos(uv:vec2<f32>,z:f32)->vec3<f32>{let ndc=vec2<f32>(uv.x*2.0-1.0,1.0-uv.y*2.0);return vec3<f32>((ndc.x-f.projection.z)/f.projection.x*z,(ndc.y-f.projection.w)/f.projection.y*z,-z);}
 fn project(p:vec3<f32>)->vec2<f32>{let ndc=vec2<f32>(f.projection.x*p.x/max(-p.z,.0001)+f.projection.z,f.projection.y*p.y/max(-p.z,.0001)+f.projection.w);return vec2<f32>(ndc.x*.5+.5,.5-ndc.y*.5);}
 fn viewNormal(n:vec3<f32>)->vec3<f32>{return normalize(vec3<f32>(dot(n,f.right.xyz),dot(n,f.up.xyz),-dot(n,f.forward.xyz)));}
@@ -128,6 +159,13 @@ fn depthSpan(pixel:vec2<i32>)->vec2<f32>{
 }
 fn positionAt(pixel:vec2<i32>,size:vec2<f32>)->vec3<f32>{
  let coord=clamp(pixel,vec2<i32>(0),vec2<i32>(size)-1);return viewPos((vec2<f32>(coord)+.5)/size,linearDepth(textureLoad(depth,coord,0)));
+}
+fn diffuseBounceRadiance(receive:f32,emit:f32,separation:f32,radiance:vec3<f32>)->vec3<f32>{
+ // Fixed quadrature over six directions. Normalizing by the accepted weights
+ // cancels the cosines/range and turns even a grazing, distant HDR texel into
+ // a full-strength shifted copy. Back-facing sources transfer no radiance.
+ let range=1.0-smoothstep(.08,.82,separation);
+ return radiance*(receive*emit*range*(.034/6.0));
 }
 fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3<f32>(0),vec3<f32>(1));}
 @fragment fn fs(in:Out)->@location(0) vec4<f32>{
@@ -166,7 +204,9 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
   let phaseSin=array<f32,4>(0.0,.38268343,.70710678,.92387953);
   let cs=phaseCos[phaseIndex];
   let sn=phaseSin[phaseIndex];
-  let radii=array<f32,2>(.035,.24);let weights=array<f32,2>(.58,.42);
+  // Keep the trim/contact ring; the wider ring also sees a chassis above snow.
+  // Both still use the same eight depth samples per pixel.
+  let radii=array<f32,2>(.035,.65);let weights=array<f32,2>(.58,.42);
   for(var ring=0;ring<2;ring++){
    let worldRadius=radii[ring];let radius=clamp(worldRadius*size.y*f.projection.y/(max(z,.1)*2.0),1.0,64.0);
    for(var k=0;k<4;k++){
@@ -191,7 +231,7 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
  if(d<.99999){
   let giDirs=array<vec2<f32>,6>(vec2<f32>(1,0),vec2<f32>(.5,.866),vec2<f32>(-.5,.866),vec2<f32>(-1,0),vec2<f32>(-.5,-.866),vec2<f32>(.5,-.866));
   let giRadius=clamp(.42*size.y*f.projection.y/(max(z,.1)*2.0),3.0,42.0);
-  var indirect=vec3<f32>(0);var indirectWeight=0.0;
+  var indirect=vec3<f32>(0);
   for(var gi=0;gi<6;gi++){
    let q=clamp(pixel+vec2<i32>(round(giDirs[gi]*giRadius)),vec2<i32>(0),dims-1);
    let qp=positionAt(q,size);let delta=qp-pos;let separation=length(delta);
@@ -205,16 +245,15 @@ fn aces(x:vec3<f32>)->vec3<f32>{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.1
       let qWorldNormal=textureLoad(normals,q,0).xyz*2.0-1.0;
       let qn=viewNormal(qWorldNormal);
       let emit=max(dot(qn,-direction),0.0);
-      let range=1.0-smoothstep(.08,.82,separation);
-      let weight=receive*(.35+.65*emit)*range;
-      indirect+=textureLoad(hdr,q,0).rgb*weight;indirectWeight+=weight;
+      if(emit>0.0){indirect+=diffuseBounceRadiance(receive,emit,separation,textureLoad(hdr,q,0).rgb);}
     }
    }
   }
-  if(indirectWeight>.001){color+=indirect/indirectWeight*.034*(.72+.28*normalSample.a);}
+  color+=indirect*(.72+.28*normalSample.a);
  }
  // Screen-space radiance for smooth materials, with explicit misses. Wet ground
- // uses its geometry reflection pass; rough/offscreen surfaces keep sky fallback.
+ // on the global mirror plane uses its geometry pass; elevated wet roads use
+ // this depth-tested path. Rough/offscreen surfaces keep sky fallback.
  let coating=textureLoad(reflectance,pixel,0);let rough=clamp(coating.a*2.0-1.0,0.0,1.0);
  // Only smooth reflective pixels pay the neighbourhood-depth and ray-march cost.
  if(d<.99999&&rough<.55&&coating.a>.5&&length(wn)>.92){

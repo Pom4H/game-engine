@@ -1,0 +1,967 @@
+{
+  "date": "2026-10-16T20:13:37.764Z",
+  "goalAchieved": false,
+  "summary": "Original authority road definitions and piers now feed the unmodified Game RoadNetwork/buildRoadGeometry in the passive Office Scene; fallback strips are suppressed only when that source is available.",
+  "cpu": {
+    "date": "2026-10-16T20:12:43.458Z",
+    "seed": 29,
+    "revision": 13,
+    "source": "original createWorld(29) RoadNetwork and buildRoadGeometry, no authority/simulation",
+    "roads": 19,
+    "controlPoints": 75,
+    "piers": 39,
+    "nonemptySourceCells": 101,
+    "sourceCorners": 224838,
+    "comparedCorners": 1143024,
+    "contexts": 16,
+    "yaws": [
+      0,
+      0.71,
+      -1.5707963267948966,
+      3.141592653589793
+    ],
+    "floors": [
+      2,
+      3
+    ],
+    "offsetZ": 1.7,
+    "maxCachedCells": 256,
+    "maxPositionError": 2.2737367544323206e-13,
+    "maxNormalError": 0,
+    "maxAttributeError": 0,
+    "materialIds": [
+      0,
+      1,
+      5,
+      7,
+      8,
+      11,
+      12,
+      15,
+      16,
+      17
+    ],
+    "roadSceneJsonBytes": 9926,
+    "limits": [
+      "CPU source vertex comparison before Engine Float32/GPU conversion; native screenshots are separate evidence.",
+      "Broad oracle views use radius 420; live Office still requests the existing 144 m scenery radius and clips terrain to 128 m."
+    ],
+    "roadSceneSha256": "f60120e72b8df4682c9dbae084a7adc6d608225fdb18a2018cb9d8703ac66b9f"
+  },
+  "native": [
+    {
+      "label": "office-source-roads-native-20261016",
+      "command": "bun tools/capture.ts --office",
+      "debugPort": 3208,
+      "exitCode": 1,
+      "ok": false,
+      "error": "AssertionError [ERR_ASSERTION]: Focus QA requires a real living NPC in another authority view cell",
+      "recordCount": 10,
+      "localPhysicsSteps": 0,
+      "gpuErrors": 0,
+      "roadNetworkBuilds": 1,
+      "maxCachedCells": 66,
+      "meshes": [
+        62,
+        102
+      ],
+      "ownerMovement": 1.5233844702018657,
+      "cleanup": {
+        "players": 1,
+        "observer": false,
+        "view": "controller"
+      },
+      "report": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/report.json",
+      "log": "../../../thegame/artifacts/office-source-roads-native-20261016.log"
+    },
+    {
+      "label": "office-source-roads-native-20261016-r2",
+      "command": "bun tools/capture.ts --office",
+      "debugPort": 3209,
+      "exitCode": 0,
+      "ok": true,
+      "error": null,
+      "recordCount": 16,
+      "localPhysicsSteps": 0,
+      "gpuErrors": 0,
+      "roadNetworkBuilds": 1,
+      "maxCachedCells": 73,
+      "meshes": [
+        62,
+        102,
+        108
+      ],
+      "ownerMovement": 1.855864819274335,
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "report": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/report.json",
+      "log": "../../../thegame/artifacts/office-source-roads-native-20261016-r2.log",
+      "residents": {
+        "actor": "resident:22089:0",
+        "body": "resident:22089:0",
+        "oldBodyMovement": 0,
+        "takeoverDistance": 0.0005510583158155007,
+        "movement": 0.26359768756044405,
+        "stoppedSpeed": 0.12349677619628226,
+        "returnedBody": "player:19f8457e-4b91-40f2-bfed-37d92070e4f6",
+        "accountRightsMatched": true,
+        "nativeCompanies": 0
+      }
+    },
+    {
+      "label": "office-source-roads-crossing-20261016",
+      "command": "bun tools/capture.ts --office-entry",
+      "debugPort": 3210,
+      "exitCode": 0,
+      "ok": true,
+      "error": null,
+      "recordCount": 16,
+      "localPhysicsSteps": 0,
+      "gpuErrors": 0,
+      "roadNetworkBuilds": 1,
+      "maxCachedCells": 78,
+      "meshes": [
+        62,
+        102,
+        53
+      ],
+      "ownerMovement": 1.7387863000314123,
+      "cleanup": {
+        "players": 0,
+        "observer": true,
+        "view": "office"
+      },
+      "report": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/report.json",
+      "log": "../../../thegame/artifacts/office-source-roads-crossing-20261016.log",
+      "residents": {
+        "actor": "resident:14791:1",
+        "body": "resident:14791:1",
+        "oldBodyMovement": 2.2032509150449187e-10,
+        "takeoverDistance": 0.0005046705659671443,
+        "movement": 0.544821808578605,
+        "stoppedSpeed": 0.01095823065240497,
+        "returnedBody": "player:48e43a8e-8606-43a9-b579-492970acc50b",
+        "accountRightsMatched": true,
+        "nativeCompanies": 0
+      }
+    }
+  ],
+  "nativeEnvironment": {
+    "CAPTURE_EXISTING": "1",
+    "CAPTURE_PORT": "3007",
+    "CAPTURE_GPU": "1",
+    "OFFICE_WALKING_QA": "1",
+    "OFFICE_URBAN_QA": "1",
+    "OFFICE_SCENERY_QA": "1",
+    "OFFICE_ROADS_QA": "1",
+    "OFFICE_CAMERA_QA": "1",
+    "OFFICE_RESIDENTS_QA": "1",
+    "OFFICE_PRESENTATION_QA": "1",
+    "PERF_LABEL": "set to the corresponding label",
+    "OFFICE_CAPTURE_LABEL": "same label",
+    "OFFICE_FOCUS_FORCE_CROSSING": "1 only for the third run"
+  },
+  "crossing": {
+    "steps": 17,
+    "initial": {
+      "id": "player:48e43a8e-8606-43a9-b579-492970acc50b",
+      "x": -343.8189263962428,
+      "z": -64.70861258449813
+    },
+    "final": {
+      "x": -385.73341887313455,
+      "y": -0.0000012207031327982065,
+      "z": -64.70861451320768,
+      "health": 100
+    },
+    "distance": 41.91449247689182,
+    "scope": "Trusted native mouse/W input, authoritative execution ACKs, no teleport or world mutation"
+  },
+  "restart": {
+    "date": "2026-10-16T19:59:45.222Z",
+    "oldPid": 6448,
+    "newPid": 11476,
+    "method": "Windows process stop after fresh checkpoint and consistent SQLite backup; original road source records; geometry hint and causal priority retained; Office/backend/microphone untouched",
+    "beforeRows": 2864,
+    "afterRows": 2870,
+    "missingRows": 0,
+    "protectedRows": 115,
+    "changedProtectedRows": 0,
+    "ownerDifferences": 0,
+    "accounts": 18,
+    "accountDifferences": 0,
+    "integrity": "ok",
+    "health": {
+      "ok": true,
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    },
+    "editorRevision": 53,
+    "geometryRevision": 1
+  },
+  "http": {
+    "date": "2026-10-16T20:13:37.588Z",
+    "sourceRoads": 19,
+    "sourcePiers": 39,
+    "sourceJsonBytes": 9926,
+    "sourceSha256": "f60120e72b8df4682c9dbae084a7adc6d608225fdb18a2018cb9d8703ac66b9f",
+    "sourceMatchesOriginalCPUOracle": true,
+    "fullJsonBytes": 588499,
+    "hitJsonBytes": 26991,
+    "hitOmitsGeometry": true
+  },
+  "served": [
+    {
+      "url": "http://127.0.0.1:3007/build/game.js",
+      "status": 200,
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4"
+    },
+    {
+      "url": "http://127.0.0.1:3007/build/office-controller.js",
+      "status": 200,
+      "bytes": 1289007,
+      "sha256": "8857726612f4bd2698cf63684e558f34209e86e3e26f105c93aa42d8437e8ec5"
+    }
+  ],
+  "commands": [
+    {
+      "cwd": "thegame",
+      "command": "bun test test/office-road-assets.test.ts test/office-urban-assets.test.ts test/office-scenery-assets.test.ts test/office-world.test.ts test/office-installation.test.ts test/road-markings.test.ts test/road-surface-partition.test.js",
+      "exitCode": 0,
+      "pass": 32,
+      "assertions": 8463,
+      "log": "../../../thegame/artifacts/office-roads-expanded-20261016.log"
+    },
+    {
+      "cwd": "game-engine",
+      "command": "bun test apps/thegame/test",
+      "exitCode": 0,
+      "pass": 133,
+      "assertions": 5334,
+      "log": "../../artifacts/office-roads-app-20261016.log"
+    },
+    {
+      "cwd": "thegame",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": "../../../thegame/artifacts/office-roads-typecheck-20261016-final.log"
+    },
+    {
+      "cwd": "game-engine/apps/thegame",
+      "command": "bun run typecheck",
+      "exitCode": 0,
+      "log": "../../artifacts/office-roads-adapter-typecheck-20261016.log"
+    },
+    {
+      "cwd": "voice-agent/ui",
+      "command": "bun x tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../artifacts/office-roads-ui-typecheck-20261016.log"
+    },
+    {
+      "cwd": "thegame",
+      "command": "bun run build",
+      "exitCode": 0,
+      "log": "../../../thegame/artifacts/office-roads-build-20261016.log"
+    },
+    {
+      "cwd": "voice-agent/ui",
+      "command": "bun run build",
+      "exitCode": 0,
+      "warning": "Existing large UI chunk warning",
+      "log": "../../artifacts/office-roads-ui-build-20261016.log"
+    }
+  ],
+  "healthAfter": {
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "serverPid": 11476
+  },
+  "sources": [
+    {
+      "path": "../../../thegame/src/game/road-records.ts",
+      "bytes": 534,
+      "sha256": "303c882514c52598d7265367197c0d429fb6836ed45cbf00bfa5a498032b7a64"
+    },
+    {
+      "path": "../../../thegame/src/game/office-world.ts",
+      "bytes": 9388,
+      "sha256": "0f1bd0846ab604bffe6d07e25a70acf18a64f685f7521afe9abd8d9267a2b217"
+    },
+    {
+      "path": "../../../thegame/src/game/office-road-assets.ts",
+      "bytes": 4852,
+      "sha256": "e844b996804b12af78a7f0e02408079d4ab517225418b6146b923938712b1971"
+    },
+    {
+      "path": "../../../thegame/src/game/office-controller.ts",
+      "bytes": 718,
+      "sha256": "7cf7565ca7af39d2e163d9f2c22f3275d7adb9ea3abdf51043e6783e81f2c211"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/roads.js",
+      "bytes": 18782,
+      "sha256": "e88b7ffe3bff5169dc2522506f5e2808e3683c4268cc4410120fe1a901c81a67"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/roads.d.ts",
+      "bytes": 315,
+      "sha256": "e2593af9cf48a8c92017bd330616a6f61a7a6a1be449e40f8043316c6c6a657e"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/road-scene.js",
+      "bytes": 16138,
+      "sha256": "c2680932eb89fb0be47a2b5d54e1721685cc20a0336c2b684b4a7122aeb7cbd8"
+    },
+    {
+      "path": "../../../thegame/src/game/runtime/road-scene.d.ts",
+      "bytes": 495,
+      "sha256": "3c81e27f79defc70c4adb54c37c0b463cd0ceb5e04ee6e1d7f9c721970076659"
+    },
+    {
+      "path": "../../../thegame/src/game/render/the-engine-projection.ts",
+      "bytes": 14774,
+      "sha256": "75d74db30150cc1eeae26e255be02cd059c3e82d226c077bfd87816f06be9a8f"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-types.ts",
+      "bytes": 4598,
+      "sha256": "bcf61742ea352a3c5560d7093df1500ccae5ce3f3e9aa7f0f061e02d91e2b255"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-roads.ts",
+      "bytes": 536,
+      "sha256": "0cc04ce09cf29de3cc88087a585013ff05d28bef298dc4cda2935ce31aac54c5"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-connection.ts",
+      "bytes": 33084,
+      "sha256": "40252b000dabf9d224cc16809ac0fbe7e05c2d13138f6080fb0ceeb2384b380e"
+    },
+    {
+      "path": "../../apps/thegame/client/canonical-world-view.ts",
+      "bytes": 29558,
+      "sha256": "27bf3de0053e44fe2cd646a0b821e71833b2cacd15e7fe402d76f77578a7b898"
+    },
+    {
+      "path": "../../../../voice-agent/ui/src/office/scene.ts",
+      "bytes": 63324,
+      "sha256": "a6b21a5caf898ccbda6b14e35e15894c33720e41bb4b551432dd05934155b008"
+    },
+    {
+      "path": "../../../thegame/test/office-road-assets.test.ts",
+      "bytes": 5517,
+      "sha256": "d0b04def47868417ab1bc43e317bd28f8ed8e3eb9a2c599f9f40c6acbafe2136"
+    },
+    {
+      "path": "../../../thegame/test/office-world.test.ts",
+      "bytes": 12512,
+      "sha256": "0ed649ba6dcf0b9c17b6a052ed1723e33a6dcf36368363c76265c6ad95cf4c2f"
+    },
+    {
+      "path": "../../apps/thegame/test/canonical-world-view.test.ts",
+      "bytes": 27242,
+      "sha256": "3161d8e265e835dda8a897dd06844fbb13a7d812d5215cd12dcdcb3e79e654ee"
+    },
+    {
+      "path": "../../apps/thegame/test/canonical-connection.test.ts",
+      "bytes": 42932,
+      "sha256": "fcc66d6ad56397cd70b528860cc72f097f35483a1ede9b4b9b67d16c79d5dfa7"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-walking.ts",
+      "bytes": 13351,
+      "sha256": "07bce0ee9e52013b1d5032587c880bf3e386bf71d7d0dd3d467ba17f85503e57"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-residents.ts",
+      "bytes": 11877,
+      "sha256": "aec5dd7e9eef8bfe692fb6ba0ff557631476f287d06b075761056422aadd6dd2"
+    },
+    {
+      "path": "../../../thegame/tools/qa-office-focus-setup.ts",
+      "bytes": 4238,
+      "sha256": "d2dd62a6f13679641135ee453dafd39fca52688a955003bdea3d048cca8f0090"
+    }
+  ],
+  "bundles": [
+    {
+      "path": "../../../thegame/public/build/game.js",
+      "bytes": 2471113,
+      "sha256": "30c283df0e42669156315539c89b625778f1ab27c8a8a0e4d2f8609979183bf4"
+    },
+    {
+      "path": "../../../thegame/public/build/office-controller.js",
+      "bytes": 1289007,
+      "sha256": "8857726612f4bd2698cf63684e558f34209e86e3e26f105c93aa42d8437e8ec5"
+    },
+    {
+      "path": "../../../../voice-agent/ui/dist/assets/index-B8hlbyLD.js",
+      "bytes": 1775920,
+      "sha256": "1ac428d2bec7c15f59059b750b5eddce0feaa4516b887bd6e23b015ac01a3a84"
+    },
+    {
+      "path": "../../../../voice-agent/ui/dist/assets/index-CmdiYlhj.css",
+      "bytes": 97764,
+      "sha256": "f616fcf9ea5c97e442d047738d763e61cd5524bf7da04c3e4a32c2702799101a"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "../../artifacts/office-source-roads/geometry-oracle.json",
+      "bytes": 1062,
+      "sha256": "8b986f5645ac5433f0402a8b201c5e4c8f7b26c5677b5a1ce6e10d98373a8083"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/geometry-oracle.ts",
+      "bytes": 3689,
+      "sha256": "9379246e0f6cc64987146a8fe64f55deda795d3ac370f0b98b3b09245c92cd21"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/http-probe.json",
+      "bytes": 317,
+      "sha256": "42996e8ee7679152a37f3b0488bf8e5f6deb10969b2d476b386ba941a9791201"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/restart-ready.json",
+      "bytes": 11511,
+      "sha256": "e8679df6df7c81a60e85336f22f3e5285756442c6ca2c3482eea72250442d317"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/restart-operation.json",
+      "bytes": 289,
+      "sha256": "46423409ad8a5844602c252edd840d190e52a09d84dbced72a3c295e1cf043a6"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/restart-audit.json",
+      "bytes": 620,
+      "sha256": "44d1a8208b927d3d3be455c9ece968e94470e345595d952fa09cf0bde4489eb6"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/backup.ts",
+      "bytes": 2465,
+      "sha256": "35115e910bd2ede5e7f2d0bbbc366ab6d5cf73de9f6171b23e3535920ab16f8f"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/restart.ps1",
+      "bytes": 2755,
+      "sha256": "f2ed91f7cef9a956cc88ead642308f048bc1588dcb3968ab263f754f14c96a2c"
+    },
+    {
+      "path": "../../artifacts/office-source-roads/audit-restart.ts",
+      "bytes": 3045,
+      "sha256": "7fcd3964bafb9870a3d0de66fc7753ebb547557def3065a7cf4d128a6355a8eb"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-roads-expanded-20261016.log",
+      "bytes": 3857,
+      "sha256": "2d179867351c5c5459a696bdb314bf380b602081b27c6d192aee541a7ffd6cb2"
+    },
+    {
+      "path": "../../artifacts/office-roads-app-20261016.log",
+      "bytes": 14935,
+      "sha256": "cddaff0ed4e61c47876ef9492b89ccbd1faca3bd027e0e6fdbe2cd3200a9a7c2"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-roads-typecheck-20261016-final.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905"
+    },
+    {
+      "path": "../../artifacts/office-roads-adapter-typecheck-20261016.log",
+      "bytes": 33,
+      "sha256": "19f696f2661e94dc27615631e68dcd8d158f3faaed38425fc49e6d12703f1796"
+    },
+    {
+      "path": "../../artifacts/office-roads-ui-typecheck-20261016.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-roads-build-20261016.log",
+      "bytes": 585,
+      "sha256": "2f8fa6438ddbd9739f76755d06c83c7f55be1c9bdd49d0bafba7a64d2f552862"
+    },
+    {
+      "path": "../../artifacts/office-roads-ui-build-20261016.log",
+      "bytes": 889,
+      "sha256": "e721437912cebee829479170bf17544d8671c6ddc4a58d9b6566f8fb22d71730"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-roads-native-20261016.log",
+      "bytes": 9811,
+      "sha256": "2d0045b5a71490ba3c0d0d463488a0f155380569550b81bf3abf4cfa9cd42be1"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/canonical-controller-source.json",
+      "bytes": 771791,
+      "sha256": "18818a34cf4319038fe01101a14c9807f2c85800b4c31f4fd4ead4021263bc5c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/report.json",
+      "bytes": 97889,
+      "sha256": "e354479c06195333072a3f06bb220678720f013f31b9f0aa7513a47f81dbb7e8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/residents-selection.json",
+      "bytes": 1569,
+      "sha256": "e9985efd43d55983f00d74d05362b61c191f238a65f26fe72be6973eab79b6a5"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/office-entry-diagnostics.json",
+      "bytes": 14096,
+      "sha256": "a9ecdde6486c205db36d003ff73414ce61cedd3ea6b9d4213b73d756b8635d28"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/office-entry.json",
+      "bytes": 14257,
+      "sha256": "16e6b5c730be1903b70455f42f928e95ec71bf8d764d8e5ccbfdaf34edcc96cb"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/report.json",
+      "bytes": 78803,
+      "sha256": "115aa268e495050bcdb154c3fb222a55f37ef4f9f449b511bae80d3eb23bd5a1"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-roads-native-20261016-r2.log",
+      "bytes": 11601,
+      "sha256": "9883f0a920ca3e43901069b7eac3fa03c266b51b2ddbfc5157128fd17e8ffae8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/canonical-controller-source.json",
+      "bytes": 768650,
+      "sha256": "6212c01d9aa95c75fe1084fa65cd84e0981bcb372b80afde7a2f4ea65b2126ba"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/canonical-residents-observed-source.json",
+      "bytes": 769605,
+      "sha256": "84f2a1f16e3ad0b094c78443fbce3bac5d76a94e773808e0931d2576585d33a9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/focus-observe.json",
+      "bytes": 48141,
+      "sha256": "3ac3e48dceb12450d33ac122f70dccd321ed2eeedf7a1285ab3978fbaacae083"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/focus-possess.json",
+      "bytes": 55891,
+      "sha256": "8e294577004360b27cdb433f034293e1663bf30effaf14b79878b474c39ade2a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/focus-return.json",
+      "bytes": 103096,
+      "sha256": "4a0a7b1d9eca36aee0b9e54bf8a3940f690defb34a4c5eaba4ba8eea5b1d637c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/focus-setup.json",
+      "bytes": 74,
+      "sha256": "1c4608db88991e9bec34c726e665192fa91183dc5e5dad16783cc5be46a55bd6"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/report.json",
+      "bytes": 177697,
+      "sha256": "fad5794409be0057ea035ccfd84ec992f5d16c81820ce2512d4ab6b7c121f246"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-before-movement.json",
+      "bytes": 4658,
+      "sha256": "c6614c2c7b39d3e4329f52c054c08a14730c5b884f31b18f8277e892ca2e092c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-movement.json",
+      "bytes": 19826,
+      "sha256": "10a63a502fea1d1850458e1cada397ffaa6ea5cf8e174d46806c5242e8e21a41"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-report.json",
+      "bytes": 23608,
+      "sha256": "6a40f00de5c6c7161df370d190909896828eea0658db4e77537a5bad4a482d94"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-selection.json",
+      "bytes": 1787,
+      "sha256": "c651c38928bdbd175d29f6b7dcf33649fcbae60f04b8f41e7080336be1e1838a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/office-entry-diagnostics.json",
+      "bytes": 14048,
+      "sha256": "bdec641efcffe7d27c0ff4fad9a20776c5e59115ab8c3ccab01ad3839ab44186"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/office-entry.json",
+      "bytes": 14209,
+      "sha256": "1c596312a90a1aea6489468365e45b151e04357aaaff241b29e84c6b59864ae7"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/report.json",
+      "bytes": 78293,
+      "sha256": "37432f1d2d387098c2e10ad100f7150a69e81599de55128376120e394fafd27f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-source-roads-crossing-20261016.log",
+      "bytes": 96,
+      "sha256": "be5a449b133d0ebbc36b298147dcb2c6a6260df3da7bc358beaebda118a0a9c9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/canonical-controller-source.json",
+      "bytes": 763535,
+      "sha256": "8d100ea1b35968852996e436311f9895f41b627d2bf476efe9ee129886e9b144"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/canonical-residents-observed-source.json",
+      "bytes": 760881,
+      "sha256": "c264320a2726ea88b13c396c39bbd7ea535b4d24fe9c0297f9a20ceb63e1cbf9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/focus-observe.json",
+      "bytes": 49353,
+      "sha256": "5b676a0f7b47f77e5ecfff061fc659117308260b06bf3071a5b3caeb6d4eddd5"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/focus-possess.json",
+      "bytes": 59788,
+      "sha256": "6102e57ebdad1965080e88b6a6bb865b1caf97b45a775301524c2202020b27de"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/focus-return.json",
+      "bytes": 55813,
+      "sha256": "bb7e3dfb5158aff7fc0a3a5704405b2afd4221bfbbd061793668bc57f00911fe"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/focus-setup.json",
+      "bytes": 7116,
+      "sha256": "f8fa3c6e3f40b18665ce611be6d387aac597361cb4659215046483f0bd377dc4"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/report.json",
+      "bytes": 162926,
+      "sha256": "a971a939f6599117e63080122cbe93b09f74ca649b1c22257e81f920f866528b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-before-movement.json",
+      "bytes": 4613,
+      "sha256": "e72d3269aa8b7c7a98cfce13dd847148d80cb3fac8a2753b51a545f9d7d9905f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-movement.json",
+      "bytes": 9556,
+      "sha256": "1c045ce450b73ee11c965bbaaf70791eda2f1d6515771ae04d7030572005287b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-report.json",
+      "bytes": 12464,
+      "sha256": "057d5378927f8fb228fdfe1dabd56a74a16958580e240310b5ae88d564fd0bb2"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-selection.json",
+      "bytes": 1112,
+      "sha256": "c85e04fb385f2d5ec7b125f8107aa0eec7d5b1cffa5487831238816bd690916a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-crossing-20261016/office-entry-diagnostics.json",
+      "bytes": 14047,
+      "sha256": "af8d23ff2cfe176a4125b3b33cc470b7199281a44c9b16a6db3a93b4b6da2607"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-crossing-20261016/office-entry.json",
+      "bytes": 14208,
+      "sha256": "e84e9f3a0d2a8669703fe8bf91f6015651e67bcf91fa2efdd9114acc929425ab"
+    }
+  ],
+  "images": [
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/entered.png",
+      "bytes": 611371,
+      "sha256": "cf3a59c52efca658fa886ad5be482c7a681e71016699a8190c470e025edf85d7"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/failure.png",
+      "bytes": 227389,
+      "sha256": "6e11eb83dee7e928d04b6572ab9c9e5db47ea50286daa04c3e373f56083b5002"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/observer.png",
+      "bytes": 894256,
+      "sha256": "87e2de4d6cebba1a9d40e2392fd9677e8dc37c00ae7a8f1bc9178da1d6a7d186"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/orbit-1.png",
+      "bytes": 581058,
+      "sha256": "91babcec82b7747e444bde489893e3f7bb95ab7788d3dda0487bb65c4941cd10"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/orbit-2.png",
+      "bytes": 568923,
+      "sha256": "9346dcc25a2a5f0d2d413cfc4cbdb57d8b19a8a9e50129317c5763025d1077ce"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/orbit-3.png",
+      "bytes": 493123,
+      "sha256": "2a4f1389c125ce4ced43ec5dd32e0a3257695aed09b9b78d53f7e5439f5b2bc9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/orbit-4.png",
+      "bytes": 605061,
+      "sha256": "aeef811f87d07282b19446469371e5e9d8f28d37ff70f0c07b7f6ffb789632d4"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/residents-panel.png",
+      "bytes": 227287,
+      "sha256": "1dda595abe210e6b68c4f46e76a112ca2d4d35d260697689dce09db75133d72e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/returned-observer.png",
+      "bytes": 659735,
+      "sha256": "e796e1e62f90e575a2ca5d0612db13890fb1f1da2d629ba78e503437f593f342"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/walk-KeyW.png",
+      "bytes": 595551,
+      "sha256": "de91ac06f18f136025271a35c0dc473ef4d560a0edbc002fd9364a06fb60ee55"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/canonical-lobby.png",
+      "bytes": 401204,
+      "sha256": "7f443b16d4255f22b73bd91c96ea6576f0970cb05716f53cc2615c5bcc2750e3"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/entrance.png",
+      "bytes": 453699,
+      "sha256": "7c8730496d47c658423f48d414ef4994e7701ea741cb937ff665dae0cc84b99f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/office-entry.png",
+      "bytes": 882083,
+      "sha256": "796f2fa735cca5dfee61880fb66a95e4c0b1c831ac2f4dd0a968f866756dfd12"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/upper-office.png",
+      "bytes": 349310,
+      "sha256": "df99143a05cff2cd7285455d84a925ac49776bcbbbc915827d82768820bb8e9a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016/workplaces.png",
+      "bytes": 500935,
+      "sha256": "5ce27e8957ac11c5abbcd0a87c76e27f9091b934b99c397a62e184101f04b03b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/entered.png",
+      "bytes": 437400,
+      "sha256": "cf5586a088c997ef7d4f9aabd631c6b1440c101406b912b69338d8bcb30a6afc"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/observer.png",
+      "bytes": 725747,
+      "sha256": "6a646543ba9d1d18fd2fdeb4cf6ba68312e21b5e84ef19dbf6b753cbe6080f9e"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/orbit-1.png",
+      "bytes": 402693,
+      "sha256": "c03287226b5b73399dbeb5b04227c17a00d9d5c3253202b67b7dfe2624780b1c"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/orbit-2.png",
+      "bytes": 407605,
+      "sha256": "9b384283a12d34cbb3bf9b48e819612124807c277e367ca419c5bf927a1092c0"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/orbit-3.png",
+      "bytes": 331197,
+      "sha256": "b505feb208344caddced8d192665538d20143ffdb91becc4ee6712c6aa7a3acd"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/orbit-4.png",
+      "bytes": 413759,
+      "sha256": "09e3eb3d67c70d848898c79154c63f048c3ca729c5310b9054bcc1be3b693981"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-moved.png",
+      "bytes": 255813,
+      "sha256": "b4e83bc61e41e62a69d07a7c5e1ec4770309a21a83566d8be36ef115c5501b98"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-observed-scope.png",
+      "bytes": 282969,
+      "sha256": "0b2b41877e376cc78c4f54e626df9097dad5d04556eb2cf424a906b6c28f7498"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-observing.png",
+      "bytes": 258572,
+      "sha256": "c3a5d25981a8bd7761db1188a6b287e8d5a854b3586e3508401f995deb67a7d3"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-panel.png",
+      "bytes": 164723,
+      "sha256": "ede4a9a67ef20b8e6adfdd9b719e78958eb059323ab22904ffd58071ee253c18"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-possessed.png",
+      "bytes": 259896,
+      "sha256": "0aaa0817e670deaa00475f51391aff60831685b375201a24dd3495d735e0d05f"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-return-start.png",
+      "bytes": 391243,
+      "sha256": "588d2d1d7dd7187d955a1d8a9a2d75da86e0e3d08525d50a90d0d9e4f3ba6c76"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-returned.png",
+      "bytes": 417302,
+      "sha256": "fdc841c6627f673bd085f36135c6888531af046354ca3fae8c30f5e94855ecab"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-stopped.png",
+      "bytes": 255818,
+      "sha256": "6e1117b4f31c34adace3c1731081eebda7335afb95c817d76d05df9f0d79f634"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/returned-observer.png",
+      "bytes": 702405,
+      "sha256": "da435a1f33c50096572bd4ed0c29317bb971293bb097417b4fee397626e31609"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/walk-KeyW.png",
+      "bytes": 381868,
+      "sha256": "5b5f144503e5d66c5ba015ecbe189ae72f906a0deb510168137f507619be8180"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/canonical-lobby.png",
+      "bytes": 369232,
+      "sha256": "054e1f3e7c5157605b43481ea36849a0844a916749b4d88d186ef9c9175368db"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/entrance.png",
+      "bytes": 476948,
+      "sha256": "c4f3ce2dd6e8a3818fba0ae54a7899fd0ea6709a99b14baa0b6eb6b45ec949b2"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/office-entry.png",
+      "bytes": 839294,
+      "sha256": "f270c8a6a443f8f5695e6ee84b1627ecf5e7b57df3272c6e845174e9bc9bd379"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/upper-office.png",
+      "bytes": 352809,
+      "sha256": "c3b78e21d4746407708714039a887e411478b071215826771fbe1d42e85dd47d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/workplaces.png",
+      "bytes": 534993,
+      "sha256": "23ca72c52db3bf0f0217610cffb53cf8dce4df73691f2601e6ca245a7840e9f1"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/entered.png",
+      "bytes": 425886,
+      "sha256": "ad94d9e53b234b3b3236fb3768642872ffc39e3854ac9f271b0970c91a2ee46a"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/observer.png",
+      "bytes": 720874,
+      "sha256": "88da1bfa92cc08071ab7bfb397138dbb8dd74070bf7003ecbd0b0bb929bf9387"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/orbit-1.png",
+      "bytes": 414407,
+      "sha256": "8e8ab38b9bb69d7d9902410a30e73531756160f2ece089cf90cb1d1104f55683"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/orbit-2.png",
+      "bytes": 397196,
+      "sha256": "8b293c550cba4522fadc466503b61cfb4d957b3b7184c76e207ccdc38b12aca7"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/orbit-3.png",
+      "bytes": 334140,
+      "sha256": "2887de9f112db3faa7924dc6dd7526888b0066ffb5db4a20f764efc60ae4ef23"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/orbit-4.png",
+      "bytes": 414181,
+      "sha256": "c7af0c21acccb25fc4ef1d8051695a2a3bb076bd3f068a5568891b902b9308f9"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-moved.png",
+      "bytes": 187786,
+      "sha256": "42b54527603e78e130ac826aa9d02b2d5abc95115f4f4b3176b7b6982468e85b"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-observed-scope.png",
+      "bytes": 244661,
+      "sha256": "fcd20317a7c87a4ecf7962212fe767c4064ce8f79d61ee8bf7883e58e18bedc4"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-observing.png",
+      "bytes": 201859,
+      "sha256": "25660c763333239ccec69b666762fc17852f96c03df773c1642f6bbb42063c22"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-panel.png",
+      "bytes": 83207,
+      "sha256": "42b360811531086b820e40c9c595ca4062e72bec89bc45bd54bc0f9fcc172c7d"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-possessed.png",
+      "bytes": 247337,
+      "sha256": "cd37a7aaf1a53243f77a71e54b38090e10e8ab214b6e44ec8f0e28f767608598"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-return-start.png",
+      "bytes": 290128,
+      "sha256": "771c9ab15d59770257e799defd90a406b2e8249043d3522f1240495c3ca8e3a6"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-returned.png",
+      "bytes": 281165,
+      "sha256": "eb264980b7519e90ab6dbcba70fe61e477c5e2a3f2acb7513a69b059fa3f7233"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-stopped.png",
+      "bytes": 198259,
+      "sha256": "0f84b00e0cc65c656f91d90ee8fab61ff005b5848ffe8afac4626c71b3bc57c8"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/returned-observer.png",
+      "bytes": 613741,
+      "sha256": "cc33724170b48360f336785d11f017ee21d8ee59c0e41fbfe4231847d1054db1"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/walk-KeyW.png",
+      "bytes": 388440,
+      "sha256": "5d3467c711253d4d513ab9232d2214b5f87056ea978ca4e7abf7533e0fb4bed0"
+    },
+    {
+      "path": "../../../thegame/artifacts/office-in-game/office-source-roads-crossing-20261016/office-entry.png",
+      "bytes": 839964,
+      "sha256": "9e0d502d8ee5516e34fae6f48bb56ef9916369a1b956446b50622f8a813aa810"
+    }
+  ],
+  "visuallyReviewed": [
+    "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/entered.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016/orbit-2.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/entered.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-native-20261016-r2/residents-observing.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/observer.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-possessed.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-moved.png",
+    "../../../thegame/artifacts/office-walking/office-source-roads-crossing-20261016/residents-returned.png",
+    "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/canonical-lobby.png",
+    "../../../thegame/artifacts/office-in-game/office-source-roads-native-20261016-r2/workplaces.png"
+  ],
+  "limits": [
+    "Live Office still uses a 144 m scenery radius and 128 m terrain clip; full terrain colors/normals, outer curved roads, water and terrain cut-outs for tunnel approaches remain incomplete.",
+    "Bridge and tunnel source geometry is covered by the complete CPU oracle; the native Office route shows local surface streets, not a rendered traversal of every bridge/tunnel.",
+    "Native first attempt failed before observing a resident because all eligible listed residents shared the owner cell. Its images/log/report are retained. Immediate failed-run UI cleanup was obstructed by the modal; browser shutdown later left zero players. Cleanup now closes that modal before releasing the controller.",
+    "Second native run had an eligible far resident, so preparation was unnecessary. Third explicitly exercised the ordinary walking setup across a real 128 m view-cell boundary.",
+    "Guest native accounts have empty companies/leases; equality across possession does not replace the earlier funded-business/lease/harness tests. Restart audits verify all prior account/owner records.",
+    "Night captures are dark; a possessed NPC close to a wall produces a tight obstruction-limited camera, and temporal silhouettes remain around feet. Lighting/material/camera parity is not complete.",
+    "Audio-reference WebSocket 503 and C920 reference warnings persist. No physical microphone capture or audio playback was verified.",
+    "No new average FPS was measured in this road phase; staged Game HUD FPS values are not a live performance benchmark.",
+    "Input prediction/debt, broader gameplay/audio and complete Game/Office parity still need work. This phase does not repeat the earlier vehicle/three-minute-idle route."
+  ]
+}

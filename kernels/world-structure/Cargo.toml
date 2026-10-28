@@ -8,6 +8,17 @@ license = "MIT"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+# Opt-in until native and WASM parity/performance gates have been measured.
+default = []
+simd-distance = []
+# Build the embedded pure linear algebra module without exporting legacy XPBD.
+linear-algebra-only = []
+
+[[example]]
+name = "distance_bench"
+required-features = ["simd-distance"]
+
 [profile.release]
 opt-level = 3
 lto = true

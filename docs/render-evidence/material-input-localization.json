@@ -1,0 +1,415 @@
+{
+  "status": "material-inputs-observed-cause-unresolved",
+  "report": "artifacts/engine-compare/surface-presence-material-input-v2/report.json",
+  "sourceState": {
+    "srcSha256": "99cc68923ad7572b293cdf415749aacc78846631d6d1ddc5e5b93695121fcaf0",
+    "distSha256": "5a9636b34f24ebb9d8b99adb2e2ae14a2ef3fd41bb6090f50238e96b614bc633",
+    "harnessSha256": "914c74ba8c71570fb455f9db22972e99b1fef85030160112d4330cec78069313",
+    "diagnosticSha256": "f63758c3c4fe7e2605b7ef586a94f0110bf7448ddc70e679cc86068f8b001fe1"
+  },
+  "adapter": {
+    "vendor": "amd",
+    "architecture": "rdna-3",
+    "description": ""
+  },
+  "scope": {
+    "count": 10000,
+    "width": 1920,
+    "height": 1080,
+    "freshDevices": 6,
+    "observedFrames": 192,
+    "canonicalFramesPerDevice": 32,
+    "productionSourceUnchanged": true,
+    "renderShadersInstrumented": true,
+    "qualityMeasurement": false,
+    "performanceMeasurement": false
+  },
+  "gates": {
+    "completed": true,
+    "coverage": true,
+    "allComparisonsExact": false,
+    "sameOrderingRepeatable": false,
+    "readbackAgreement": true,
+    "opaqueBoundaryAgreement": true,
+    "materialInputAgreement": true,
+    "repeatability": false,
+    "materialProbeRepeatable": true,
+    "archivesVerified": true,
+    "physicalReplay": true,
+    "rootCauseEstablished": false,
+    "competitiveAdvantageEstablished": false
+  },
+  "materialInput": {
+    "attachment": "normal rgba16float",
+    "sourceStrideFloats": 40,
+    "colorOffsetFloats": 32,
+    "indexRawWordOffset": 1024,
+    "nonInstancedSentinel": 31743,
+    "indexPrecision": "exact normal binary16 value decoded by raw word",
+    "colorConversion": "only the adjacent representable binary16 interval from each recorded binary32 source component; cross-frame image comparisons remain exact",
+    "checkedStages": [
+      "final",
+      "afterOpaque"
+    ],
+    "sourceAgreement": "actual GPU source words must equal production CPU records every captured frame",
+    "checks": 384,
+    "checkedChannels": 1197350208,
+    "invalidIndexPixels": 0,
+    "changedColorChannels": 0,
+    "disagreements": []
+  },
+  "readback": {
+    "checkedStages": [
+      "opaque",
+      "lightingProbe"
+    ],
+    "checks": 384,
+    "channelsPerMethod": 3185049600
+  },
+  "upstream": [
+    {
+      "mode": "ascending",
+      "repetition": 1,
+      "frame": 20,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 12,
+        "maxEncodedError": 3865,
+        "coordinates": [
+          {
+            "x": 686,
+            "y": 892,
+            "channel": 0,
+            "before": 13452,
+            "after": 9587
+          },
+          {
+            "x": 686,
+            "y": 892,
+            "channel": 1,
+            "before": 13572,
+            "after": 9953
+          },
+          {
+            "x": 686,
+            "y": 892,
+            "channel": 2,
+            "before": 13426,
+            "after": 10407
+          },
+          {
+            "x": 687,
+            "y": 892,
+            "channel": 0,
+            "before": 13444,
+            "after": 9597
+          },
+          {
+            "x": 687,
+            "y": 892,
+            "channel": 1,
+            "before": 13564,
+            "after": 9966
+          },
+          {
+            "x": 687,
+            "y": 892,
+            "channel": 2,
+            "before": 13419,
+            "after": 10417
+          },
+          {
+            "x": 686,
+            "y": 893,
+            "channel": 0,
+            "before": 13452,
+            "after": 9605
+          },
+          {
+            "x": 686,
+            "y": 893,
+            "channel": 1,
+            "before": 13572,
+            "after": 9978
+          },
+          {
+            "x": 686,
+            "y": 893,
+            "channel": 2,
+            "before": 13426,
+            "after": 10426
+          },
+          {
+            "x": 687,
+            "y": 893,
+            "channel": 0,
+            "before": 13444,
+            "after": 9600
+          },
+          {
+            "x": 687,
+            "y": 893,
+            "channel": 1,
+            "before": 13563,
+            "after": 9972
+          },
+          {
+            "x": 687,
+            "y": 893,
+            "channel": 2,
+            "before": 13419,
+            "after": 10421
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 0,
+      "frame": 30,
+      "stage": "specularAfterOpaque",
+      "comparison": {
+        "changedChannels": 8,
+        "maxEncodedError": 89,
+        "coordinates": [
+          {
+            "x": 1382,
+            "y": 366,
+            "channel": 0,
+            "before": 77,
+            "after": 124
+          },
+          {
+            "x": 1382,
+            "y": 366,
+            "channel": 1,
+            "before": 74,
+            "after": 124
+          },
+          {
+            "x": 1382,
+            "y": 366,
+            "channel": 2,
+            "before": 35,
+            "after": 124
+          },
+          {
+            "x": 1382,
+            "y": 366,
+            "channel": 3,
+            "before": 183,
+            "after": 229
+          },
+          {
+            "x": 1383,
+            "y": 366,
+            "channel": 0,
+            "before": 76,
+            "after": 124
+          },
+          {
+            "x": 1383,
+            "y": 366,
+            "channel": 1,
+            "before": 74,
+            "after": 124
+          },
+          {
+            "x": 1383,
+            "y": 366,
+            "channel": 2,
+            "before": 35,
+            "after": 124
+          },
+          {
+            "x": 1383,
+            "y": 366,
+            "channel": 3,
+            "before": 183,
+            "after": 229
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 2,
+      "frame": 5,
+      "stage": "velocityAfterOpaque",
+      "comparison": {
+        "changedChannels": 6,
+        "maxEncodedError": 1229,
+        "coordinates": [
+          {
+            "x": 689,
+            "y": 366,
+            "channel": 0,
+            "before": 34884,
+            "after": 33728
+          },
+          {
+            "x": 689,
+            "y": 366,
+            "channel": 1,
+            "before": 36918,
+            "after": 35689
+          },
+          {
+            "x": 690,
+            "y": 366,
+            "channel": 0,
+            "before": 34884,
+            "after": 33729
+          },
+          {
+            "x": 690,
+            "y": 366,
+            "channel": 1,
+            "before": 36918,
+            "after": 35691
+          },
+          {
+            "x": 691,
+            "y": 366,
+            "channel": 0,
+            "before": 34884,
+            "after": 33730
+          },
+          {
+            "x": 691,
+            "y": 366,
+            "channel": 1,
+            "before": 36918,
+            "after": 35693
+          }
+        ]
+      }
+    },
+    {
+      "mode": "shuffled",
+      "repetition": 2,
+      "frame": 7,
+      "stage": "opaqueAfterOpaque",
+      "comparison": {
+        "changedChannels": 24,
+        "maxEncodedError": 1034,
+        "coordinates": [
+          {
+            "x": 980,
+            "y": 702,
+            "channel": 0,
+            "before": 11850,
+            "after": 11201
+          },
+          {
+            "x": 980,
+            "y": 702,
+            "channel": 1,
+            "before": 12245,
+            "after": 11246
+          },
+          {
+            "x": 980,
+            "y": 702,
+            "channel": 2,
+            "before": 12074,
+            "after": 11336
+          },
+          {
+            "x": 981,
+            "y": 702,
+            "channel": 0,
+            "before": 11849,
+            "after": 11160
+          },
+          {
+            "x": 981,
+            "y": 702,
+            "channel": 1,
+            "before": 12244,
+            "after": 11210
+          },
+          {
+            "x": 981,
+            "y": 702,
+            "channel": 2,
+            "before": 12073,
+            "after": 11322
+          },
+          {
+            "x": 982,
+            "y": 702,
+            "channel": 0,
+            "before": 11849,
+            "after": 11173
+          },
+          {
+            "x": 982,
+            "y": 702,
+            "channel": 1,
+            "before": 12243,
+            "after": 11224
+          },
+          {
+            "x": 982,
+            "y": 702,
+            "channel": 2,
+            "before": 12072,
+            "after": 11330
+          },
+          {
+            "x": 983,
+            "y": 702,
+            "channel": 0,
+            "before": 11849,
+            "after": 11277
+          },
+          {
+            "x": 983,
+            "y": 702,
+            "channel": 1,
+            "before": 12243,
+            "after": 11298
+          },
+          {
+            "x": 983,
+            "y": 702,
+            "channel": 2,
+            "before": 12071,
+            "after": 11378
+          }
+        ]
+      }
+    }
+  ],
+  "tests": {
+    "command": "npm run check",
+    "passed": 298,
+    "failed": 0,
+    "log": "artifacts/material-input-check.log",
+    "focusedAfterSourceAssociationFix": {
+      "command": "node --test test/canonical-summary.test.mjs",
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "failedFirstAttempt": {
+    "report": "artifacts/engine-compare/surface-presence-material-input/report.json",
+    "status": "failed",
+    "archive": "artifacts/engine-compare/surface-presence-material-input/measured-state",
+    "cause": "Diagnostic associated a VisibilityBatch with InstanceStream; corrected by resolving the camera source batch and requiring batch.visibility identity. The failure is retained and does not pass an execution or quality gate."
+  },
+  "references": [
+    {
+      "title": "WGSL floating point conversion",
+      "url": "https://www.w3.org/TR/WGSL/#floating-point-conversion"
+    }
+  ],
+  "interpretation": "Observed fragment material RGB and encoded source indices match across every captured repetition and agree with actual GPU source records at both opaque pass end and full-frame end, while opaque color still differs. These observed input values do not explain the captured opaque differences; the remaining material inputs, arithmetic and export still need to be isolated.",
+  "limitations": [
+    "Source-index encoding uses exactly representable normal binary16 values and its raw word is decoded without numeric integer rounding. Non-instanced geometry is counted with a separate sentinel; its RGB is not checked against the instance table.",
+    "RGB source checks derive the two adjacent representable conversion results from each binary32 source value, as specified by WGSL. This is a numerical conversion contract, not a relaxed image gate: every cross-frame stage comparison remains zero tolerance.",
+    "The 92-float material uniform records and all sampled material/environment texture contents are not directly observed by this control. Stable binary16 RGB does not prove every full-precision fragment input unchanged. A next control should read the material uniforms from the actual draw bindings and compare with captured host uploads before decomposing material arithmetic.",
+    "Normal output replacement can change compiler scheduling and downstream effects; reads and inline compute also affect GPU scheduling. No diagnostic image or timing establishes production visual quality, performance or a driver violation."
+  ]
+}

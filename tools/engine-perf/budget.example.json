@@ -1,0 +1,21 @@
+{
+  "fps": 60,
+  "tickHz": 60,
+  "physicsHz": 120,
+  "width": 1920,
+  "height": 1080,
+  "device": "Windows RDNA3",
+  "renderCpuFraction": 0.5,
+  "gpuFraction": 0.9,
+  "simulationFraction": 0.6,
+  "physicsFraction": 0.6,
+  "minSamples": 120,
+  "percentile": 0.95,
+  "limits": {
+    "render.upload.bytes": 8388608,
+    "memory.heap.bytes": 536870912,
+    "network.pending": 48,
+    "worker.queue": 8
+  },
+  "required": ["frame.interval.ms", "render.cpu.ms", "render.gpu.ms"]
+}

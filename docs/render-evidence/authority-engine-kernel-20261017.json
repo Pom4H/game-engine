@@ -1,0 +1,2025 @@
+{
+  "date": "2026-10-17T15:13:28.867Z",
+  "classification": "progress",
+  "goalComplete": false,
+  "scope": "Actual Engine authority-stage execution in the original Game, with independent legacy equivalence, complete CPU regression gates, preserved live saved world, and both native entry points.",
+  "requirements": [
+    {
+      "requirement": "Replace original Game authority stage execution with Engine",
+      "status": "proved-for-production-authority",
+      "evidence": "The actual createAuthorityKernel uses EngineKernel through a host-context adapter; live /api/health confirms six modules and an executed compiled Engine program after the managed server update."
+    },
+    {
+      "requirement": "Preserve stage cadence, ordering, game effects and safe large ticks",
+      "status": "proved-for-tested-contract",
+      "evidence": "Independent frozen original kernel compared across four tiers, six publication rates and rare periods; owned mutable host state, nested calls, exceptions and late registration. Full Game gate: 1522 pass / 7 optional PostgreSQL skips. Full Engine gate: 672 pass / 19 explicitly logged skips."
+    },
+    {
+      "requirement": "Keep the existing Office as another entry into the same full Game",
+      "status": "proved-for-native-entry-and-control-scope",
+      "evidence": "Four real installed Office views in the original Game, then the actual Office UI; identical account body across entries, movement/ACK, seven executed car commands, saved NPC observation/possession/movement/return, no Office physics and zero reported GPU errors."
+    },
+    {
+      "requirement": "Account-owned businesses, leases and external workforce harness survive body changes",
+      "status": "proved-by-current-regressions-and-preservation",
+      "evidence": "Current account-control.test.ts/company-api.test.ts test nonempty business ownership after possession; workforce-harness.test.ts tests account keys, ownership/restart, physical work/water/rest/food and takeover fencing. All pass in the full Game run. Old protected live records and company ledger are unchanged. The fresh native browser account itself has no business/lease, so that run is not a nonempty ownership proof."
+    },
+    {
+      "requirement": "Preserve the existing saved world during the authority replacement",
+      "status": "proved-for-persisted-records",
+      "evidence": "Consistent SQLite snapshot before managed restart; final old-row comparison has zero missing records, zero changed protected records, all old company ledger entries unchanged, integrity ok, same seed/revision and editor geometry."
+    },
+    {
+      "requirement": "Use Engine for remaining generic runtime facilities and preserve every original feature",
+      "status": "not-yet-achieved",
+      "evidence": "GameWorldRuntime still instantiates old InterestPlanner, LocationScheduler and LocationSimulationPool. Their reusable mechanisms versus game-domain policy, and remaining network/audio boundaries, need further implementation/audit. A stage-kernel replacement and the selected native scenarios cannot prove the entire objective."
+    }
+  ],
+  "checks": {
+    "date": "2026-10-17T15:03:23.9405892+00:00",
+    "engineExitCode": 0,
+    "gameExitCode": 0,
+    "gameBuildExitCode": 0,
+    "officeTypesExitCode": 0,
+    "officeBuildExitCode": 0,
+    "adapterExitCode": 0,
+    "engine": {
+      "seconds": 66.756562,
+      "skip": 19,
+      "fail": 0,
+      "pass": 672
+    },
+    "game": {
+      "assertions": 6115494,
+      "fail": 0,
+      "skip": 7,
+      "seconds": 787.21,
+      "pass": 1522,
+      "files": 236
+    },
+    "adapter": {
+      "seconds": 10.47,
+      "assertions": 7543,
+      "files": 15,
+      "fail": 0,
+      "pass": 155
+    },
+    "productionSources": [
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\core\\kernel.ts",
+        "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\game-engine\\src\\index.ts",
+        "sha256": "b38d0f494c88bdc3cace5ec85ea3317b49451ee21053afd224b394cc1e1d69c5"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\engine-kernel.ts",
+        "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\authority-pipeline.ts",
+        "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\game\\authority.ts",
+        "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03"
+      },
+      {
+        "path": "C:\\Users\\Roman\\Documents\\thegame\\src\\server\\index.ts",
+        "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e"
+      }
+    ],
+    "invocationRecovery": "First build commands could not resolve bun in fresh shell and ran no build/tests; repeated with explicit Bun/Node PATH. Terminal exit codes above were then observed."
+  },
+  "operation": {
+    "classification": "progress",
+    "previousGoalTurnClassification": "progress",
+    "fullGame": {
+      "sessionId": 81365,
+      "exitCode": 0,
+      "command": "bun run game:check"
+    },
+    "fullEngine": {
+      "sessionId": 75712,
+      "exitCode": 0,
+      "command": "bun run check"
+    },
+    "gameBuild": {
+      "exitCode": 0,
+      "command": "bun run build",
+      "cwd": "C:/Users/Roman/Documents/thegame"
+    },
+    "officeBuild": {
+      "sessionId": 94728,
+      "exitCode": 0,
+      "command": "bun x tsc --noEmit; bun run build",
+      "cwd": "C:/Users/Roman/voice-agent/ui"
+    },
+    "adapter": {
+      "sessionId": 47622,
+      "exitCode": 0,
+      "command": "bun run game:office:check"
+    },
+    "restart": {
+      "sessionId": 73234,
+      "exitCode": 0,
+      "command": "powershell -File artifacts/authority-engine-kernel-20261017/restart-game.ps1"
+    },
+    "native": {
+      "sessionId": 52878,
+      "exitCode": 0,
+      "command": "bun tools/capture.ts --office",
+      "cwd": "C:/Users/Roman/Documents/thegame",
+      "environment": {
+        "CAPTURE_EXISTING": "1",
+        "CAPTURE_PORT": "3007",
+        "CAPTURE_DEBUG_PORT": "3330",
+        "CAPTURE_GPU": "1",
+        "OFFICE_WALKING_QA": "1",
+        "OFFICE_TRANSPORT_QA": "1",
+        "OFFICE_RESIDENTS_QA": "1",
+        "OFFICE_RESIDENT_ACTOR": "resident:building:-4:1:1:27462",
+        "PERF_LABEL": "authority-engine-native-20261017-r1",
+        "OFFICE_CAPTURE_LABEL": "authority-engine-native-20261017-r1",
+        "OFFICE_UI_URL": "http://127.0.0.1:5173/"
+      }
+    },
+    "fps": {
+      "sessionId": 36600,
+      "exitCode": 0,
+      "manifest": "docs/render-evidence/fps-live-20261017-authority-engine-r1.json"
+    },
+    "uiBuild": "index-PtG9U8WP.js"
+  },
+  "runtime": {
+    "date": "2026-10-17T15:09:31.8727734+00:00",
+    "gamePid": 18304,
+    "vitePid": 21580,
+    "voicePid": 15312,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "hubListening": false,
+    "captureListening": false,
+    "savedAgents": 8,
+    "activeAgents": 0,
+    "manualResume": true,
+    "listeners": [
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 12088
+      },
+      {
+        "LocalPort": 7860,
+        "OwningProcess": 18732
+      },
+      {
+        "LocalPort": 5173,
+        "OwningProcess": 21580
+      },
+      {
+        "LocalPort": 3007,
+        "OwningProcess": 18304
+      }
+    ]
+  },
+  "restart": {
+    "date": "2026-10-17T15:03:42.8198924+00:00",
+    "previousPid": 4296,
+    "pid": 18304,
+    "players": 0,
+    "seed": 29,
+    "revision": 13,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "protectedProcesses": [
+      {
+        "pid": 21580,
+        "started": "639275591521337931"
+      },
+      {
+        "pid": 15312,
+        "started": "639275788185556123"
+      }
+    ],
+    "editorTokenUnchanged": true
+  },
+  "restartAudit": {
+    "date": "2026-10-17T15:03:56.764Z",
+    "pid": 18304,
+    "beforeRows": 5465,
+    "afterRows": 5479,
+    "missingRows": 0,
+    "protectedRows": 327,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 69,
+    "integrity": "ok",
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13,
+      "kernel": {
+        "backend": "the-engine",
+        "engineKernel": true,
+        "resourceOrder": "id",
+        "modules": 6,
+        "slots": 6,
+        "cachedProfiles": 1,
+        "compileBuilds": 1,
+        "compileHits": 0,
+        "plugins": 0,
+        "compiledPrograms": 1
+      }
+    }
+  },
+  "nativeAudit": {
+    "date": "2026-10-17T15:06:53.537Z",
+    "pid": 18304,
+    "beforeRows": 5479,
+    "afterRows": 5506,
+    "missingRows": 0,
+    "protectedRows": 327,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "accounts": 69,
+    "integrity": "ok",
+    "editorRevision": 62,
+    "geometryRevision": 9,
+    "health": {
+      "players": 0,
+      "seed": 29,
+      "revision": 13
+    }
+  },
+  "preservation": {
+    "date": "2026-10-17T15:09:32.218Z",
+    "beforeRows": 5465,
+    "afterRows": 5516,
+    "missingRows": 0,
+    "protectedRows": 327,
+    "changedProtectedRows": 0,
+    "preservedCompanyLedger": {
+      "companies": {
+        "before": 24,
+        "after": 24,
+        "changedExisting": 0
+      },
+      "leases": {
+        "before": 0,
+        "after": 0,
+        "changedExisting": 0
+      },
+      "employees": {
+        "before": 19,
+        "after": 19,
+        "changedExisting": 0
+      },
+      "orders": {
+        "before": 17,
+        "after": 17,
+        "changedExisting": 0
+      }
+    },
+    "integrity": "ok",
+    "players": 0,
+    "kernel": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    },
+    "editorRevision": 62,
+    "geometryRevision": 9
+  },
+  "nativeSummary": {
+    "browserMode": "native-gpu",
+    "states": 21,
+    "entryContinuity": {
+      "expectedActorId": "player:4c42c79d-f36d-42cc-ad18-a1baf883a197",
+      "actor": "player:4c42c79d-f36d-42cc-ad18-a1baf883a197",
+      "matched": true
+    },
+    "walkingDistance": 1.2563570352411908,
+    "vehicleCommands": [
+      {
+        "id": 1,
+        "command": "abs",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6443
+      },
+      {
+        "id": 2,
+        "command": "abs",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6518
+      },
+      {
+        "id": 3,
+        "command": "esp",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6541
+      },
+      {
+        "id": 4,
+        "command": "esp",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6595
+      },
+      {
+        "id": 5,
+        "command": "up",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6621
+      },
+      {
+        "id": 6,
+        "command": "down",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6741
+      },
+      {
+        "id": 7,
+        "command": "auto",
+        "status": "applied",
+        "ok": true,
+        "message": "Управление автомобилем обновлено.",
+        "tick": 6781
+      }
+    ],
+    "residents": {
+      "target": "resident:building:-4:1:1:27462",
+      "takeoverDistance": 0.12018885868856348,
+      "moved": 0.30771104598507343,
+      "returnedBody": "player:4c42c79d-f36d-42cc-ad18-a1baf883a197",
+      "rightsBefore": {
+        "accountId": "4c42c79d-f36d-42cc-ad18-a1baf883a197",
+        "companies": [],
+        "leases": []
+      },
+      "rightsAfter": {
+        "accountId": "4c42c79d-f36d-42cc-ad18-a1baf883a197",
+        "companies": [],
+        "leases": []
+      }
+    },
+    "cleanup": {
+      "players": 0,
+      "observer": true,
+      "view": "office"
+    },
+    "inGameOfficeViews": 4
+  },
+  "fps": {
+    "manifest": "docs/render-evidence/fps-live-20261017-authority-engine-r1.json",
+    "averageFPS": 55.631447839336374,
+    "p50Ms": 10.10000000000582,
+    "p95Ms": 29,
+    "renderResolution": [
+      704,
+      396
+    ],
+    "gameBundle": {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-20261017/fps/game.js"
+    }
+  },
+  "microbenchmark": {
+    "date": "2026-10-17T14:49:06.953Z",
+    "scope": "Paired ABBA microbenchmark of the actual six-stage declaration with synchronous counter effects; not full-world tick time or FPS.",
+    "iterations": 30000,
+    "samples": [
+      {
+        "name": "original",
+        "ms": 16.7536,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "engine",
+        "ms": 66.6831,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "engine",
+        "ms": 64.94190000000002,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "original",
+        "ms": 8.777899999999988,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "original",
+        "ms": 7.858499999999992,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "engine",
+        "ms": 74.23740000000001,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "engine",
+        "ms": 98.49700000000001,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      },
+      {
+        "name": "original",
+        "ms": 11.9409,
+        "value": 160000,
+        "packets": 10000,
+        "checksum": 800080000
+      }
+    ],
+    "originalMedianMs": 10.359399999999994,
+    "engineMedianMs": 70.46025,
+    "originalUsPerTick": 0.34531333333333314,
+    "engineUsPerTick": 2.348675,
+    "equivalent": true,
+    "backend": {
+      "backend": "the-engine",
+      "engineKernel": true,
+      "resourceOrder": "id",
+      "modules": 6,
+      "slots": 6,
+      "cachedProfiles": 1,
+      "compileBuilds": 1,
+      "compileHits": 0,
+      "plugins": 0,
+      "compiledPrograms": 1
+    }
+  },
+  "failedProbes": [
+    "Initial pipeline test rejected an implicit Game resource conflict under the default strict Engine policy; the explicit stable-ID policy now preserves the host order without weakening the default.",
+    "Initial build invocations in a fresh shell could not resolve Bun and executed no check/build. Subsequent commands used an explicit Bun/Node PATH and their actual terminal exit codes were observed."
+  ],
+  "reviewedImages": [
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/workplaces.png",
+      "bytes": 546497,
+      "sha256": "71948b485c301983334360be41be4b659767d8297cbba5da5c7210337dd14980",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/workplaces.png",
+      "reviewed": true,
+      "note": "Installed desks, monitors and furniture in the original Game entry."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/upper-office.png",
+      "bytes": 356852,
+      "sha256": "07c2acd8b5b5fafb49f6a9369a74cf197c58a4f4593c3196746c7ad89ba2167f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/upper-office.png",
+      "reviewed": true,
+      "note": "Second installed Office floor and original Game HUD; staged capture, not a performance benchmark."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/entered.png",
+      "bytes": 503347,
+      "sha256": "dab4f965f14a4acd7b5fb5f24dfcdd5054ac8e9402f0c2e59636549b892b57a0",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/entered.png",
+      "reviewed": true,
+      "note": "Actual Office UI controls the same original account body in the city."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-driver.png",
+      "bytes": 584106,
+      "sha256": "34d08ebc16eefff85bc712033cd37523c861db25575269a70614847cabfb6d0d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-driver.png",
+      "reviewed": true,
+      "note": "Original vehicle and visible authority-driven ABS/ESP/Auto buttons."
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-possessed.png",
+      "bytes": 124912,
+      "sha256": "91824ee6847da78b720175326cf5181fafb84290647cfa5fe59d8cf9d27a3e74",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-possessed.png",
+      "reviewed": true,
+      "note": "Existing saved NPC rendered under player control, with return-to-owner action."
+    }
+  ],
+  "sources": [
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 42431,
+      "sha256": "0ef7fa0c0dacc9dbf7a604f118a7d9dd90b8d2b5e6284af830b8ef57dd158330",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "src/core/kernel.ts",
+      "bytes": 21302,
+      "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/src/core/kernel.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/index.ts",
+      "bytes": 22291,
+      "sha256": "b38d0f494c88bdc3cace5ec85ea3317b49451ee21053afd224b394cc1e1d69c5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/src/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/core/kernel.js",
+      "bytes": 20724,
+      "sha256": "d19991a0c4c42d6de8d1cb23f1b061f8768b3c3fb009153fad83624cc4cf3abe",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/core/kernel.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/core/kernel.d.ts",
+      "bytes": 6023,
+      "sha256": "3f2a4c634c54ca9adfb32dc336ceec607bd59b39c1664e0747fed2cf5bd3bdd8",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/core/kernel.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/index.js",
+      "bytes": 12553,
+      "sha256": "b8e6be699d2af43541aa2ae2d63cb6e564f10b6713c042dd7b33f0c0ffa43f76",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/index.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/index.d.ts",
+      "bytes": 23082,
+      "sha256": "052a7afb5d92cabca2c3ff07705b6781a07ea98f00918da7e4ae51c64c613d37",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/index.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "test/core.test.mjs",
+      "bytes": 19120,
+      "sha256": "3d60fe58e6b64eba751e2ea4fa10d82c15ad48a1c08635091c35886ce9d39c3b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/core.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/kernel-depth.test.mjs",
+      "bytes": 13238,
+      "sha256": "92b4a72ebd64065019757cf4d5749d095a3368fcccca9d1a3354d5485605643c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/kernel-depth.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/kernel-cadence-order.test.mjs",
+      "bytes": 3498,
+      "sha256": "192bd6fb4f3b24fb9993c35a3f6838616394d20ad232cd7b00d7412c3b4a2d3a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/kernel-cadence-order.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 8344,
+      "sha256": "aff15bbde488e9d774a929307fca707f460ec807d8bd52055bac06d0825696ab",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 40961,
+      "sha256": "510b452076324866bcf6f4bb421129da555e646c3c78583d041eaf3f8147ab7a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 1163,
+      "sha256": "32f43483c7815fed3e4da4e733f1c5c1fd67e990e5654467314fd1003e85fd43",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 258907,
+      "sha256": "c800ae3f321c307e196c4a1b4fd244f95c2603f2d49799a71fa8ba53207b0773",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-authority-engine-r1.json",
+      "bytes": 3633,
+      "sha256": "616615ecc645eae23e7c19b81f367c914a1d6a8cf21c0547dc3d147cb473e27b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/docs/render-evidence/fps-live-20261017-authority-engine-r1.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/audit.ts",
+      "bytes": 4585,
+      "sha256": "ff8300d1511d22d239f797dcf923bbeabbab16299b1f30268dd954b57234993d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/audit.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 67663,
+      "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority-pipeline.ts",
+      "bytes": 4072,
+      "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/authority-pipeline.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/engine-kernel.ts",
+      "bytes": 1697,
+      "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/engine-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "bytes": 14282,
+      "sha256": "ed5c140a4da8a0cb9527b6098745d5661b23cb4ae638fbe68fad9353f9326f8d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "bytes": 14376,
+      "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/server/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/scheduler.ts",
+      "bytes": 11089,
+      "sha256": "637f3b8d0eed7e6941bb75c489c1c29026d0eec5b3a0501939d9fb694e8b3e97",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/scheduler.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/interest.ts",
+      "bytes": 5022,
+      "sha256": "04963d99e6767e327c5bf2278722bb23d8d7aa6553f8c996117b91ed4164aef4",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/interest.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/contracts.ts",
+      "bytes": 2048,
+      "sha256": "93f8d55ad440b667883233332f7a2a42dc6f05a30b98be526fb69247b6d41fd5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/contracts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/locations.ts",
+      "bytes": 3652,
+      "sha256": "df0a0f1d7bddd285250bb26285fbca9e06ff8161c6e73906fc220ac443fa9e9f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/locations.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/index.ts",
+      "bytes": 389,
+      "sha256": "fd3567c299a16c431d15ef382fed8f998f64c9181925fa9b88f023cb4ac703ae",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-pool.ts",
+      "bytes": 7910,
+      "sha256": "62b30f743819fb9cec168c4e06ab7230e60ad428831496ec515a81134aa1283b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/workers/location-pool.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/location.ts",
+      "bytes": 9202,
+      "sha256": "c655617bc80445f8ab3b3fe6af9ab2ec018ee7a4ec45801f283eda3b884dc293",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/simulation/location.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/authority-pipeline.test.ts",
+      "bytes": 5326,
+      "sha256": "053fd50caa3d510d722df2ec9ede61396f5bef64475b99ea4207d8364af6cb40",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/authority-pipeline.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/authority-engine-kernel.test.ts",
+      "bytes": 4940,
+      "sha256": "c593a762b4f319a05216a638c9c1b8249cc774af33b103a7be9971ec59730caa",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/authority-engine-kernel.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/original-authority-kernel.ts",
+      "bytes": 8991,
+      "sha256": "18c3a97a63111e13b20af61a9726492936540796aa49ea3e26b2f0f9a957124d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/fixtures/original-authority-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/account-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-api.test.ts",
+      "bytes": 5471,
+      "sha256": "43b2b8eb4ae2ffed62169cf1afe31b6da96a30d3a97a1a3145d060ef9b71fe6e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/company-api.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/workforce-harness.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9353,
+      "sha256": "872eb55e2b7d6d614ff0f97464a22eced2df029cc94d52390fb37dd09c08c49d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-transport.ts",
+      "bytes": 15890,
+      "sha256": "fd079a4e3d4bac2a317e1edf090a161a2dc7e72ccdfe341edfda66480fb1d9df",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-transport.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 884904,
+      "sha256": "1291da2241d3276b3ca7eeef4f33a25d2de80a818a99c794e0212e5e02e9a082",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 181620,
+      "sha256": "97f26239aed71b44cb5bcbb1d3b6e2b505c15245d354bb1be8147df72f0f0a59",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71819,
+      "sha256": "c2d195f269a1aeaf52b2538ffcf9609a83438295f5298283d6ee2bbbcbd9380c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 10019,
+      "sha256": "f821a0614b0d4ee8c1b47fecc27d570cb0853467f104f4961309b7d604056721",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "3cddc50072b5cd352ec96d90c2311b7b1850ed3265d83b3f0fde6aee85206992",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/index.html"
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/adapter-full.log",
+      "bytes": 17692,
+      "sha256": "79792173f5be43dd5e01fe810847ad55d5f58874fe938853272afddcc9e123ea",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/adapter-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/archive-evidence.ts",
+      "bytes": 15134,
+      "sha256": "3e8935aeaa96aba4840331edbd7741a02d177a775d8df9efedfe945815d098f5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/archive-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/audit-restart.ts",
+      "bytes": 5080,
+      "sha256": "a9c3feb274a1ec8eeae351d09e83d2868250587763929bf284515a5a1a58fc4b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/audit-restart.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/engine/core.test.mjs",
+      "bytes": 19120,
+      "sha256": "3d60fe58e6b64eba751e2ea4fa10d82c15ad48a1c08635091c35886ce9d39c3b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/engine/core.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/engine/index.ts",
+      "bytes": 22262,
+      "sha256": "c9804c968ef06bb822fc5da872e026e727af0fcba907df7f593692cb79a874d0",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/engine/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/engine/kernel-depth.test.mjs",
+      "bytes": 13238,
+      "sha256": "92b4a72ebd64065019757cf4d5749d095a3368fcccca9d1a3354d5485605643c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/engine/kernel-depth.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/engine/kernel.ts",
+      "bytes": 18620,
+      "sha256": "ab0db16d3f698992c6f971898662b8d9df725e3f85982de93dda3a31889c7065",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/engine/kernel.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/game/authority-pipeline.test.ts",
+      "bytes": 5326,
+      "sha256": "053fd50caa3d510d722df2ec9ede61396f5bef64475b99ea4207d8364af6cb40",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/game/authority-pipeline.test.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/game/authority-pipeline.ts",
+      "bytes": 4012,
+      "sha256": "8bd4b30eb8db637dd63021f53b87d25adb266603a91b9ce50d6b33d87e114c55",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/game/authority-pipeline.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/game/authority.ts",
+      "bytes": 67657,
+      "sha256": "85e4c45e44d3b81bbe686ec38ed494ce6a6e6b67bba0750d5a2fb2aba661d0cd",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/game/authority.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before/game/server-index.ts",
+      "bytes": 14346,
+      "sha256": "22eaa25ac54848d8049e4efd43853c2f79bb9582034f230784c53977e0bdcbd1",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before/game/server-index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before-canonical-server.err.log",
+      "bytes": 15445,
+      "sha256": "da94eb2c95af6bd77166e2f5caab0b1dcadcb0dc79332ee7500f4101a1256848",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before-canonical-server.err.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/before-canonical-server.log",
+      "bytes": 723,
+      "sha256": "38fbc4ed5f596873538936519dbd7fce7a452ca406b458ce0fcaadf39ea628f3",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/before-canonical-server.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/checks.json",
+      "bytes": 1873,
+      "sha256": "42bf6c18537938dbfddb5b3308c43dbc7f0f40a106acbbd0f37b7d7c3971b519",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/checks.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/engine-build-r3.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/engine-build-r3.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/engine-build.log",
+      "bytes": 30,
+      "sha256": "341dbf950da7c23a1afd5a2e8fb0f704a557673bfc3c4ee9948da208e55071cb",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/engine-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/engine-focused.log",
+      "bytes": 3174,
+      "sha256": "4445e0e0a70f59d726320bed6bca2ca91bddc81f6b81f3760b05aeece89e14e2",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/engine-focused.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/engine-full.log",
+      "bytes": 66548,
+      "sha256": "cbaed9f15b66efcf7dffc832954944c774b77ded7d3d6110fdc02fb237740058",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/engine-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/engine-types.log",
+      "bytes": 33,
+      "sha256": "d66548006c5c7c54f315f252a8864713f539323f6c6187c23bb7db83274361fa",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/engine-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/final-preservation.json",
+      "bytes": 886,
+      "sha256": "96b8b8a946e4bb929dbb3976ed45ca1f908abaf0d800fa44343041ddefc19bd8",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/final-preservation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/final-preservation.ts",
+      "bytes": 2395,
+      "sha256": "a221f60efd2f9e67e7a208907e1bdb72e7acdb6d308fbdc9e2ccbe9f152ffe88",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/final-preservation.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/capture.log",
+      "bytes": 146578,
+      "sha256": "cf85a789405513ffa6709d4bce0dd1ef0d348ce2a2e6a4e6c8a22dec71c9193a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/capture.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/fps-result.ts",
+      "bytes": 4020,
+      "sha256": "3edcde6b4759ac30b23794d7af5da5f5fa3a65c2a567bf902a247ca6cea80425",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/fps-result.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/health-before.json",
+      "bytes": 23875,
+      "sha256": "016ac958caa493a8a51aadb7f0d61450502a601adfcb543994e7e075292bfbf3",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/health-before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/operation.json",
+      "bytes": 1014,
+      "sha256": "4199d7aa8bc622cb7789cc6bc3531027d3f1c6d341e108a4a29dfb206167b0f7",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/operation.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/fps/run-fps.ps1",
+      "bytes": 2152,
+      "sha256": "6282ddff57cca9ae7b116753dc305e17e04a1aef0fd7b45e8786851c3dedb3e2",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/fps/run-fps.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-build.log",
+      "bytes": 585,
+      "sha256": "0002b2c3e9b5b23d1b49a4afc853f6a0cb893bd3f6ead0a74afdc31ce6144df5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-focused.log",
+      "bytes": 1072,
+      "sha256": "bbff541cdf3c1298d0cadbb6cd20cb5884e01f28600fab6dc1068c852bade161",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-focused.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-full.log",
+      "bytes": 171216,
+      "sha256": "e3e0927563bb4edebcde1060b233b89899b6436446e9f067e91f78a0271eff96",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-full.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-types-initial.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-types-initial.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-types-r2.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-types-r2.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/game-types-r3.log",
+      "bytes": 22,
+      "sha256": "ec70a7f844a4d3d74ffde78937d0fb3f825d89bcf7cedb2db5435050e293c905",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/game-types-r3.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/health-before-restart.json",
+      "bytes": 77070,
+      "sha256": "cc859a103625be94a03a1dd531dac3ed0da1d904b2074e9329e0c7a530fcf2fc",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/health-before-restart.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/kernel-benchmark.json",
+      "bytes": 1768,
+      "sha256": "207a26f81abf7759c764be3d0f023cb5c6de33761cedf3940c42cfdc1593f9b7",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/kernel-benchmark.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/kernel-benchmark.ts",
+      "bytes": 2118,
+      "sha256": "534f6e117afdfa3a03933bf991e093d9d3941f0fece00df0a881a6d6009fbd42",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/kernel-benchmark.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/native-r1.log",
+      "bytes": 9601,
+      "sha256": "449a616a609a41cbad78924487103539f04257ae30ea2c9995ed20199f2bcdfc",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/native-r1.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/office-build.log",
+      "bytes": 889,
+      "sha256": "eb11ea2ce7cf0f4fdb7bb47a8ace12da11d9150a0bc4f829efdd99d185df9f31",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/office-build.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/office-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/office-types.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/operations.json",
+      "bytes": 1646,
+      "sha256": "5ecfa97743af1b2618c35f8637b277ed1fae2afc292998e7fe38e67ee7e97d79",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/operations.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/pipeline-initial.log",
+      "bytes": 4864,
+      "sha256": "faf1b9ddfd344bc7564df14fd4c2a3003787616b42c802c3d35549fa19e38acc",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/pipeline-initial.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/pipeline-r2.log",
+      "bytes": 573,
+      "sha256": "64631fd1301e086f72aa079bd4f96318c11c8517a3ccb06e8f93c4de06a06d2b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/pipeline-r2.log"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/requirements-current.json",
+      "bytes": 2752,
+      "sha256": "f6d295b0ffbb787bc7073ce8d364a365a2e66f8c9ab421aaaaf4feb38832523a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/requirements-current.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/after-audit.json",
+      "bytes": 1000,
+      "sha256": "e8d3f098394de74a9b8d2b9310f0f3d908dc878f2484c5632e4af2ad4ed1cb16",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/after-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/before.json",
+      "bytes": 1118,
+      "sha256": "b1ff1bc4d56bb72be7b6a4aead27af4332df0980276cea7662416a9aaac8d7ef",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/before.sqlite",
+      "bytes": 11608064,
+      "sha256": "49f494aa3d239e66fe2c6d37435d33ce9166f5756d7fda050daf213b170c9d48",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/served-before/audio-worklet.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/served-before/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/served-before/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart/r1/served-before/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart/r1/served-before/office-controller.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart-game.ps1",
+      "bytes": 5066,
+      "sha256": "1c7992e8666d9fa364966742fc7973605687c8a6a350e0b2f2fbef1c51db126f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart-game.ps1"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/restart.json",
+      "bytes": 1078,
+      "sha256": "d13ded2d45a8e3c2f41cfa75d3bd5b810222c6aa4826ff4faba93215881e7e68",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/restart.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/runtime-final.json",
+      "bytes": 912,
+      "sha256": "94ecdf16a914a8ce7801bcd00c5a2b336e53cb211b581420ad9f4e123c8a835a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/runtime-final.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/authority-engine-kernel-20261017/verify-evidence.ts",
+      "bytes": 1491,
+      "sha256": "f39f7169604e1b9c05e95741217f3623b8bb5053a513d69108da5da81c857901",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/authority-engine-kernel-20261017/verify-evidence.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/after-audit.json",
+      "bytes": 726,
+      "sha256": "ff15582c4a0c3890b9f82774e9b02aabb9c6e4ccdd32ca79ad52036d95a31288",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/after-audit.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/before.json",
+      "bytes": 1132,
+      "sha256": "768fe0e2295eb0c7f411e57c6a53439b33a7827cbd072780d7b7942aeadd0b53",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/before.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/before.sqlite",
+      "bytes": 11640832,
+      "sha256": "9608eb903b008ae2a039070496c06ee285e9a3d1479e66e30ee7708c6ac07278",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/before.sqlite"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/audio-worklet.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/game.js"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/authority-engine-native-20261017-r1/served-before/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/canonical-lobby.png",
+      "bytes": 395644,
+      "sha256": "47570310c2f50f8ec0472a167d676bc4fab2d294d5172aa91e2eaa7f4e3a0e31",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/canonical-lobby.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/entrance.png",
+      "bytes": 482621,
+      "sha256": "931a86f1ac37ec35f2a3832478c0d8ad0aad051f39a152b4a58dc92c011f4c50",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/entrance.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry-diagnostics.json",
+      "bytes": 17893,
+      "sha256": "dd6c7b228a141dc356302a299e3c5b87e53717f4ca6d2119326f1dc100bfc263",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry-diagnostics.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry.json",
+      "bytes": 18054,
+      "sha256": "1a059c1b91f5f21e7b8968bd3fa9d5455d229a7c8603442a2d6eae16e4a392c6",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry.png",
+      "bytes": 592296,
+      "sha256": "b9f71e8b51e393e76b6e2517d96ae639ae5cb2b7451bb32b259dc239b6527052",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/office-entry.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/report.json",
+      "bytes": 80409,
+      "sha256": "8ca20fbe01354b07018bc3af90436f8daf79e035caea45bfc03f2d97e2d2444a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/upper-office.png",
+      "bytes": 356852,
+      "sha256": "07c2acd8b5b5fafb49f6a9369a74cf197c58a4f4593c3196746c7ad89ba2167f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/upper-office.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-in-game/authority-engine-native-20261017-r1/workplaces.png",
+      "bytes": 546497,
+      "sha256": "71948b485c301983334360be41be4b659767d8297cbba5da5c7210337dd14980",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-in-game/authority-engine-native-20261017-r1/workplaces.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/canonical-residents-observed-source.json",
+      "bytes": 13597395,
+      "sha256": "19b8fab8f45ff22a8067bad471922874820db763236bd0baf1677465ef4af129",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/canonical-residents-observed-source.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/entered.png",
+      "bytes": 503347,
+      "sha256": "dab4f965f14a4acd7b5fb5f24dfcdd5054ac8e9402f0c2e59636549b892b57a0",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/entered.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/observer.png",
+      "bytes": 589910,
+      "sha256": "9dec10cf974a80ae313a975c7c155396e4d43c5aed1a432cb3c9f99df6d29640",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/report.json",
+      "bytes": 476193,
+      "sha256": "62c8ffcf2daee693914d11a4b3f8ad9143a32cb62dfe39e749564872b2e6d626",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-before-movement.json",
+      "bytes": 6723,
+      "sha256": "64a50bef4c0a24ee30229468dcf9ab4571a38b31e0f242c3886bd61b3f6f4667",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-before-movement.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-directory-pages.json",
+      "bytes": 78,
+      "sha256": "bb5bdd3bde3510dd3fb1f0e080c695d073c58518430f5bac6b1f81019c52ba0d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-directory-pages.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-directory.png",
+      "bytes": 249542,
+      "sha256": "2cef16a848f2ae2e07181163bcfd8277767754cbec139b24524d43804bd02a61",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-directory.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-moved.png",
+      "bytes": 123260,
+      "sha256": "423fc4c9fd5115d9ed7865a65c70618842b783ebe3fa44e82db93af45dead098",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-moved.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-movement.json",
+      "bytes": 9570,
+      "sha256": "2a515e203a34ce0263099a6f534d05b7c8d58c21c47f130f9ef016d6943f3c29",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-movement.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-observed-scope.png",
+      "bytes": 122944,
+      "sha256": "6078378ce8f6e159cdf083633a994fca477dd849dd3e79abfb0aefa0a7a00fd7",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-observed-scope.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-observing.png",
+      "bytes": 119973,
+      "sha256": "b83daad25a4a4d87a8277985f45acc62df11eecb280edf4bf058f0c327e20987",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-observing.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-possessed.png",
+      "bytes": 124912,
+      "sha256": "91824ee6847da78b720175326cf5181fafb84290647cfa5fe59d8cf9d27a3e74",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-possessed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-report.json",
+      "bytes": 11886,
+      "sha256": "5e44b6123534a9846624cd834a36df35e48a84434d4ffdefd89cf2b953d5145c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-return-start.png",
+      "bytes": 567484,
+      "sha256": "f01ad205d18d783c115b030fa86849ca9683e5b734a3ae50b0efe3dabd88b9fe",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-return-start.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-returned.png",
+      "bytes": 594864,
+      "sha256": "30f568edf1fdcc28b00894908fa4bc03a641935139900e3d3e0a81c8ca5f81c8",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-returned.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-selection.json",
+      "bytes": 1562,
+      "sha256": "f2f1cf5436948d6f4a5217d4feba62bf55de19d7d2764f0a8bba783bff79e9e8",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-selection.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-stopped.png",
+      "bytes": 124555,
+      "sha256": "eed255b65e1d4a61988ec79af94695dbb235bbfe62543ee7d262f2bc89a7f61f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-stopped.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/residents-takeover-source.json",
+      "bytes": 16364,
+      "sha256": "cca7cc5028cfc5274f900ce53c6bd96d1d887b6eecd5f6c480ced09969e21444",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/residents-takeover-source.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/returned-observer.png",
+      "bytes": 635476,
+      "sha256": "bddbf3021b003811a31b819cbb9be655f825fea2a0f8c80161a4fd451e1ae231",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/returned-observer.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-abs-changed.png",
+      "bytes": 600028,
+      "sha256": "525a6a94218c13b1ed2c00deb9138aaa628a6ef208b7a174302ec837991bab96",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-abs-changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-aids-restored.png",
+      "bytes": 604386,
+      "sha256": "ebe55f6ceb2a3f4f0b8a9037c2edbb897717ddd1752c66b7be1475a7606449db",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-aids-restored.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-driver.png",
+      "bytes": 584106,
+      "sha256": "34d08ebc16eefff85bc712033cd37523c861db25575269a70614847cabfb6d0d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-driver.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-driving.png",
+      "bytes": 550253,
+      "sha256": "acf70c3e57c208fd86bd266565a3bf126df60dc141165bbcfe907c6f44f337ac",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-driving.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-engine-off.png",
+      "bytes": 600204,
+      "sha256": "fcce1915dd0cbb440eb94fc7affe6f531ece5f5477d12ac900df64977c8dc522",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-engine-off.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-esp-changed.png",
+      "bytes": 605725,
+      "sha256": "a7a524752cc19482be3101996a2fc907338236db1987ae52d8098b96dec1dd3e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-esp-changed.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-exited.png",
+      "bytes": 587838,
+      "sha256": "b4c9de07ee99991bf7a8770ee1bc91ec130451bbd259ab7258d8807cfdb03054",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-exited.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-manual-up.png",
+      "bytes": 616973,
+      "sha256": "242196dc755a3582bd617c573865f7a23aa36127e248d7b5b8caec0e6ecda913",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-manual-up.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-passenger.png",
+      "bytes": 595703,
+      "sha256": "c7aacf70761551329ba066fafe1371a70740ca06dbb384755b029f32c91d96e2",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-passenger.png"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/transport-report.json",
+      "bytes": 93165,
+      "sha256": "d2afced6dbe43866f8b8f18274d577981d0bc54a7111b02b45ca419e6386c0be",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/transport-report.json"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/office-walking/authority-engine-native-20261017-r1/walk-KeyW.png",
+      "bytes": 480915,
+      "sha256": "67bcb30914a5e32b2ce02d32ba965c2f360cd4dbf44bc33e8b1dce72d67b0d2f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/office-walking/authority-engine-native-20261017-r1/walk-KeyW.png"
+    },
+    {
+      "repo": "engine",
+      "path": "README.md",
+      "bytes": 42431,
+      "sha256": "0ef7fa0c0dacc9dbf7a604f118a7d9dd90b8d2b5e6284af830b8ef57dd158330",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "package.json",
+      "bytes": 4210,
+      "sha256": "181903dd17dafeccd8db2b5d4545649a0688827d9d7ebaf9191bc6311543a524",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/package.json"
+    },
+    {
+      "repo": "engine",
+      "path": "src/core/kernel.ts",
+      "bytes": 21302,
+      "sha256": "58cfbed34b21e787f664c8a45c413c65daa82ba268844d3de434b4d4a3d54023",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/src/core/kernel.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "src/index.ts",
+      "bytes": 22291,
+      "sha256": "b38d0f494c88bdc3cace5ec85ea3317b49451ee21053afd224b394cc1e1d69c5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/src/index.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/core/kernel.js",
+      "bytes": 20724,
+      "sha256": "d19991a0c4c42d6de8d1cb23f1b061f8768b3c3fb009153fad83624cc4cf3abe",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/core/kernel.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/core/kernel.d.ts",
+      "bytes": 6023,
+      "sha256": "3f2a4c634c54ca9adfb32dc336ceec607bd59b39c1664e0747fed2cf5bd3bdd8",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/core/kernel.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/index.js",
+      "bytes": 12553,
+      "sha256": "b8e6be699d2af43541aa2ae2d63cb6e564f10b6713c042dd7b33f0c0ffa43f76",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/index.js"
+    },
+    {
+      "repo": "engine",
+      "path": "dist/index.d.ts",
+      "bytes": 23082,
+      "sha256": "052a7afb5d92cabca2c3ff07705b6781a07ea98f00918da7e4ae51c64c613d37",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/dist/index.d.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "test/core.test.mjs",
+      "bytes": 19120,
+      "sha256": "3d60fe58e6b64eba751e2ea4fa10d82c15ad48a1c08635091c35886ce9d39c3b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/core.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/kernel-depth.test.mjs",
+      "bytes": 13238,
+      "sha256": "92b4a72ebd64065019757cf4d5749d095a3368fcccca9d1a3354d5485605643c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/kernel-depth.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "test/kernel-cadence-order.test.mjs",
+      "bytes": 3498,
+      "sha256": "192bd6fb4f3b24fb9993c35a3f6838616394d20ad232cd7b00d7412c3b4a2d3a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/test/kernel-cadence-order.test.mjs"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/README.md",
+      "bytes": 8344,
+      "sha256": "aff15bbde488e9d774a929307fca707f460ec807d8bd52055bac06d0825696ab",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/README.md"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-connection.ts",
+      "bytes": 40961,
+      "sha256": "510b452076324866bcf6f4bb421129da555e646c3c78583d041eaf3f8147ab7a",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/client/canonical-connection.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "apps/thegame/client/canonical-controls.ts",
+      "bytes": 1163,
+      "sha256": "32f43483c7815fed3e4da4e733f1c5c1fd67e990e5654467314fd1003e85fd43",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/apps/thegame/client/canonical-controls.ts"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/THE_GAME_OFFICE_INTEGRATION.md",
+      "bytes": 258907,
+      "sha256": "c800ae3f321c307e196c4a1b4fd244f95c2603f2d49799a71fa8ba53207b0773",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/docs/THE_GAME_OFFICE_INTEGRATION.md"
+    },
+    {
+      "repo": "engine",
+      "path": "docs/render-evidence/fps-live-20261017-authority-engine-r1.json",
+      "bytes": 3633,
+      "sha256": "616615ecc645eae23e7c19b81f367c914a1d6a8cf21c0547dc3d147cb473e27b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/docs/render-evidence/fps-live-20261017-authority-engine-r1.json"
+    },
+    {
+      "repo": "engine",
+      "path": "artifacts/office-worker-rest/audit.ts",
+      "bytes": 4585,
+      "sha256": "ff8300d1511d22d239f797dcf923bbeabbab16299b1f30268dd954b57234993d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/engine/artifacts/office-worker-rest/audit.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority.ts",
+      "bytes": 67663,
+      "sha256": "21563783b8dccfb9aa23218054708ee08647aa74ae02706bb36067ba300c0f03",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/authority.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/authority-pipeline.ts",
+      "bytes": 4072,
+      "sha256": "04066fc0c022758b4813021400dca143ce080156bdf46775dfc8cfc7b669932f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/authority-pipeline.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/engine-kernel.ts",
+      "bytes": 1697,
+      "sha256": "c5839d2910e587e9513194e8c1ecf34d5ca3ad2f827eaf6f3ae924fe533e61f7",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/engine-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/game/world-runtime.ts",
+      "bytes": 14282,
+      "sha256": "ed5c140a4da8a0cb9527b6098745d5661b23cb4ae638fbe68fad9353f9326f8d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/game/world-runtime.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/server/index.ts",
+      "bytes": 14376,
+      "sha256": "d1371d7449fb75d4be224aa855afc79be4ccf1520c8d25331e71d3edb647981e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/server/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/scheduler.ts",
+      "bytes": 11089,
+      "sha256": "637f3b8d0eed7e6941bb75c489c1c29026d0eec5b3a0501939d9fb694e8b3e97",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/scheduler.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/interest.ts",
+      "bytes": 5022,
+      "sha256": "04963d99e6767e327c5bf2278722bb23d8d7aa6553f8c996117b91ed4164aef4",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/interest.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/contracts.ts",
+      "bytes": 2048,
+      "sha256": "93f8d55ad440b667883233332f7a2a42dc6f05a30b98be526fb69247b6d41fd5",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/contracts.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/locations.ts",
+      "bytes": 3652,
+      "sha256": "df0a0f1d7bddd285250bb26285fbca9e06ff8161c6e73906fc220ac443fa9e9f",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/locations.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/world/index.ts",
+      "bytes": 389,
+      "sha256": "fd3567c299a16c431d15ef382fed8f998f64c9181925fa9b88f023cb4ac703ae",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/world/index.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/workers/location-pool.ts",
+      "bytes": 7910,
+      "sha256": "62b30f743819fb9cec168c4e06ab7230e60ad428831496ec515a81134aa1283b",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/workers/location-pool.ts"
+    },
+    {
+      "repo": "game",
+      "path": "src/engine/simulation/location.ts",
+      "bytes": 9202,
+      "sha256": "c655617bc80445f8ab3b3fe6af9ab2ec018ee7a4ec45801f283eda3b884dc293",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/src/engine/simulation/location.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/authority-pipeline.test.ts",
+      "bytes": 5326,
+      "sha256": "053fd50caa3d510d722df2ec9ede61396f5bef64475b99ea4207d8364af6cb40",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/authority-pipeline.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/authority-engine-kernel.test.ts",
+      "bytes": 4940,
+      "sha256": "c593a762b4f319a05216a638c9c1b8249cc774af33b103a7be9971ec59730caa",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/authority-engine-kernel.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/fixtures/original-authority-kernel.ts",
+      "bytes": 8991,
+      "sha256": "18c3a97a63111e13b20af61a9726492936540796aa49ea3e26b2f0f9a957124d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/fixtures/original-authority-kernel.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/account-control.test.ts",
+      "bytes": 23152,
+      "sha256": "48058f66b8d21c588ed77cb82b2fe76fa5d0adb0e61f79b424cd654df082c9f1",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/account-control.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/company-api.test.ts",
+      "bytes": 5471,
+      "sha256": "43b2b8eb4ae2ffed62169cf1afe31b6da96a30d3a97a1a3145d060ef9b71fe6e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/company-api.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "test/workforce-harness.test.ts",
+      "bytes": 22471,
+      "sha256": "5d06d80be0376959efd30216e15d7dfd10189eecb6268c86d502dda74d98c388",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/test/workforce-harness.test.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/capture.ts",
+      "bytes": 34968,
+      "sha256": "8ca9e555f5951bba93dc037c67f0521e297de76c18f471cffedb4761f407a418",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/capture.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office.ts",
+      "bytes": 9353,
+      "sha256": "872eb55e2b7d6d614ff0f97464a22eced2df029cc94d52390fb37dd09c08c49d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-walking.ts",
+      "bytes": 18456,
+      "sha256": "05209b27741b6ed7f9a10dd4df3fa8d1ee5d7763794cf5fc2b86a692deedfd5e",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-walking.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-transport.ts",
+      "bytes": 15890,
+      "sha256": "fd079a4e3d4bac2a317e1edf090a161a2dc7e72ccdfe341edfda66480fb1d9df",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-transport.ts"
+    },
+    {
+      "repo": "game",
+      "path": "tools/qa-office-residents.ts",
+      "bytes": 17724,
+      "sha256": "4aedd674db5b0acb0fcbaf308cecce560d7537600493a5f79fadb6f6daca1d0d",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/tools/qa-office-residents.ts"
+    },
+    {
+      "repo": "game",
+      "path": "docs/VERIFICATION.md",
+      "bytes": 884904,
+      "sha256": "1291da2241d3276b3ca7eeef4f33a25d2de80a818a99c794e0212e5e02e9a082",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/docs/VERIFICATION.md"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/game.js",
+      "bytes": 2511057,
+      "sha256": "ba0ec1cc57cb353e670160d3fc8a6bfacaace676c980bcc2743303e48cf0f761",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/game.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/office-controller.js",
+      "bytes": 1562954,
+      "sha256": "d1854c3e37320a71101247e05dcc531f8fa7d9f479d23ef6b630764970f36dba",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/office-controller.js"
+    },
+    {
+      "repo": "game",
+      "path": "public/build/audio-worklet.js",
+      "bytes": 81273,
+      "sha256": "8b6ec7868869f0a8edf9d4e03cd2b2af04c0102ad5bbf7743afec50e2d869c18",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/public/build/audio-worklet.js"
+    },
+    {
+      "repo": "game",
+      "path": "artifacts/performance-live-fps-live-20261017-authority-engine-r1.json",
+      "bytes": 222863,
+      "sha256": "242cc5cb3d1b10bd17f4ea93b684e142675cc3d2191a8d4274d975741c7f5881",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/game/artifacts/performance-live-fps-live-20261017-authority-engine-r1.json"
+    },
+    {
+      "repo": "office",
+      "path": "VERIFICATION.md",
+      "bytes": 181620,
+      "sha256": "97f26239aed71b44cb5bcbb1d3b6e2b505c15245d354bb1be8147df72f0f0a59",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/VERIFICATION.md"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/Office.tsx",
+      "bytes": 60524,
+      "sha256": "65b1eb729492179ad60f11d75ca3c0a8e9b8dec39466db3e22d5832c2e898bbd",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/Office.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/scene.ts",
+      "bytes": 71819,
+      "sha256": "c2d195f269a1aeaf52b2538ffcf9609a83438295f5298283d6ee2bbbcbd9380c",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/scene.ts"
+    },
+    {
+      "repo": "office",
+      "path": "ui/src/office/GamePanel.tsx",
+      "bytes": 10019,
+      "sha256": "f821a0614b0d4ee8c1b47fecc27d570cb0853467f104f4961309b7d604056721",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/src/office/GamePanel.tsx"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/index.html",
+      "bytes": 422,
+      "sha256": "3cddc50072b5cd352ec96d90c2311b7b1850ed3265d83b3f0fde6aee85206992",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/index.html"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/environment-map.worker-D5wbJvIo.js",
+      "bytes": 4799,
+      "sha256": "fc58bb0c67674547d43b1ef636e29ed95dd704fb66999ae623379e94b57c9b61",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/assets/environment-map.worker-D5wbJvIo.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/gesture.worker-BHWWTrrT.js",
+      "bytes": 144701,
+      "sha256": "c0712c936db6c17d3d6368c0a0473569f996da41ee9ed5049d45cd609c642f07",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/assets/gesture.worker-BHWWTrrT.js"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-BSSF13Sx.css",
+      "bytes": 99413,
+      "sha256": "40b0ef39c25cfb723b7e8e2ff7a225ec20b8a41a5011bcb91b36e54b96604657",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/assets/index-BSSF13Sx.css"
+    },
+    {
+      "repo": "office",
+      "path": "ui/dist/assets/index-PtG9U8WP.js",
+      "bytes": 1814523,
+      "sha256": "f2f7a573896dc2ac51d11bbe2c7cb25c87a242371b667ab441a528c856f52565",
+      "archive": "artifacts/authority-engine-kernel-evidence-20261017/office/ui/dist/assets/index-PtG9U8WP.js"
+    }
+  ],
+  "counts": {
+    "files": 151,
+    "bytes": 69579227,
+    "sources": 49,
+    "reviewedImages": 5
+  },
+  "limits": [
+    "This is a stage-execution migration, not completion of every reusable subsystem or original feature. Generic location/interest/worker boundaries remain open.",
+    "Native fresh-account rights are empty: nonempty company/lease and harness ownership relies on the current full regression suite and earlier dedicated live business proof.",
+    "FPS is an independent stationary 900-frame sample after 180 warmup frames at 704x396 internal resolution. It is not a paired regression test, sustained-60, moving/vehicle or Office UI benchmark.",
+    "No microphone/voice transport claim. Existing voice process was preserved; hub 8765 remains off. Native diagnostics retain browser autoplay/powerPreference warnings and Vite debug/events/favicon 404s; GPU error arrays are empty.",
+    "The small six-stage kernel microbenchmark is not full authority tick time or FPS."
+  ]
+}

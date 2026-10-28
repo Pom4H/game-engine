@@ -7,6 +7,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./browser": "./dist/browser.js",
+    "./acting": "./dist/acting/index.js",
     "./network": "./dist/network/index.js",
     "./render-ir": "./dist/render-ir/index.js",
     "./execution": "./dist/execution/index.js",
@@ -15,15 +16,22 @@
     "./storage": "./dist/storage/index.js",
     "./world-ir": "./dist/world-ir/index.js",
     "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js",
-    "./observability": "./dist/observability/activity.js"
+    "./observability": "./dist/observability/index.js"
   },
   "files": [
     "dist",
     "README.md"
   ],
   "scripts": {
+    "game": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-game-office.ps1",
+    "game:build": "bun run --cwd ../thegame build",
+    "game:check": "bun run --cwd ../thegame typecheck && bun run --cwd ../thegame test --timeout 60000",
+    "game:office:check": "bun run --cwd apps/thegame typecheck && bun test --timeout 60000 ./apps/thegame/test",
     "characters": "bun run build && node tools/character-creator/server.mjs",
     "characters:bundle": "bun run build && node tools/character-creator/bundle.mjs",
+    "demo": "npm run build && node tools/winter/server.mjs",
+    "demo:verify": "npm run build && node tools/winter/server.mjs --verify",
+    "snow-city:record": "npm run build && node tools/snow-city/record.mjs",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.build.json && node --test test/*.test.mjs",
@@ -35,6 +43,7 @@
     "wave:test": "cargo test --manifest-path kernels/world-wave/Cargo.toml && bun run wave:build && bun run build && node --test test/wave-wasm.test.mjs",
     "wave:bench": "node tools/world-wave/benchmark.mjs",
     "structure:rust:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-structure/Cargo.toml",
+    "structure:linear:build": "node tools/world-structure/build-sparse.mjs",
     "structure:rust:test": "cargo test --manifest-path kernels/world-structure/Cargo.toml && bun run structure:rust:build && bun run build && node --test test/structure-rust-wasm.test.mjs",
     "structure:rust:bench": "node tools/world-structure/benchmark.mjs",
     "rigid:rust:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path kernels/world-rigid/Cargo.toml",
@@ -47,11 +56,20 @@
     "office:check": "bun run build && node --test test/agent-office.test.mjs",
     "office:campus": "bun run build && node tools/agent-office/campus-server.mjs",
     "office:campus:check": "bun run build && node --test test/agent-campus.test.mjs",
-    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs"
+    "office:campus:render:worker": "node tools/agent-office/render-on-worker.mjs",
+    "game:fixture": "bun apps/thegame/server.ts",
+    "game:office": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-office-entry.ps1",
+    "perf": "node tools/engine-perf/cli.mjs",
+    "perf:audit": "node tools/engine-perf/cli.mjs audit",
+    "perf:record": "node tools/engine-perf/cli.mjs record",
+    "perf:capture": "node tools/engine-perf/cli.mjs capture",
+    "perf:report": "node tools/engine-perf/cli.mjs report",
+    "perf:compare": "node tools/engine-perf/cli.mjs compare",
+    "perf:overhead": "node tools/engine-perf/cli.mjs bench"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "typescript": "^7.0.2"
+    "typescript": "7.1.0-beta"
   },
   "engines": {
     "node": ">=22"
