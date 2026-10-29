@@ -1,0 +1,22 @@
+[package]
+name = "rom4-engine-runtime"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+license = "MIT"
+description = "Allocation-free batched numerical kernels for the game-engine Rust migration"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
+
+[profile.test]
+opt-level = 2

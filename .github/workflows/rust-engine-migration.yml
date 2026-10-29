@@ -1,0 +1,43 @@
+name: Rust engine migration parity and benchmarks (manual)
+on:
+  workflow_dispatch:
+concurrency:
+  group: rust-engine-migration-self-hosted
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: rustup target add wasm32-unknown-unknown
+      - name: Native tests, scalar Wasm build and strict parity
+        run: node tools/engine-runtime/verify.mjs
+      - name: Scalar workload timings, including host boundary and M3 node transfer
+        run: node tools/engine-runtime/benchmark.mjs
+        env:
+          ROM4_BENCHMARK_NAME: benchmark.scalar.json
+      - name: SIMD build and the same strict parity gates
+        run: node tools/engine-runtime/verify.mjs --simd
+      - name: SIMD workload timings (never assumed faster)
+        run: node tools/engine-runtime/benchmark.mjs
+        env:
+          ROM4_RUST_WASM: artifacts/rust-engine/rom4-engine.simd.wasm
+          ROM4_BENCHMARK_NAME: benchmark.simd.json
+      - name: Inventory remaining TypeScript responsibilities
+        if: always()
+        run: node tools/engine-runtime/audit.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rust-engine-migration-evidence
+          path: |
+            artifacts/rust-engine/*.json
+            artifacts/rust-engine/*.wasm
+          retention-days: 7

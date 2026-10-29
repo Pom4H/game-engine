@@ -16,12 +16,10 @@
     "./storage": "./dist/storage/index.js",
     "./world-ir": "./dist/world-ir/index.js",
     "./scene/acoustic-coupling": "./dist/scene/acoustic-coupling.js",
-    "./observability": "./dist/observability/index.js"
+    "./observability": "./dist/observability/index.js",
+    "./rust": "./dist/rust.js"
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md"],
   "scripts": {
     "game": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/start-game-office.ps1",
     "game:build": "bun run --cwd ../thegame build",
@@ -65,14 +63,13 @@
     "perf:capture": "node tools/engine-perf/cli.mjs capture",
     "perf:report": "node tools/engine-perf/cli.mjs report",
     "perf:compare": "node tools/engine-perf/cli.mjs compare",
-    "perf:overhead": "node tools/engine-perf/cli.mjs bench"
+    "perf:overhead": "node tools/engine-perf/cli.mjs bench",
+    "rust:build": "node tools/engine-runtime/build.mjs",
+    "rust:verify": "node tools/engine-runtime/verify.mjs",
+    "rust:bench": "node tools/engine-runtime/benchmark.mjs",
+    "rust:audit": "node tools/engine-runtime/audit.mjs"
   },
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "typescript": "7.1.0-beta"
-  },
-  "engines": {
-    "node": ">=22"
-  },
+  "devDependencies": {"@types/node": "^24.0.0", "typescript": "7.1.0-beta"},
+  "engines": {"node": ">=22"},
   "packageManager": "bun@1.4.2"
 }
