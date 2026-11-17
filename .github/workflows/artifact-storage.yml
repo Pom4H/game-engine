@@ -52,7 +52,7 @@ permissions:
   actions: write
   contents: read
 concurrency:
-  group: actions-artifact-storage-budget
+  group: actions-artifact-storage-budget-hosted
   cancel-in-progress: false
 jobs:
   cleanup:
