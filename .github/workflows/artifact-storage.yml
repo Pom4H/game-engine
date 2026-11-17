@@ -43,6 +43,11 @@ on:
   schedule:
     - cron: 37 3 * * *
   workflow_dispatch: null
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/artifact-storage.yml
 permissions:
   actions: write
   contents: read
@@ -51,10 +56,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   cleanup:
-    runs-on:
-      - self-hosted
-      - Windows
-      - X64
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       ARTIFACT_BUDGET_MIB: "256"
