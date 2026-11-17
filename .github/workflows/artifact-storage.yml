@@ -56,7 +56,10 @@ concurrency:
   cancel-in-progress: false
 jobs:
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
     timeout-minutes: 10
     env:
       ARTIFACT_BUDGET_MIB: "256"
