@@ -1,0 +1,293 @@
+{
+  "date": "2026-10-20T14:44:02.461Z",
+  "scope": "Native D3D12 vs Vulkan, same compiled executable, recorded TheGame scene and render-loop protocol",
+  "width": 1280,
+  "height": 720,
+  "entities": 2114,
+  "exeSha256": "4ba22b5bc9faaf8dd162d08f42c5d3496bd87a528bd9b4516043915bf826f8f0",
+  "sceneSha256": "bc756e10067471694444640530b245d4c06b1efdf11f8a00b4f5ea2f75fee573",
+  "options": {
+    "profiling": true,
+    "visibility": "gpu",
+    "logarithmicDepthFar": 2000,
+    "features": {
+      "temporalAA": true,
+      "bloom": true,
+      "motionBlur": true
+    }
+  },
+  "postOptions": {
+    "temporalAA": true,
+    "bloom": false,
+    "motionBlur": 0
+  },
+  "quality": {
+    "channels": 2764800,
+    "changedChannels": 432132,
+    "changedChannelPercent": 15.629774305555555,
+    "changedPixels": 190726,
+    "changedPixelPercent": 20.69509548611111,
+    "mae": 1.0793880208333333,
+    "rmse": 5.369604715734738,
+    "psnrDb": 33.53195728423652,
+    "maxError": 81,
+    "channelsAbove2": 181729,
+    "units": "8-bit RGB code values (0..255); alpha excluded"
+  },
+  "results": {
+    "d3d12": {
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "D3D12 driver version 32.0.31041.1004",
+        "isFallbackAdapter": false,
+        "backend": "d3d12"
+      },
+      "bunVersion": "1.4.3",
+      "startupMs": 99244.5548,
+      "static": {
+        "interval": {
+          "samples": 180,
+          "mean": 42.87690777777777,
+          "p50": 42.70100000000093,
+          "p95": 46.70550000001094,
+          "p99": 48.83399999998801,
+          "max": 49.65780000000086
+        },
+        "averageFPS": 23.322577392539483,
+        "onePercentLowFPS": 20.306258998213313,
+        "framesOver33ms": 180,
+        "framesOver50ms": 0,
+        "cpuSubmit": {
+          "samples": 180,
+          "mean": 11.557615555555094,
+          "p50": 11.500499999994645,
+          "p95": 14.300499999997555,
+          "p99": 15.678799999994226,
+          "max": 18.36009999999078
+        },
+        "completedFrame": {
+          "samples": 180,
+          "mean": 41.59401999999989,
+          "p50": 41.51710000001185,
+          "p95": 45.05809999999474,
+          "p99": 47.572100000004866,
+          "max": 47.74219999999332
+        },
+        "gpuWait": {
+          "samples": 180,
+          "mean": 29.746236111111973,
+          "p50": 29.54889999999432,
+          "p95": 31.717600000003586,
+          "p99": 32.8072000000102,
+          "max": 34.51459999999497
+        },
+        "gpu": {
+          "samples": 180,
+          "mean": 26.620359111111036,
+          "p50": 26.607616000000004,
+          "p95": 26.935296,
+          "p99": 27.000832000000006,
+          "max": 27.066368000000004
+        },
+        "repetitions": 1,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 23.322577392539483,
+            "p99": 48.83399999998801
+          }
+        ]
+      },
+      "camera": {
+        "interval": {
+          "samples": 180,
+          "mean": 133.62043277777784,
+          "p50": 47.709499999997206,
+          "p95": 668.5082000000111,
+          "p99": 808.9119000000064,
+          "max": 1076.127600000007
+        },
+        "averageFPS": 7.483885355042108,
+        "onePercentLowFPS": 1.060985724702313,
+        "framesOver33ms": 180,
+        "framesOver50ms": 65,
+        "cpuSubmit": {
+          "samples": 180,
+          "mean": 99.37333722222247,
+          "p50": 14.026400000002468,
+          "p95": 632.9353999999876,
+          "p99": 746.608200000017,
+          "max": 1041.5394000000088
+        },
+        "completedFrame": {
+          "samples": 180,
+          "mean": 132.22745833333386,
+          "p50": 46.47959999999148,
+          "p95": 667.33679999999,
+          "p99": 807.7149000000209,
+          "max": 1075.0437000000093
+        },
+        "gpuWait": {
+          "samples": 180,
+          "mean": 32.49103888888947,
+          "p50": 32.12039999998524,
+          "p95": 37.58150000000023,
+          "p99": 38.930300000007264,
+          "max": 60.688200000004144
+        },
+        "gpu": {
+          "samples": 180,
+          "mean": 29.084512711111085,
+          "p50": 28.246016,
+          "p95": 32.309248,
+          "p99": 32.833535999999995,
+          "max": 33.226752
+        },
+        "repetitions": 1,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 7.483885355042108,
+            "p99": 808.9119000000064
+          }
+        ]
+      }
+    },
+    "vulkan": {
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-3",
+        "device": "amd-radeon-760m-graphics",
+        "description": "AMD proprietary driver: 26.8.1 (LLPC) 2.0.395",
+        "isFallbackAdapter": false,
+        "backend": "vulkan"
+      },
+      "bunVersion": "1.4.3",
+      "startupMs": 41971.861800000006,
+      "static": {
+        "interval": {
+          "samples": 180,
+          "mean": 50.08358777777778,
+          "p50": 49.725500000000466,
+          "p95": 54.63880000000063,
+          "p99": 60.45300000000134,
+          "max": 80.21929999999702
+        },
+        "averageFPS": 19.96662069093426,
+        "onePercentLowFPS": 14.217440107256534,
+        "framesOver33ms": 180,
+        "framesOver50ms": 85,
+        "cpuSubmit": {
+          "samples": 180,
+          "mean": 12.010086111110851,
+          "p50": 11.753799999998591,
+          "p95": 14.488199999999779,
+          "p99": 17.677300000003015,
+          "max": 21.78030000000581
+        },
+        "completedFrame": {
+          "samples": 180,
+          "mean": 48.612612222222175,
+          "p50": 48.44670000000042,
+          "p95": 52.518199999998615,
+          "p99": 55.061399999998685,
+          "max": 59.251900000002934
+        },
+        "gpuWait": {
+          "samples": 180,
+          "mean": 36.2172227777782,
+          "p50": 35.422700000002806,
+          "p95": 39.152399999999034,
+          "p99": 39.59279999999853,
+          "max": 39.720100000005914
+        },
+        "gpu": {
+          "samples": 180,
+          "mean": 32.84045368888896,
+          "p50": 32.768,
+          "p95": 33.226752000000005,
+          "p99": 33.292288000000006,
+          "max": 33.35782400000001
+        },
+        "repetitions": 1,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 19.96662069093426,
+            "p99": 60.45300000000134
+          }
+        ]
+      },
+      "camera": {
+        "interval": {
+          "samples": 180,
+          "mean": 147.5611255555556,
+          "p50": 55.00149999999849,
+          "p95": 687.1478000000061,
+          "p99": 956.2622999999876,
+          "max": 982.523000000001
+        },
+        "averageFPS": 6.77685261775472,
+        "onePercentLowFPS": 1.0315737384639814,
+        "framesOver33ms": 180,
+        "framesOver50ms": 163,
+        "cpuSubmit": {
+          "samples": 180,
+          "mean": 106.95086444444443,
+          "p50": 14.42050000000745,
+          "p95": 647.4599000000017,
+          "p99": 914.8533999999927,
+          "max": 943.6721000000107
+        },
+        "completedFrame": {
+          "samples": 180,
+          "mean": 146.16593333333336,
+          "p50": 53.579200000007404,
+          "p95": 685.9589000000124,
+          "p99": 954.7816999999923,
+          "max": 980.8598000000056
+        },
+        "gpuWait": {
+          "samples": 180,
+          "mean": 38.816266666666905,
+          "p50": 38.24120000000403,
+          "p95": 43.559699999997974,
+          "p99": 44.558399999994435,
+          "max": 44.931400000001304
+        },
+        "gpu": {
+          "samples": 180,
+          "mean": 35.81178311111111,
+          "p50": 34.734080000000006,
+          "p95": 39.78035199999999,
+          "p99": 40.501248,
+          "max": 40.501248000000004
+        },
+        "repetitions": 1,
+        "perRun": [
+          {
+            "repetition": 0,
+            "frames": 180,
+            "warmup": 180,
+            "averageFPS": 6.77685261775472,
+            "p99": 956.2622999999876
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "Same-machine diagnostic, one repetition per backend/case, 180 path warmup + 180 measured frames per case. Vulkan ran first, D3D12 second. No random-order or thermal control.",
+    "Both backends deliberately retain synchronous environment-map baking and per-frame GPU completion/presentation/timer. These are render-loop start intervals, not externally measured display presentation or complete native gameplay.",
+    "No claim that changing the backend repairs CPU stalls. GPU timestamps and CPU submission are recorded separately. Cold startup includes scene restore, pipeline compilation and assets; cache state differs.",
+    "The renderer is the current local Engine build, matching the preceding recorded game comparison; its dist fingerprint and dirty working-tree provenance are preserved separately."
+  ]
+}

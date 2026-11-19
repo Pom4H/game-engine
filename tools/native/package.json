@@ -1,0 +1,10 @@
+{
+  "name": "@rom4/game-engine-native-host",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@kmamal/gpu": "1.0.0-5",
+    "@kmamal/sdl": "1.0.0-3"
+  },
+  "trustedDependencies": ["@kmamal/gpu", "@kmamal/sdl"]
+}
